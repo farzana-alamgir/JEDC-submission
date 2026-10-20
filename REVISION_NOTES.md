@@ -530,6 +530,58 @@ so the repay policy is computed and then discarded. In every state where it is u
 unchanged — which is why the used policy and the simulation are untouched. The flips occur where
 the objective is flat in `b'` to within 1e-14, so `maxloc` picks a different tied index.
 
+### 4.4e Making the corrected calibration solvable
+
+With sigma = 0.4 from the data (REVISION_NOTES 4.6), theta = -1.5 and
+alpha = 1.652632e-4 calibrated to the measured 3.74% share, **the model solves on the
+corrected process** -- no bisection failure, because sigma < 1 removes the lower price
+floor entirely. `p_num = 225` gives sd/spacing >= 2.0 in every volatility state.
+
+Three things had to be removed first, all of them pure waste:
+
+| what | why it blocked | fix |
+|---|---|---|
+| `SDF_matrix`, rank 6 | `argument = rstar`, so every element was the same number; **5.6 GB** at p_num = 225 | replaced by the scalar it always was |
+| `expected_SDF_matrix` loop | constant SDF times rows summing to one, i.e. identically `sdf_value`; 5.6e8 terms | direct assignment |
+| `q_nodef` fixed point | state-independent by construction; (y*p*s)^2 terms per sweep for one scalar | scalar recursion, same stopping rule |
+
+The `expected_SDF_matrix` initialisation was also an out-of-bounds write using loop
+indices left past their bounds -- the defect the review flagged -- now a whole-array zero.
+
+Verified at p_num = 7 against the previous build: **38 of 40 files identical**, the two
+that differ being exactly `q_nodef` and `expected_SDF` themselves, at 1e-15. Those two
+previously showed 41 and 28 "distinct" values that were one number plus summation noise;
+they are now exactly constant.
+
+### 4.4f `q_fun`, and a convergence-tolerance problem it exposed
+
+`q_fun` was then the binding cost: a 23,625-term triple sum, called `b_num` times per
+state, **5.6e10 inner iterations per sweep** at p_num = 225 -- over eleven minutes for a
+single sweep. It factorizes exactly like the value expectation and is now precomputed.
+
+**This changes the update scheme.** `q_fun` read `default_decision` and `q_paid_matrix`
+as they stood mid-sweep, and both are written during the sweep, so the original is
+Gauss-Seidel in those objects; precomputing makes it Jacobi. Same fixed point, different
+path.
+
+At the shipped tolerance that matters more than it should:
+
+| `criteria` | scheme | simulated default freq | mean q |
+|---|---|---|---|
+| 1e-3 (shipped) | Gauss-Seidel | 0.007276 | 0.816440 |
+| 1e-3 | Jacobi | 0.007653 | 0.815234 |
+| 1e-7 | Gauss-Seidel | **0.007689** | 0.817960 |
+| 1e-7 | Jacobi | **0.007668** | 0.818740 |
+
+Converged, the two schemes agree to **0.27%**; at 1e-3 they differ by **5.2%**. The
+shipped Gauss-Seidel run is the furthest from its own converged answer. So this is not a
+modelling choice between schemes -- **the benchmark is under-converged**, and a reported
+moment moves ~5% because of it.
+
+Note both 1e-7 runs stopped at the 1500-sweep cap rather than on tolerance, so even that
+is an upper bound on accuracy. Tightening `criteria` (line 1363) and raising the cap
+belongs in step 4, re-establishing the benchmark, and should be documented as a change.
+
 ### 4.5 Still outstanding
 
 - **The forks carry the pre-revision calibration** while the benchmark has been updated — a

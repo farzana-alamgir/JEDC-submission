@@ -21,7 +21,7 @@ DOUBLE PRECISION :: beta, sigma, b_inf, b_sup, y_inf, y_sup, std_eps,mmax_global
      p_vol_inf, p_vol_sup, std_u_p, std_u_vol, rho_p, rho_p_vol, mean_p, mean_p_vol, std_p_vol,eta
 
 parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width = 1.5d+0,  rstar = 0.01d+0,  &
-     prob_excl_end =0.0833d+0, std_eps = 0.03d+0, rho = 0.9d+0, beta=0.96, alpha=0.3, theta=0.5,&          !A-m has been changed in order to capture the new specification of stealing function
+     prob_excl_end =0.0833d+0, std_eps = 0.03d+0, rho = 0.9d+0, beta=0.96, alpha=1.652632d-4, theta=-1.5d+0,&          !A-m has been changed in order to capture the new specification of stealing function
      mean_y = -0.5d+0*std_eps**2,delta = 0.03d+0,  m=4d+0, scale_y=10d+0, d0= -0.246, d1=0.37, mmax_global=100d+0,&
      std_u_p = 1d+0, std_u_vol= 1d+0, rho_p = 0.976d+0, rho_p_vol = 0.678d+0 ,pprime=3.97d+0,mean_p = 0.12d+0, mean_p_vol = -2.166d+0, eta = 0.3323d+0)
 
@@ -63,7 +63,7 @@ INTEGER :: b_num, y_num, quad_num, nout, i_y_global, i_excl_global, p_num, p_vol
      i_b_global, i_default_global, indicator_2, i_b_next, i_b_zero, b_num_interm, counter
 
 
-parameter (b_num= 100, y_num = 21, p_num=7, p_vol_num=5)
+parameter (b_num= 100, y_num = 21, p_num=225, p_vol_num=5)
 ! parameter (b_num= 200, y_num = 50)
 
 DOUBLE PRECISION :: b_grid(1:b_num), y_grid(1:y_num), default_grid(1:2), &
@@ -93,6 +93,7 @@ DOUBLE PRECISION, DIMENSION (y_num, p_num, p_vol_num) :: c1_matrix, output1_matr
 ! Precomputed conditional expectations of the value functions, and the two
 ! intermediate contractions used to build them. See precompute_expectations.
 DOUBLE PRECISION, DIMENSION(b_num, y_num, p_num, p_vol_num) :: exp_v_matrix, exp_aux_a, exp_aux_b
+DOUBLE PRECISION, DIMENSION(b_num, y_num, p_num, p_vol_num) :: q_fun_matrix, q_src
 DOUBLE PRECISION, DIMENSION(y_num, p_num, p_vol_num) :: exp_v_excl_matrix, exc_aux_a, exc_aux_b
 
 contains
@@ -469,8 +470,8 @@ END SUBROUTINE tauchen_fixed
 !=====================================================================
 SUBROUTINE precompute_expectations
 IMPLICIT NONE
-INTEGER :: iy, iyn, ip, ipn, iv, ivn
-DOUBLE PRECISION :: w
+INTEGER :: iy, iyn, ip, ipn, iv, ivn, ib
+DOUBLE PRECISION :: w, m_const, coup_const
 
 ! --- Step 1: contract over next-period endowment ---
 do ivn = 1, p_vol_num
@@ -518,6 +519,71 @@ do iv = 1, p_vol_num
                  + w * exp_aux_b(:, iy, ip, ivn)
             exp_v_excl_matrix(iy, ip, iv) = exp_v_excl_matrix(iy, ip, iv) &
                  + w * exc_aux_b(iy, ip, ivn)
+         end do
+      end do
+   end do
+end do
+
+
+! --- Bond price: the same contraction applied to the survival-weighted payoff ---
+!
+! q(b',y,p,s) = sum_{s',p',y'} P_s P_p P_y * surv(b',y',p',s')
+!                              * m * (coupon + (1-delta)*q_paid(b',y',p',s'))
+!
+! q_fun evaluated this directly: a 23,625-term triple sum per call, called
+! b_num times per state, i.e. 5.6e10 inner iterations per sweep at p_num = 225.
+! It was the single largest cost and made a sweep take over eleven minutes.
+!
+! CAVEAT -- this changes the update scheme. q_fun read default_decision and
+! q_paid_matrix as they stood at the moment of the call, and both are written
+! DURING the sweep, so the original is Gauss-Seidel in those objects.
+! Precomputing at the top of the sweep makes it Jacobi. The fixed point is the
+! same; the path to it is not, so iterates differ and the sweep count can change.
+m_const = EXP(-rstar)
+coup_const = (rstar + delta)/(1d+0 + rstar)
+do ivn = 1, p_vol_num
+   do ipn = 1, p_num
+      do iyn = 1, y_num
+         do ib = 1, b_num
+            q_src(ib, iyn, ipn, ivn) = &
+                 (1d+0 - default_grid(default_decision(ib, iyn, ipn, ivn))) &
+                 * m_const * (coup_const + (1d+0-delta)*q_paid_matrix(ib, iyn, ipn, ivn))
+         end do
+      end do
+   end do
+end do
+
+do ivn = 1, p_vol_num
+   do ipn = 1, p_num
+      do iy = 1, y_num
+         exp_aux_a(:, iy, ipn, ivn) = 0d+0
+         do iyn = 1, y_num
+            exp_aux_a(:, iy, ipn, ivn) = exp_aux_a(:, iy, ipn, ivn) &
+                 + trans_matrix(iy, iyn) * q_src(:, iyn, ipn, ivn)
+         end do
+      end do
+   end do
+end do
+
+do ivn = 1, p_vol_num
+   do ip = 1, p_num
+      do iy = 1, y_num
+         exp_aux_b(:, iy, ip, ivn) = 0d+0
+         do ipn = 1, p_num
+            exp_aux_b(:, iy, ip, ivn) = exp_aux_b(:, iy, ip, ivn) &
+                 + trans_matrix_p(ip, ipn, ivn) * exp_aux_a(:, iy, ipn, ivn)
+         end do
+      end do
+   end do
+end do
+
+do iv = 1, p_vol_num
+   do ip = 1, p_num
+      do iy = 1, y_num
+         q_fun_matrix(:, iy, ip, iv) = 0d+0
+         do ivn = 1, p_vol_num
+            q_fun_matrix(:, iy, ip, iv) = q_fun_matrix(:, iy, ip, iv) &
+                 + trans_matrix_p_vol(iv, ivn) * exp_aux_b(:, iy, ip, ivn)
          end do
       end do
    end do
@@ -654,7 +720,8 @@ DOUBLE PRECISION :: delta_y, prob_mass, y_pointer, qq, pdf_tirar, cdf_right, cdf
     prob_vector_p_1(p_num,p_vol_num), prob_vector_p_2(p_num,p_vol_num), prob_vector_p_3(p_num,p_vol_num),&
     prob_vector_p_4(p_num,p_vol_num), prob_vector_p_5(p_num,p_vol_num), variance_p_innovation1, variance_p_innovation2,&
     variance_p_innovation3, variance_p_innovation4, variance_p_innovation5, &
-    p_grid_common(p_num), var_log_vol, mean_innov_var, uncond_sd_log_p, grid_spacing, sd_log_vol
+    p_grid_common(p_num), var_log_vol, mean_innov_var, uncond_sd_log_p, grid_spacing, sd_log_vol, &
+    pv_new(p_num), pvv_new(p_vol_num)
 
     CHARACTER(LEN = 2) :: column_num
     CHARACTER(LEN = 1) :: fileName0
@@ -694,7 +761,12 @@ if(p_vol_num < 2) then
                       sqrt(variance_p_vol), trans_matrix_p_vol)
    prob_vector_p_vol = 1d+0/dble(p_vol_num)
    do j = 1, 20000
-      prob_vector_p_vol = matmul(prob_vector_p_vol, trans_matrix_p_vol)
+      pvv_new = matmul(prob_vector_p_vol, trans_matrix_p_vol)
+      if (maxval(abs(pvv_new - prob_vector_p_vol)) < 1d-14) then
+         prob_vector_p_vol = pvv_new
+         exit
+      end if
+      prob_vector_p_vol = pvv_new
    end do
    prob_vector_p_vol = prob_vector_p_vol/sum(prob_vector_p_vol)
    if (sqrt(variance_p_vol) < 0.5d+0*(p_vol_grid(2)-p_vol_grid(1))) then
@@ -803,7 +875,12 @@ else
          ! volatility state, by power iteration on the kernel.
          prob_vector_p(:, i) = 1d+0/dble(p_num)
          do j = 1, 20000
-            prob_vector_p(:, i) = matmul(prob_vector_p(:, i), trans_matrix_p(:,:,i))
+            pv_new = matmul(prob_vector_p(:, i), trans_matrix_p(:,:,i))
+            if (maxval(abs(pv_new - prob_vector_p(:, i))) < 1d-14) then
+               prob_vector_p(:, i) = pv_new
+               exit
+            end if
+            prob_vector_p(:, i) = pv_new
          end do
          prob_vector_p(:, i) = prob_vector_p(:, i)/sum(prob_vector_p(:, i))
       end do
@@ -1315,7 +1392,7 @@ do i_p_vol = 1,p_vol_num
             exp_v_excl_vector(:) = exp_v_excl_matrix(i_y_global, i_p, i_p_vol)
 
             do i_b_prime = 1,b_num
-               q_vector(i_b_prime) = q_fun(i_b_prime, i_y_global,i_p, i_p_vol)
+               q_vector(i_b_prime) = q_fun_matrix(i_b_prime, i_y_global, i_p, i_p_vol)
             end do
 
 
@@ -1361,7 +1438,7 @@ do i_p_vol = 1,p_vol_num
             output0_matrix(i_b, i_y, i_p, i_p_vol)=(((1-alpha)*TFP0_matrix(i_b, i_y, i_p, i_p_vol)**theta)+(alpha*oil0_matrix(i_b, i_y, i_p, i_p_vol)**theta))**(1./theta)
 
                c0_matrix(i_b, i_y, i_p, i_p_vol)=output0_matrix(i_b, i_y, i_p, i_p_vol)- b_initial * coupon +(b_grid(i_b_optimal0)-&
-               (1d+0 - delta)*b_initial)* q_fun(i_b_optimal0, i_y,i_p,i_p_vol)-exp(p_initial)*oil0_matrix(i_b, i_y, i_p, i_p_vol)
+               (1d+0 - delta)*b_initial)* q_fun_matrix(i_b_optimal0, i_y,i_p,i_p_vol)-exp(p_initial)*oil0_matrix(i_b, i_y, i_p, i_p_vol)
 !
 
                ! NOW, CHECK IF FOR THIS COMBINATION (b_initial,y_initial, i_r, i_r_vol) IT IS OPTIMAL TO DEFAULT OR NOT
@@ -1387,7 +1464,7 @@ do i_p_vol = 1,p_vol_num
                   c_matrix(i_b, i_y,i_p, i_p_vol) = c0_matrix(i_b,i_y,i_p, i_p_vol)
 
 
-                  q_paid_matrix_new(i_b, i_y,i_p, i_p_vol) =  q_fun( i_b_optimal0, i_y,i_p, i_p_vol)
+                  q_paid_matrix_new(i_b, i_y,i_p, i_p_vol) =  q_fun_matrix(i_b_optimal0, i_y,i_p, i_p_vol)
 !
 
                end if
@@ -1458,7 +1535,7 @@ WRITE(17, *) counter
                WRITE(10, '(F6.2)') default_grid(default_decision(i_b, i_y,i_p, i_p_vol))
 
 
-               WRITE(11, '(F15.11)') q_fun(i_b, i_y,i_p, i_p_vol)
+               WRITE(11, '(F15.11)') q_fun_matrix(i_b, i_y,i_p, i_p_vol)
 
                WRITE(12, *) b_next_matrix(i_b, i_y,i_p, i_p_vol)
 
@@ -1509,88 +1586,59 @@ end subroutine iterate
 subroutine solve_q_nodef
 USE param
 DOUBLE PRECISION :: dev, criterion_q_nodef, q_nodef_new(y_num,p_num,p_vol_num), coupon_nodef,&
-SDF_matrix(y_num,p_num, p_vol_num, y_num, p_num, p_vol_num), argument
+argument, sdf_value, q_nodef_scalar, q_nodef_scalar_new
 INTEGER :: i_y, i_p, i_p_vol, i_y_next, i_p_vol_next, i_p_next
 
-! 1. First, compute the SDF_matrix
-do i_p_vol = 1,p_vol_num
-   do i_p = 1,p_num
-      do i_y = 1,y_num
-         y_initial = y_grid(i_y)
-
-         do i_p_vol_next = 1,p_vol_num
-            do i_p_next = 1,p_num
-               do i_y_next = 1,y_num
-
-                  argument = (rstar)
-
-                  SDF_matrix(i_y_next,i_p_next,i_p_vol_next,i_y,i_p,i_p_vol)= EXP(-argument)
-
-               end do
-            end do
-         end do
-      end do
-   end do
-end do
+! 1. The stochastic discount factor.
+!
+! argument is identically rstar, so every element of what used to be a rank-6
+! SDF_matrix(y,p,s,y,p,s) held the same number. That array is 6.9e8 doubles
+! (5.6 GB) at p_num = 251, which simply cannot be allocated, so it is replaced
+! by the scalar it always was. If a state-dependent SDF is introduced later --
+! Referee 1's Major 5 asks about risk-averse lenders -- this is where it goes,
+! and it should then be stored as a function of the states it actually varies
+! over, not as a full rank-6 product space.
+argument  = rstar
+sdf_value = EXP(-argument)
 
 !1.5 Intermediate step: compute the Expected SDF (I don't need it here, but I wanted for the simulations)
-expected_SDF_matrix(i_y, i_p, i_p_vol) = 0d+0
+! The expected SDF. With a constant SDF and transition rows that each sum to
+! one, the triple sum is identically sdf_value, so the (y*p*s)^2 loop that used
+! to accumulate it -- 5.6e8 terms at p_num = 225 -- is replaced by an assignment.
+expected_SDF_matrix = sdf_value
 
-do i_p_vol = 1,p_vol_num
-   do i_p = 1,p_num
-      do i_y = 1,y_num
-         y_initial = y_grid(i_y)
-         do i_p_vol_next = 1,p_vol_num
-            do i_p_next = 1,p_num
-               do i_y_next = 1,y_num
-                 expected_SDF_matrix(i_y, i_p, i_p_vol) = expected_SDF_matrix(i_y, i_p, i_p_vol) + &
-                 SDF_matrix(i_y_next,i_p_next,i_p_vol_next,i_y,i_p, i_p_vol) *&
-                 trans_matrix_p_vol(i_p_vol, i_p_vol_next)* trans_matrix_p(i_p, i_p_next, i_p_vol_next)*&
-                 trans_matrix(i_y, i_y_next)
-               end do
-            end do
-         end do
-      end do
-   end do
-end do
-
-
-!2. Iterate on the q_nodef
+!2. Iterate on q_nodef
+!
+! q(s) = sum_s' P(s,s') * sdf * (coupon + (1-delta)*q(s'))
+!
+! sdf and coupon are constants and every transition row sums to one, so the
+! right-hand side does not depend on s: q is the SAME NUMBER in every state.
+! The original loop rediscovered that by summing over the full (y,p,sigma)
+! product space on every sweep -- (y*p*s)^2 = 2.8e8 terms per sweep at
+! p_num = 225, times ~300 sweeps -- to produce one scalar.
+!
+! The scalar recursion below is the same sequence from the same starting point
+! with the same stopping rule, so it reproduces the previous value. Note that
+! value is not the exact fixed point: stopping on a per-step change of 1e-6
+! with a contraction factor of sdf*(1-delta) ~ 0.96 leaves a residual error of
+! about 2.4e-5. The exact root is
+!     q = sdf*coupon / (1 - sdf*(1-delta))
+! which here is 0.9888588 against the iterate's 0.9888352. Tightening
+! criterion_q_nodef, or using the closed form, is a separate decision because
+! it would move the benchmark.
 
 dev = 10d+0
 criterion_q_nodef = 1d-6
-q_nodef = 0d+0
+q_nodef_scalar = 0d+0
+coupon_nodef = (rstar + delta )/ (1d+0 + rstar)
 
 do while(dev > criterion_q_nodef)
-   q_nodef_new = 0d+0
-   dev = 0d+0
-   !calculate long-term bond price
-
-   do i_p_vol = 1,p_vol_num
-      do i_p = 1,p_num
-         do i_y = 1,y_num
-            y_initial = y_grid(i_y)
-            do i_p_vol_next = 1,p_vol_num
-               do i_p_next = 1,p_num
-                  do i_y_next = 1,y_num
-                     coupon_nodef = (rstar + delta )/ (1d+0 + rstar)
-
-                     q_nodef_new(i_y, i_p, i_p_vol) = q_nodef_new(i_y, i_p, i_p_vol) + &
-                     SDF_matrix(i_y_next,i_p_next,i_p_vol_next,i_y,i_p, i_p_vol) *&
-                     (coupon_nodef+(1d+0-delta)*q_nodef(i_y_next,i_p_next,i_p_vol_next))*&
-                     trans_matrix_p_vol(i_p_vol, i_p_vol_next)*&
-                     trans_matrix_p(i_p, i_p_next, i_p_vol_next)*trans_matrix(i_y, i_y_next)
-                  end do
-               end do
-            end do
-            dev = max(abs(q_nodef_new(i_y,i_p,i_p_vol)-q_nodef(i_y,i_p,i_p_vol)), dev)
-
-         end do
-      end do
-   end do
-   q_nodef = q_nodef_new
-
+   q_nodef_scalar_new = sdf_value*(coupon_nodef + (1d+0-delta)*q_nodef_scalar)
+   dev = abs(q_nodef_scalar_new - q_nodef_scalar)
+   q_nodef_scalar = q_nodef_scalar_new
 end do
+
+q_nodef = q_nodef_scalar
 
 !3. Save q_nodef and SDF_matrix
 
@@ -1614,7 +1662,7 @@ do i_p_vol = 1,p_vol_num
             do i_p_next = 1,p_num
                do i_y_next = 1,y_num
 
-                  write(20, *) SDF_matrix(i_y_next,i_p_next,i_p_vol_next,i_y,i_p, i_p_vol)
+                  write(20, *) sdf_value
 
                end do
             end do
