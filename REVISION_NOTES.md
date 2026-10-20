@@ -148,39 +148,95 @@ against a grid-rescaling channel worth **tens of percent**.
 > never saw. Report 2 explicitly invites the answer "if the pure effect is small, that is fine";
 > we would be returning the opposite answer for the wrong reason, and it would likely survive review.
 
-### 3.3 Finding C — probable factor-of-two in the volatility calibration (**needs verification**)
+### 3.3 Finding C — the volatility calibration (**re-estimated; provenance established**)
 
-Flagged as inference, not a confirmed defect: the paper PDF could not be read on this machine
-(no `pdftotext`/poppler) and `volatilities.csv` is not in the repo.
+An earlier version of this section presented
+`exp(−4.33) = (0.1147)² = [exp(−4.33/2)]²` as evidence for a convention error. **That was a
+mistake and has been removed:** `exp(a) = [exp(a/2)]²` holds for any `a`, so it carries no
+evidential weight. The section below replaces it with a direct re-estimation.
 
-The code sets `σ_t = exp(p_vol_grid)` with `mean_p_vol = -4.33`:
+Re-running the script's own active specification — `svsample(log real price,
+designmatrix="ar1")`, `set.seed(123)`, on `empirical/oil_qtrly.xlsx` (n=100, 1995Q1–2019Q4) —
+reproduces the Fortran parameters closely enough to establish where each came from:
 
-| | σ (quarterly innovation sd) | uncond. sd of log p | one-step `½σ²` | uncond. `½Var(log p)` |
-|---|---|---|---|---|
-| (A) code as written, σ = exp(h) | 0.0132 (1.3%) | 6.6% | 0.0087% | 0.22% |
-| (B) stochvol convention, σ = exp(h/2) | 0.1147 (11.5%) | 57.7% | 0.658% | 16.6% |
+| Fortran | Value | Estimate it matches | Verdict |
+|---|---|---|---|
+| `rho_p` | 0.98 | `beta_1 = 0.9763` | ✅ correct |
+| `mean_p` | 0.12 | `beta_0 = 0.1176` | ⚠️ that is the AR(1) **intercept**, not the unconditional mean |
+| `mean_p_vol` | −4.33 | `mu = −4.3317` | ⚠️ `mu` is the mean of log **variance** `h` |
+| `rho_p_vol` | 0.66 | `phi = 0.6779` | ✅ correct (persistence is scale-free) |
+| `eta` | 0.44 | `sigma = 0.4460`, but **only under the commented-out priors** | ❌ different estimation |
+
+Two distinct problems:
+
+1. **Convention.** `stochvol` parameterizes `y_t = exp(h_t/2)·ε_t`, so `h` is the log *variance*
+   and σ = exp(h/2). The Fortran applies σ = exp(h), i.e. it uses the variance where the
+   standard deviation belongs. Implied quarterly innovation sd is 0.0132 (1.3%) instead of
+   0.1147 (11.5%), and unconditional sd of log p is 6.6% instead of 57.7% — against 48.5% in
+   the data.
+2. **Incoherent mixing.** `eta = 0.44` matches `sigma` from the *commented-out* prior
+   specification at `oil_empirical_quarterly_claude.R:49-50`
+   (`priormu=c(-10,1), priorphi=c(20,1.1), priorsigma=0.1`). But that run returns
+   `mu = −9.36` and `phi = 0.993`, nothing like −4.33 and 0.66. Under the default priors
+   `sigma = 0.6647`. So the three volatility parameters appear to come from two different
+   posteriors with incompatible priors.
+
+`pprime = 3.97` is declared at line 23 and **never used anywhere**; 3.97 is the sample mean of
+log real oil price (3.9689).
+
+**Recommended values**, all from one estimation. Two equivalent options:
+
+| | ρ_p | μ | ρ_σ | η | code change |
+|---|---|---|---|---|---|
+| A — keep `σ = exp(x)` | 0.976 | **−2.166** | 0.678 | **0.3323** | none (pure parameter swap) |
+| B — use `σ = exp(h/2)` | 0.976 | −4.332 | 0.678 | 0.665 | change the exponent in 3 places |
+
+p̄ is a *normalization*, not an estimate, and must be documented as such in Table 2.
+
+Implied moments at the corrected calibration: E[σ] = 0.127 (data: 0.144 OLS residual sd);
+unconditional sd of log p = 0.650 with ρ_p = 0.976, or 0.440 with the OLS ρ_p = 0.9475
+(data: 0.485). For the constant-volatility economy, `v0 = E[v] = 0.0198` versus the
+referee-literal `e^{2μ} = 0.0131` — a ratio of 1.51, so the choice of `v0` must be stated.
+
+### 3.3a Consequence — the corrected calibration breaks the model (**confirmed by running it**)
+
+Feeding the Option A values into the unmodified code fails at
+`oil_prod_CES.f90:381`: `iterations exceeded at bisection`, `d_bi = 224.6`.
+
+This is an **economic** boundary, not a numerical one. The oil-demand FOC solved at `:364`
+admits an interior optimum only if
 
 ```
-exp(−4.33) = 0.01316 = (0.1147)² = [exp(−4.33/2)]²
+p > α^(1/θ)  =  0.3² = 0.09      (for θ > 0)
 ```
 
-`stochvol`'s `svsample` parameterizes `y_t = exp(h_t/2)·ε_t`, so `h` is the log **variance** and
-σ = exp(h/2). If the AR(1) was fit to `h` (mean −4.33) and the Fortran then applied σ = exp(h),
-**the model is using the variance where the standard deviation belongs.** The same logic applies
-to `eta = 0.44`, which would need halving to 0.22.
+The corrected grid's lowest price is `e^{−3.0646} = 0.0466`, below the floor, where oil demand
+is unbounded. Raising `mmax_global` cannot fix it. The old calibration's floor price was 0.668,
+which is why it ran. The *high* end is harmless: as p → ∞, m → 0 and output tends to
+`(1−α)^{1/θ}·A`.
 
-Two corroborations:
+| p | optimal m | oil bill p·m | vs `mmax_global = 100` |
+|---|---|---|---|
+| 0.047 | unbounded | — | no solution |
+| 0.100 | 4410 | 441 | exceeds bracket |
+| 0.129 | 290 | 37.4 | exceeds bracket |
+| 0.200 | 36.5 | 7.3 | ok |
+| 0.670 | 1.3 | 0.9 | ok |
 
-1. Report 2 asserts "quarterly log price innovations above 10%" — consistent with (B), not (A).
-   This suggests the paper's text reports a number the code does not use.
-2. Report 2's Major 6 (model 0.5–1.5bp vs data 6–8bp per 10% oil move) is what an oil price
-   ~9× too stable would produce.
+With endowment `A ≈ 10`, p = 0.129 implies an oil bill of 3.7× GDP — so ρ_p = 0.9475 clears the
+floor but is not economically credible.
 
-Empirically the sd of the log real oil price over 1995–2019 is roughly 0.40–0.55, consistent with
-(B) = 0.58 and not with (A) = 0.066.
+Note also that Rouwenhorst sets the half-width as `psi = sqrt(n−1)·sd` (`:105`), so **adding
+price nodes widens the grid**: n=7 spans ±2.45 sd, n=25 spans ±4.90. Refining `p_num` pushes the
+lowest price further below the floor. Accuracy and feasibility cannot both be improved under
+Rouwenhorst — an independent argument for a fixed common grid with Tauchen.
 
-**This is a clean fork.** Either the paper reports σ > 10% and the code is wrong, or the paper
-reports σ ≈ 1.3% and Referee 2's premise is wrong and should be rebutted in the response letter.
+**This connects to Referee 1's Major 3.** θ = 0.5 implies an elasticity of substitution of
+`1/(1−θ) = 2`, i.e. oil and the domestic input as strong *substitutes*; short-run evidence puts
+it well below 1, i.e. θ < 0. With θ < 0 the pathology disappears entirely: `α·m^θ → 0` as
+m → ∞, the bracket converges to `(1−α)^{1/θ}·A`, and `F(m) → +∞`, so a root always exists
+(verified numerically at p = 0.047). A more realistic oil elasticity removes the numerical
+failure and answers a referee at the same time.
 
 ### 3.4 Recommended order of operations
 
@@ -227,5 +283,91 @@ and turn a criticism into a result.
 
 **Inferred, requires the author to confirm:**
 
-- Finding C, the σ vs σ² convention. Needs Table 2 of the paper and the R-side AR(1) fit on the
-  `stochvol` volatility series (neither is in this repo).
+- Finding C's **provenance** is now established by re-estimation (§3.3), but confirmation against
+  the paper's Table 2 is still outstanding — the manuscript PDF could not be read on this machine.
+  The `eta = 0.44` attribution rests on a numerical match to the commented-out prior
+  specification; confirm against whatever estimation output was actually used before changing
+  Table 2. MCMC sampling noise means small differences from the original run are expected.
+
+---
+
+## Part 4 — Simulation bugs found and fixed
+
+Found by an automated review of the untracked forks, then verified directly against the model's
+own output. Both were present in the **benchmark**, not only the forks. Fixed in commit
+`3c4460d`; the pre-fix state is preserved at tag `submitted-baseline`.
+
+### 4.1 All simulated panels shared one oil-price path
+
+`random_matrix_rw` was dimensioned `(period_num, 2)` with no sample index, while the endowment
+draws in `random_matrix` were correctly `(period_num, sample_num, 2)`. Drawn at `(i,·)` inside
+the `do j=1,sample_num` loop, every one of the 500 panels followed an identical oil-price and
+volatility path. Cross-sample averaging therefore did nothing to reduce price-shock sampling
+error: the effective sample size for every price-related moment was **one path**, understating
+standard errors by roughly √500 ≈ 22×.
+
+Fixed by giving the array a sample dimension and drawing per sample. Per-sample initial
+conditions (`i_p_previous`, `i_p_vol_previous`) were already reset at the top of the `j` loop.
+
+**Verified:** samples 1 and 2 now differ on 1275 of 1500 periods; 17 and 18 distinct prices
+respectively. Previously identical.
+
+### 4.2 Allocations read at the wrong debt index
+
+`c_matrix`, `oil_matrix` and `output_matrix` are indexed by the debt the country **enters** the
+period with — `c0_matrix` is defined from `b_initial = b_grid(i_b)` at line 1035 — but `simulate`
+reassigned `i_b_next` *before* using it as that index.
+
+The correct fix differs by branch:
+
+| branch | fix |
+|---|---|
+| repay, default, exclusion-ends | `i_b_current` |
+| exclusion-continues | `output1_matrix` / `oil1_matrix` / `c1_matrix` |
+
+In the default branch `i_b_current` suffices because `c_matrix` at a state where default is
+optimal already holds `c1_matrix` (line 1047). During *continued* exclusion neither debt index
+works: the country is in autarky, and `c_matrix` at zero debt returns the repay allocation
+including fresh bond proceeds. Those branches now read the autarky arrays directly, which
+required promoting `c1_matrix`, `output1_matrix`, `oil1_matrix` and `TFP1_matrix` from locals of
+`iterate` to module scope. `q_fun(i_b_next, …)` is left unchanged — the bond price correctly
+depends on the amount issued.
+
+**Verified** at state (i_y=10, i_p=4, i_p_vol=3), original parameters:
+
+| | n | c | gdp | y |
+|---|---|---|---|---|
+| excl=1 (repay) | 20218 | 5.118 | 5.628 | 9.728 |
+| excl=2 (autarky) | 1407 | 4.590 | 4.982 | 8.620 |
+
+`gdp` now falls 11.5% at default, tracking the 11.4% fall in `y`; before the fix it was
+bit-identical across `excl=1` and `excl=2`, omitting the `d0`/`d1` default output cost.
+Consumption in exclusion now takes 393 distinct values across 64,611 observations; before the
+fix it was a single constant. The consumption drop at default is 10.3%.
+
+Both bugs affect consumption volatility, the consumption and output drop at default, `tb/gdp`,
+and any welfare moment built on them.
+
+### 4.3 Still outstanding
+
+- **The `intermediate` fork's oil price is frozen.** With `p_vol_num=1` the code takes the
+  `p_vol_num < 2` branch, where `tauchen` fills both `p_grid(:,1)` and `trans_matrix_p(:,:,1)`,
+  then `discretize_AR` overwrites the *grid* (`z` is `intent(out)`) while Tauchen's transition
+  matrix survives. The mismatched pair has diagonal 0.9995. Confirmed in its output: the price
+  column takes exactly one value, 1.05745457, across all 750,000 rows, versus 15 distinct values
+  in the benchmark. The intermediate economy is therefore numerically the *basic* economy, and
+  the full-vs-intermediate comparison in Section 6.2 does not isolate the volatility channel.
+- **The forks carry the pre-revision calibration** while the benchmark has been updated — a
+  price-innovation sd of 0.0156 against 0.127, a factor of 8.1. Any cross-economy comparison run
+  now would attribute that level gap to the volatility channel. Nothing records the difference:
+  all three variants write identically-named `graphs_*.txt`, and `param_calib.txt` dumps only
+  `beta`/`d0`/`d1`/`delta`.
+- **Not independently verified** (reported by the review, consistent with observed behaviour but
+  not re-checked here): an out-of-bounds write to `expected_SDF_matrix` at line 1208;
+  `graphs_pdf_y.txt` written from the never-assigned `prob_vector`, containing a literal `NaN`;
+  and `p_grid_1..5` dumped as all-zeros in the intermediate run, which makes
+  `working_graphs_dec29.m` divide by zero.
+- **Efficiency.** `func_m` — a 5000-iteration bisection — is called inside `objective_function`,
+  which `optimize` evaluates 100× per call, but its result depends only on `(y, p, excl)`, all
+  constant across the b-loop. That is roughly 1.5M bisections per VFI sweep to produce 294
+  distinct values. Hoisting it into a precomputed table would remove most of the runtime.
