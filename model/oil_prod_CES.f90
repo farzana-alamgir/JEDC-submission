@@ -25,6 +25,27 @@ parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width 
      mean_y = -0.5d+0*std_eps**2,delta = 0.03d+0,  m=4d+0, scale_y=10d+0, d0= -0.246, d1=0.37, mmax_global=100d+0,&
      std_u_p = 1d+0, std_u_vol= 1d+0, rho_p = 0.976d+0, rho_p_vol = 0.678d+0 ,pprime=3.97d+0,mean_p = 0.12d+0, mean_p_vol = -2.166d+0, eta = 0.3323d+0)
 
+!---------------------------------------------------------------------
+! Price-grid discretization switch.
+!
+! .false. reproduces the submitted behaviour: discretize_AR builds a SEPARATE
+!         Rouwenhorst grid per volatility state, whose half-width scales with
+!         exp(sigma_t). A volatility shock then rescales the price LEVEL, and
+!         the same price index means a different physical price in different
+!         volatility states. See REVISION_NOTES section 3.1.
+! .true.  uses ONE physical log-price grid shared by every volatility state,
+!         with volatility entering only the transition kernel via tauchen_fixed.
+!         This is the process the paper actually specifies.
+!
+! p_width_sd is the grid half-width in unconditional SDs of log price. The
+! usable range interacts with the CES elasticity: an interior oil optimum needs
+! the lowest grid price above alpha**(1/theta) when theta > 0. See
+! oil_price_validation/elasticity_sweep.py, column max_price_half_width_sd.
+!---------------------------------------------------------------------
+LOGICAL :: use_common_p_grid
+DOUBLE PRECISION :: p_width_sd, p_vol_width_sd
+parameter (use_common_p_grid = .true., p_width_sd = 4d+0, p_vol_width_sd = 2d+0)
+
 CHARACTER(LEN = 10) :: outFormat
 
 ! parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width = 1.5d+0,  rstar = 0.01d+0, kappa=0, epsilon=5.2, &
@@ -325,6 +346,87 @@ z=(x-mu)/sd
 	END IF
 END SUBROUTINE Ncdf
 
+
+!=====================================================================
+! Accurate standard-normal CDF, for the common-grid price discretization.
+!
+! The Ncdf routine above is a Polya-type closed-form approximation with
+! absolute error of order 3e-3 in probability. That is too coarse to build
+! a transition kernel that has to reproduce conditional means and variances,
+! so the common-grid path uses ERFC instead. This matches the independently
+! validated Python kernel in oil_price_validation/validate.py, which uses
+! 0.5*erfc(-t/sqrt(2)).
+!=====================================================================
+! Probability of a standardized normal falling in [lo, hi].
+!
+! Evaluated with ERFC on whichever side keeps both terms small, which avoids the
+! catastrophic cancellation that `normal_cdf(hi) - normal_cdf(lo)` suffers when
+! both CDFs are near 1. Identical in form to normal_cell in
+! oil_price_validation/price_kernel.f90, whose output is checked against the
+! Python kernel to 1e-12.
+DOUBLE PRECISION FUNCTION normal_cell(lo, hi)
+IMPLICIT NONE
+DOUBLE PRECISION, INTENT(IN) :: lo, hi
+DOUBLE PRECISION, PARAMETER :: root2 = 1.41421356237309504880168872420969808d+0
+if (lo >= 0d+0) then
+   normal_cell = 0.5d+0*(ERFC(lo/root2) - ERFC(hi/root2))
+else
+   normal_cell = 0.5d+0*(ERFC(-hi/root2) - ERFC(-lo/root2))
+end if
+normal_cell = max(0d+0, normal_cell)
+END FUNCTION normal_cell
+
+
+!=====================================================================
+! Transition matrix for  z' = (1-rho)*mu + rho*z + sd_eps*eps  on a GIVEN grid.
+!
+! Unlike `tauchen` and `discretize_AR`, the grid is an INPUT, not an output.
+! That is the whole point: one physical price grid shared by every volatility
+! state, with the volatility entering only through sd_eps. With the grid
+! generated per state instead, a change in volatility rescales the price grid
+! and therefore the price LEVEL, which is not the process the paper specifies.
+!
+! Cell edges are midpoints between nodes; the two tails are assigned to the
+! boundary nodes, as in validate.py's normal_rows.
+!=====================================================================
+SUBROUTINE tauchen_fixed(n, z, rho_ar, mu_z, sd_eps, Pi)
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: n
+DOUBLE PRECISION, INTENT(IN) :: z(n), rho_ar, mu_z, sd_eps
+DOUBLE PRECISION, INTENT(OUT) :: Pi(n,n)
+INTEGER :: i, j
+DOUBLE PRECISION :: cond_mean, row_sum, edge(n+1)
+DOUBLE PRECISION, PARAMETER :: big = 1d+100   ! finite surrogate for infinity
+
+if (sd_eps <= 0d+0) then
+   write(*,*) 'tauchen_fixed: sd_eps must be positive, got', sd_eps
+   call exit
+end if
+if (n < 2) then
+   Pi = 1d+0
+   return
+end if
+
+edge(1)   = -big
+edge(n+1) =  big
+do j = 2, n
+   edge(j) = 0.5d+0*(z(j-1) + z(j))
+end do
+
+do i = 1, n
+   cond_mean = (1d+0 - rho_ar)*mu_z + rho_ar*z(i)
+   do j = 1, n
+      Pi(i,j) = normal_cell((edge(j)-cond_mean)/sd_eps, (edge(j+1)-cond_mean)/sd_eps)
+   end do
+   row_sum = sum(Pi(i,:))
+   if (row_sum <= 0d+0) then
+      write(*,*) 'tauchen_fixed: degenerate row', i
+      call exit
+   end if
+   Pi(i,:) = Pi(i,:)/row_sum
+end do
+END SUBROUTINE tauchen_fixed
+
 !-----------------------------------------------------
 ! Bisection
 !-----------------------------------------------------
@@ -424,7 +526,8 @@ DOUBLE PRECISION :: delta_y, prob_mass, y_pointer, qq, pdf_tirar, cdf_right, cdf
     prob_vector_p_vol(p_vol_num), prob_vector_p(p_num,p_vol_num), variance_p_vol, variance_p_innovation, exp_p(p_num, p_vol_num), &
     prob_vector_p_1(p_num,p_vol_num), prob_vector_p_2(p_num,p_vol_num), prob_vector_p_3(p_num,p_vol_num),&
     prob_vector_p_4(p_num,p_vol_num), prob_vector_p_5(p_num,p_vol_num), variance_p_innovation1, variance_p_innovation2,&
-    variance_p_innovation3, variance_p_innovation4, variance_p_innovation5
+    variance_p_innovation3, variance_p_innovation4, variance_p_innovation5, &
+    p_grid_common(p_num), var_log_vol, mean_innov_var, uncond_sd_log_p, grid_spacing, sd_log_vol
 
     CHARACTER(LEN = 2) :: column_num
     CHARACTER(LEN = 1) :: fileName0
@@ -441,10 +544,43 @@ if(p_vol_num < 2) then
    prob_vector_p_vol= 1d+0
 
  else
+  if (use_common_p_grid) then
+   !------------------------------------------------------------------
+   ! Explicit volatility grid with a MATCHING kernel.
+   !
+   ! The submitted path below has the same defect that froze the price in the
+   ! intermediate model: tauchen fills p_vol_grid (+/-m*sd, spacing 0.904 here)
+   ! AND trans_matrix_p_vol, then discretize_AR overwrites the GRID with
+   ! Rouwenhorst nodes (+/-sqrt(n-1)*sd, spacing 0.452) while its own matrix
+   ! goes to trans_matrix_p_vol_AR, which is never read. The surviving Tauchen
+   ! matrix was built for cells twice as wide as the grid actually has, so it
+   ! puts too much mass on the diagonal and the volatility process comes out
+   ! more persistent than calibrated. Unlike the price case this one is LIVE in
+   ! the benchmark (p_vol_num = 5).
+   !------------------------------------------------------------------
+   sd_log_vol = sqrt(variance_p_vol/(1d+0 - rho_p_vol**(2d+0)))
+   do i = 1, p_vol_num
+      p_vol_grid(i) = mean_p_vol - p_vol_width_sd*sd_log_vol &
+           + 2d+0*p_vol_width_sd*sd_log_vol*dble(i-1)/dble(p_vol_num-1)
+   end do
+   call tauchen_fixed(p_vol_num, p_vol_grid, rho_p_vol, mean_p_vol, &
+                      sqrt(variance_p_vol), trans_matrix_p_vol)
+   prob_vector_p_vol = 1d+0/dble(p_vol_num)
+   do j = 1, 20000
+      prob_vector_p_vol = matmul(prob_vector_p_vol, trans_matrix_p_vol)
+   end do
+   prob_vector_p_vol = prob_vector_p_vol/sum(prob_vector_p_vol)
+   if (sqrt(variance_p_vol) < 0.5d+0*(p_vol_grid(2)-p_vol_grid(1))) then
+      write(*,*) '*** WARNING: p_vol_num too small / p_vol_width_sd too wide:'
+      write(*,*) '*** volatility innovation sd is under half a grid cell.'
+   end if
+
+  else
     !call tauchen(y_num,rho, zero, variance_y,m, y_grid, trans_matrix)
     call tauchen(p_vol_num,rho_p_vol, mean_p_vol, variance_p_vol,m, p_vol_grid, trans_matrix_p_vol)
 
    call discretize_AR(rho_p_vol, mean_p_vol , variance_p_vol, p_vol_grid, trans_matrix_p_vol_AR, prob_vector_p_vol)
+  end if
 
    do i=1,p_vol_num
       cdf_matrix_p_vol(i,1) = trans_matrix_p_vol(i,1)
@@ -509,13 +645,78 @@ if(p_vol_num < 2) then
 
 else
 
-   do i=1,p_vol_num
-      variance_p_innovation = (std_u_p * exp(p_vol_grid(i)))**(2)
-      ! This is ok, because it's the conditional variance of the innovations to epsilon_r in period t, conditional on observing a realization
-      ! of the volatility in that period (r_vol_grid(i) .or. \sigma_{r,t} using the model's notation).
-       !call tauchen(p_num,rho_p, mean_p, variance_p_innovation, m, p_grid(:, i), trans_matrix_p(:,:,i))
-      call discretize_AR(rho_p, mean_p , variance_p_innovation, p_grid(:, i), trans_matrix_p(:,:,i), prob_vector_p(:,i))
-   end do
+   if (use_common_p_grid) then
+
+      !------------------------------------------------------------------
+      ! ONE physical log-price grid, shared by every volatility state.
+      !
+      ! Width is set from the UNCONDITIONAL sd of log p, integrating over the
+      ! volatility process:
+      !     E[v] = E[exp(2*x)] = exp(2*mean_p_vol + 2*Var(x)),  x = log sd_t
+      !     Var(x) = eta^2 / (1 - rho_p_vol^2)
+      !     sd(log p) = sqrt( E[v] / (1 - rho_p^2) )
+      ! Volatility then enters ONLY through the conditional sd in the kernel,
+      ! so the price index means the same physical price in every state.
+      !------------------------------------------------------------------
+      var_log_vol        = (std_u_vol*eta)**(2d+0) / (1d+0 - rho_p_vol**(2d+0))
+      mean_innov_var     = exp(2d+0*mean_p_vol + 2d+0*var_log_vol)
+      uncond_sd_log_p    = sqrt(mean_innov_var / (1d+0 - rho_p**(2d+0)))
+
+      do i = 1, p_num
+         p_grid_common(i) = mean_p - p_width_sd*uncond_sd_log_p &
+              + 2d+0*p_width_sd*uncond_sd_log_p*dble(i-1)/dble(p_num-1)
+      end do
+
+      do i = 1, p_vol_num
+         ! Same grid in every column: p_grid(i_p, k) no longer depends on k.
+         p_grid(:, i) = p_grid_common
+         call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
+                            std_u_p*exp(p_vol_grid(i)), trans_matrix_p(:,:,i))
+         ! Stationary distribution of the price chain conditional on this
+         ! volatility state, by power iteration on the kernel.
+         prob_vector_p(:, i) = 1d+0/dble(p_num)
+         do j = 1, 20000
+            prob_vector_p(:, i) = matmul(prob_vector_p(:, i), trans_matrix_p(:,:,i))
+         end do
+         prob_vector_p(:, i) = prob_vector_p(:, i)/sum(prob_vector_p(:, i))
+      end do
+
+      write(*,*) 'common price grid: sd(log p) =', uncond_sd_log_p, &
+                 ' range =', exp(p_grid_common(1)), exp(p_grid_common(p_num))
+
+      !------------------------------------------------------------------
+      ! Resolution check. The grid must span the UNCONDITIONAL range while
+      ! still resolving a one-period move, whose sd is exp(p_vol_grid(k)) and
+      ! is smallest in the lowest volatility state. If the node spacing is not
+      ! comfortably below that sd, the conditional distribution collapses onto
+      ! a single node and the chain is frozen in low-volatility states -- the
+      ! same pathology, arrived at from the opposite direction.
+      !------------------------------------------------------------------
+      grid_spacing = p_grid_common(2) - p_grid_common(1)
+      write(*,*) 'grid spacing =', grid_spacing
+      do i = 1, p_vol_num
+         write(*,*) '  vol state', i, ' cond sd =', std_u_p*exp(p_vol_grid(i)), &
+                    ' sd/spacing =', std_u_p*exp(p_vol_grid(i))/grid_spacing
+      end do
+      if (std_u_p*exp(p_vol_grid(1)) < 2d+0*grid_spacing) then
+         write(*,*) '*** WARNING: p_num too small for this price process.'
+         write(*,*) '*** The lowest-volatility conditional sd is under 2 grid cells,'
+         write(*,*) '*** so that state cannot move. Raise p_num (the standalone'
+         write(*,*) '*** validation in oil_price_validation uses 201 price nodes)'
+         write(*,*) '*** or narrow p_width_sd.'
+      end if
+
+   else
+
+      do i=1,p_vol_num
+         variance_p_innovation = (std_u_p * exp(p_vol_grid(i)))**(2)
+         ! This is ok, because it's the conditional variance of the innovations to epsilon_r in period t, conditional on observing a realization
+         ! of the volatility in that period (r_vol_grid(i) .or. \sigma_{r,t} using the model's notation).
+         !call tauchen(p_num,rho_p, mean_p, variance_p_innovation, m, p_grid(:, i), trans_matrix_p(:,:,i))
+         call discretize_AR(rho_p, mean_p , variance_p_innovation, p_grid(:, i), trans_matrix_p(:,:,i), prob_vector_p(:,i))
+      end do
+
+   end if
 
  !! Creating price grid for different levels of volatilities:
  ! vol_grid=1

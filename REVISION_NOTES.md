@@ -376,7 +376,78 @@ is the branch any `p_vol_num=1` run would take.
 
 The last row reflects §4.1 and §4.3 together: distinct prices *and* independent paths per panel.
 
-### 4.4 Still outstanding
+### 4.4 Common price grid ported into the Fortran
+
+`use_common_p_grid = .true.` (module `param`) switches the price discretization to **one
+physical log-price grid shared by every volatility state**, with volatility entering only the
+transition kernel. This is the structural fix for §3.1. Setting the flag to `.false.` restores
+the submitted behaviour exactly, so the two are comparable.
+
+New routines in module `param`: `normal_cell` (ERFC-based, cancellation-safe, identical in form
+to `normal_cell` in `oil_price_validation/price_kernel.f90`) and `tauchen_fixed`, which takes the
+grid as an **input** rather than generating it. Grid half-width is `p_width_sd` unconditional SDs,
+where sd(log p) = sqrt(E[v]/(1−ρ_p²)) and E[v] = exp(2·mean_p_vol + 2·Var(x)).
+
+The existing `Ncdf` is a Polya-type closed form with absolute error ~3e-3 — fine for its original
+use but far too coarse for a kernel that must reproduce conditional moments, hence the separate
+ERFC path. **`Ncdf` is still used for the endowment process `y`**, which inherits that error; not
+changed here because it would move the benchmark.
+
+**Verified** against an independent Python implementation of the same formulas, using
+full-precision parameters:
+
+| check | result |
+|---|---|
+| grid identical across volatility states | max diff **0** |
+| price kernel vs reference | **1.1e-16** |
+| volatility kernel vs reference | **5.6e-17** |
+
+(An earlier 1.09e-10 discrepancy was an artifact of the test reading `p_vol_grid.txt`, which is
+written with only 8 decimals — not a code defect.)
+
+### 4.4a A second live grid/kernel mismatch, in the volatility process
+
+Tracing those grid values exposed the **same defect as §4.3, live in the benchmark**, for the
+volatility chain: `tauchen` fills `p_vol_grid` (±m·sd, spacing 0.586) *and* `trans_matrix_p_vol`,
+then `discretize_AR` overwrites the **grid** with Rouwenhorst nodes (±√(n−1)·sd, spacing 0.293)
+while its own matrix goes to `trans_matrix_p_vol_AR`, which is never read. The surviving Tauchen
+matrix was built for cells twice as wide as the grid actually has.
+
+At the submitted parameters (η=0.44, ρ_σ=0.66), on the same ±2 sd grid:
+
+| | sd(log σ) | persistence |
+|---|---|---|
+| target | 0.5857 | 0.660 |
+| **submitted kernel** | **0.3568 (−39.1%)** | 0.673 |
+| matched kernel (fixed) | 0.5970 (+1.9%) | 0.641 |
+
+**The submitted model's volatility process has 39% less dispersion than calibrated.** Persistence
+is roughly right; it is the *size* of volatility shocks that is wrong. This compounds §3.3 — the
+volatility level is understated by the convention error, and its variation is understated again
+here.
+
+### 4.4b Known limitation: `p_num` must rise sharply
+
+A common grid must span the unconditional range while still resolving a one-period move, whose sd
+is `exp(p_vol_grid(k))` and is smallest in the lowest volatility state. At `p_num = 7` the model
+now prints a warning, because it fails badly:
+
+| p_num | spacing | cond sd / spacing (lowest vol) | states (b·y·p·v) |
+|---|---|---|---|
+| 7 | 0.861 | **0.05** | 73,500 |
+| 101 | 0.052 | 0.90 | 1,060,500 |
+| **201** | 0.026 | 1.80 | 2,110,500 |
+| 401 | 0.013 | 3.59 | 4,210,500 |
+
+Roughly **224 nodes** are needed for the lowest-volatility state to move at all — consistent with
+the 201 used in the standalone validation. This is the same freezing pathology as §4.3, reached
+from the opposite direction: there the kernel was too persistent, here the grid is too coarse.
+
+The cost is severe. The expectation loops over next-period `(y, p, σ)`, so VFI work scales
+roughly with `p_num²`: 7 → 201 is about **800×**. The efficiency fix in §4.5 (hoisting `func_m`)
+becomes a prerequisite, not an optimisation, and `b_num`/`y_num` may need revisiting.
+
+### 4.5 Still outstanding
 
 - **The forks carry the pre-revision calibration** while the benchmark has been updated — a
   price-innovation sd of 0.0156 against 0.127, a factor of 8.1. Any cross-economy comparison run
@@ -388,7 +459,7 @@ The last row reflects §4.1 and §4.3 together: distinct prices *and* independen
   `graphs_pdf_y.txt` written from the never-assigned `prob_vector`, containing a literal `NaN`;
   and `p_grid_1..5` dumped as all-zeros in the intermediate run, which makes
   `working_graphs_dec29.m` divide by zero.
-- **Efficiency.** `func_m` — a 5000-iteration bisection — is called inside `objective_function`,
+- **Efficiency (now a prerequisite, see 4.4b).** `func_m` — a 5000-iteration bisection — is called inside `objective_function`,
   which `optimize` evaluates 100× per call, but its result depends only on `(y, p, excl)`, all
   constant across the b-loop. That is roughly 1.5M bisections per VFI sweep to produce 294
   distinct values. Hoisting it into a precomputed table would remove most of the runtime.
