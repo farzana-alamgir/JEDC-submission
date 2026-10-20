@@ -46,6 +46,11 @@ LOGICAL :: use_common_p_grid
 DOUBLE PRECISION :: p_width_sd, p_vol_width_sd
 parameter (use_common_p_grid = .true., p_width_sd = 4d+0, p_vol_width_sd = 2d+0)
 
+! Memo cache for func_m (see the comment in that function).
+DOUBLE PRECISION :: m_cache_y, m_cache_p, m_cache_val
+INTEGER :: m_cache_excl
+LOGICAL :: m_cache_valid = .false.
+
 CHARACTER(LEN = 10) :: outFormat
 
 ! parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width = 1.5d+0,  rstar = 0.01d+0, kappa=0, epsilon=5.2, &
@@ -442,6 +447,26 @@ double precision, intent(in):: p_initial, y_initial
 double precision:: d_bi, m_opt, mmin, mmax,func_m,A
 integer :: iter_bi
 
+!---------------------------------------------------------------------
+! Memo cache.
+!
+! func_m is a pure function of (y_initial, p_initial, i_excl_global): A depends
+! only on y_initial and i_excl_global, and the root condition only on those plus
+! p_initial. Everything else is a compile-time parameter.
+!
+! `optimize` scans b_num = 100 debt choices and calls objective_function for
+! each, and objective_function calls func_m -- but y_initial, p_initial and
+! i_excl_global are module globals that do not change inside that loop. So 99
+! of every 100 bisections repeat work already done. Caching the last result
+! removes them. Results are bit-identical, not approximate: on a hit the stored
+! value is the one the bisection would have recomputed.
+!---------------------------------------------------------------------
+if (m_cache_valid .and. i_excl_global == m_cache_excl .and. &
+    y_initial == m_cache_y .and. p_initial == m_cache_p) then
+   func_m = m_cache_val
+   return
+end if
+
 !Initializing
 mmin = 1e-16
 mmax = mmax_global
@@ -488,8 +513,17 @@ func_m=m_opt
 if (d_bi .ge. tol_bi) then
 print *, 'iterations exceeded at bisection'
 print*, 'd_bi', d_bi
+print*, 'y_initial', y_initial, ' p_initial', exp(p_initial)
+print*, 'An interior oil optimum needs p > alpha**(1/theta) =', alpha**(1d+0/theta)
 call exit
 end if
+
+! Store only a converged result, so a failed solve can never be served from cache.
+m_cache_y     = y_initial
+m_cache_p     = p_initial
+m_cache_excl  = i_excl_global
+m_cache_val   = m_opt
+m_cache_valid = .true.
 
 
 end function func_m

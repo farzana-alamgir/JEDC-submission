@@ -447,6 +447,59 @@ The cost is severe. The expectation loops over next-period `(y, p, σ)`, so VFI 
 roughly with `p_num²`: 7 → 201 is about **800×**. The efficiency fix in §4.5 (hoisting `func_m`)
 becomes a prerequisite, not an optimisation, and `b_num`/`y_num` may need revisiting.
 
+### 4.4c Performance: `func_m` memo cache
+
+`optimize` scans `b_num = 100` debt choices, calling `objective_function` for each, and that
+calls `func_m` — a bisection — even though `y_initial`, `p_initial` and `i_excl_global` are module
+globals that do not change inside the loop. 99 of every 100 bisections repeated work already done.
+
+`func_m` is a pure function of those three, so caching the last result is exact, not approximate.
+Measured on the original calibration and the submitted grid path:
+
+| | wall time | outputs |
+|---|---|---|
+| before | 240.3 s | — |
+| after | **50.5 s** | **all 40 files bit-identical**, incl. the 160MB simulation (same md5) |
+
+**4.8×.** Less than the "removes essentially the whole runtime" estimate in the review, because
+the bisection converges in roughly 14 iterations, not the 5000 cap — it was most of the runtime,
+not nearly all of it.
+
+### 4.4d The real barrier at large `p_num`: the expectation loop
+
+With `func_m` handled, the binding constraint is the expectation in `iterate`:
+
+```
+do i_b_prime = 1,b_num
+   do i_p_vol_next, i_p_next, i_y_next      ! p_vol_num * p_num * y_num
+      exp_v_next += P_sigma * P_p * P_y * v_matrix(...)
+```
+
+nested inside the loops over `(i_y, i_p, i_p_vol)`. Cost per sweep is
+`b_num · (y_num·p_num·p_vol_num)²`, i.e. **quadratic in `p_num`**:
+
+| p_num | ops/sweep | vs now |
+|---|---|---|
+| 7 | 5.4e7 | 1× |
+| 201 | 4.5e10 | **~800×** |
+
+At 201 nodes that is days per solve. The sum factorizes, because the kernel is a product:
+
+```
+A(b',y,p',s') = sum_y'  P_y(y,y')     V(b',y',p',s')     ! independent of (p,s)
+B(b',y,p,s')  = sum_p'  P_p(p,p'|s')  A(b',y,p',s')
+E(b',y,p,s)   = sum_s'  P_s(s,s')     B(b',y,p,s')
+```
+
+Cost becomes `b·y·p²·s` (the middle step dominates) instead of `b·y²·p²·s²` — a factor of
+`y_num·p_num·p_vol_num / p_num = y_num·p_vol_num` = **105×**. That brings 201 nodes back to
+roughly the current cost per sweep. Memory for the intermediates is about 17MB each at
+`b=100, y=21, p=201, s=5`.
+
+Two further easy wins in the same loop: `exp_v_excl` reads `v1_matrix`, which has **no debt
+index**, so it is recomputed identically `b_num` times; and `expectation` is assigned but never
+used.
+
 ### 4.5 Still outstanding
 
 - **The forks carry the pre-revision calibration** while the benchmark has been updated — a
