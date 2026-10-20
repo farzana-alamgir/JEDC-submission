@@ -472,6 +472,7 @@ SUBROUTINE precompute_expectations
 IMPLICIT NONE
 INTEGER :: iy, iyn, ip, ipn, iv, ivn, ib
 DOUBLE PRECISION :: w, m_const, coup_const
+DOUBLE PRECISION :: acc_by(b_num, y_num), acc_y(y_num)
 
 ! --- Step 1: contract over next-period endowment ---
 do ivn = 1, p_vol_num
@@ -491,36 +492,40 @@ do ivn = 1, p_vol_num
 end do
 
 ! --- Step 2: contract over next-period price, conditional on next volatility ---
+! Contract over p' with the (b,y) plane as one contiguous block.
+!
+! Indexing this as exp_aux_a(:, iy, ipn, ivn) inside the ipn loop strides by
+! b_num*y_num*8 bytes per step, re-traversing a scattered multi-MB region
+! p_num times for every (iy, ivn). At p_num = 225 that was slow enough that a
+! single call did not finish in ten minutes. Accumulating over the whole
+! contiguous (b,y) slice instead keeps the accumulator in cache and streams
+! the source once per ipn.
 do ivn = 1, p_vol_num
    do ip = 1, p_num
-      do iy = 1, y_num
-         exp_aux_b(:, iy, ip, ivn) = 0d+0
-         exc_aux_b(iy, ip, ivn)    = 0d+0
-         do ipn = 1, p_num
-            w = trans_matrix_p(ip, ipn, ivn)
-            exp_aux_b(:, iy, ip, ivn) = exp_aux_b(:, iy, ip, ivn) &
-                 + w * exp_aux_a(:, iy, ipn, ivn)
-            exc_aux_b(iy, ip, ivn) = exc_aux_b(iy, ip, ivn) &
-                 + w * exc_aux_a(iy, ipn, ivn)
-         end do
+      acc_by = 0d+0
+      acc_y  = 0d+0
+      do ipn = 1, p_num
+         w = trans_matrix_p(ip, ipn, ivn)
+         acc_by = acc_by + w * exp_aux_a(:, :, ipn, ivn)
+         acc_y  = acc_y  + w * exc_aux_a(:, ipn, ivn)
       end do
+      exp_aux_b(:, :, ip, ivn) = acc_by
+      exc_aux_b(:, ip, ivn)    = acc_y
    end do
 end do
 
 ! --- Step 3: contract over next-period volatility ---
 do iv = 1, p_vol_num
    do ip = 1, p_num
-      do iy = 1, y_num
-         exp_v_matrix(:, iy, ip, iv)   = 0d+0
-         exp_v_excl_matrix(iy, ip, iv) = 0d+0
-         do ivn = 1, p_vol_num
-            w = trans_matrix_p_vol(iv, ivn)
-            exp_v_matrix(:, iy, ip, iv) = exp_v_matrix(:, iy, ip, iv) &
-                 + w * exp_aux_b(:, iy, ip, ivn)
-            exp_v_excl_matrix(iy, ip, iv) = exp_v_excl_matrix(iy, ip, iv) &
-                 + w * exc_aux_b(iy, ip, ivn)
-         end do
+      acc_by = 0d+0
+      acc_y  = 0d+0
+      do ivn = 1, p_vol_num
+         w = trans_matrix_p_vol(iv, ivn)
+         acc_by = acc_by + w * exp_aux_b(:, :, ip, ivn)
+         acc_y  = acc_y  + w * exc_aux_b(:, ip, ivn)
       end do
+      exp_v_matrix(:, :, ip, iv)   = acc_by
+      exp_v_excl_matrix(:, ip, iv) = acc_y
    end do
 end do
 
@@ -567,25 +572,21 @@ end do
 
 do ivn = 1, p_vol_num
    do ip = 1, p_num
-      do iy = 1, y_num
-         exp_aux_b(:, iy, ip, ivn) = 0d+0
-         do ipn = 1, p_num
-            exp_aux_b(:, iy, ip, ivn) = exp_aux_b(:, iy, ip, ivn) &
-                 + trans_matrix_p(ip, ipn, ivn) * exp_aux_a(:, iy, ipn, ivn)
-         end do
+      acc_by = 0d+0
+      do ipn = 1, p_num
+         acc_by = acc_by + trans_matrix_p(ip, ipn, ivn) * exp_aux_a(:, :, ipn, ivn)
       end do
+      exp_aux_b(:, :, ip, ivn) = acc_by
    end do
 end do
 
 do iv = 1, p_vol_num
    do ip = 1, p_num
-      do iy = 1, y_num
-         q_fun_matrix(:, iy, ip, iv) = 0d+0
-         do ivn = 1, p_vol_num
-            q_fun_matrix(:, iy, ip, iv) = q_fun_matrix(:, iy, ip, iv) &
-                 + trans_matrix_p_vol(iv, ivn) * exp_aux_b(:, iy, ip, ivn)
-         end do
+      acc_by = 0d+0
+      do ivn = 1, p_vol_num
+         acc_by = acc_by + trans_matrix_p_vol(iv, ivn) * exp_aux_b(:, :, ip, ivn)
       end do
+      q_fun_matrix(:, :, ip, iv) = acc_by
    end do
 end do
 
@@ -1655,21 +1656,13 @@ do i_p_vol = 1,p_vol_num
    end do
 end do
 
-do i_p_vol = 1,p_vol_num
-   do i_p = 1,p_num
-      do i_y = 1,y_num
-         do i_p_vol_next = 1,p_vol_num
-            do i_p_next = 1,p_num
-               do i_y_next = 1,y_num
-
-                  write(20, *) sdf_value
-
-               end do
-            end do
-         end do
-      end do
-   end do
-end do
+! The SDF is a single constant, so write it once rather than dumping the same
+! number over the whole (y,p,sigma)^2 product space. That loop wrote 5.6e8
+! identical lines at p_num = 225 -- roughly 12 GB, and formatting them was
+! consuming ~76% of total runtime, which is what stalled the first attempts at
+! a large-grid solve. At the submitted p_num = 7 it was 14 MB of one repeated
+! value. Nothing reads this file: working_graphs_dec29.m never references it.
+write(20, *) sdf_value
 
 close(20)
 close(21)
