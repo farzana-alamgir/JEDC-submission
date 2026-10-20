@@ -57,6 +57,12 @@ DOUBLE PRECISION, DIMENSION(p_num, p_num, p_vol_num) :: trans_matrix_p_AR,trans_
 
 DOUBLE PRECISION, DIMENSION (y_num, p_num, p_vol_num) :: q_def_free_paid_matrix
 
+! Autarky (default-state) allocations. Promoted from locals of `iterate` to module
+! scope so that `simulate` can read them during exclusion periods, when the country
+! is in autarky and c_matrix/oil_matrix/output_matrix do not describe its allocation.
+DOUBLE PRECISION, DIMENSION (y_num, p_num, p_vol_num) :: c1_matrix, output1_matrix, &
+                                                         oil1_matrix, TFP1_matrix
+
 contains
 
 
@@ -486,9 +492,14 @@ if(p_vol_num < 2) then
       variance_p_innovation = (std_u_p * exp(mean_p_vol) * scale_int)**(2d+0)
       ! scale_int is the fix for the Jensen's inequality
 
-      !call tauchen(y_num,rho, zero, variance_y,m, y_grid, trans_matrix)
-    call tauchen(p_num,rho_p, mean_p, variance_p_innovation, m, p_grid(:, 1), trans_matrix_p(:,:,1))
-     call discretize_AR(rho_p, mean_p , variance_p_innovation, p_grid(:, 1), trans_matrix_p_AR(:,:,1), prob_vector_p(:,1))
+      ! NOTE: previously this called tauchen (filling p_grid(:,1) AND trans_matrix_p(:,:,1))
+      ! and then discretize_AR, whose `z` argument is intent(out). That OVERWROTE the grid
+      ! with Rouwenhorst nodes (+/-2.449*sig_z) while leaving Tauchen's transition matrix
+      ! (built for its own wider +/-4*sig_z grid) in place. The mismatched pair had diagonal
+      ! ~0.9992 instead of ~0.9423, which froze the oil price: every row of the simulated
+      ! output carried the same price. Use discretize_AR for BOTH grid and matrix, matching
+      ! the p_vol_num >= 2 branch and the benchmark model.
+      call discretize_AR(rho_p, mean_p , variance_p_innovation, p_grid(:, 1), trans_matrix_p(:,:,1), prob_vector_p(:,1))
 
       variance_p_level_epsilon_tomorrow = variance_p_innovation
       !variance_r_level_epsilon_tomorrow is the conditional variance of innovations to the world interest rate *tomorrow*, conditional on
@@ -509,7 +520,7 @@ else
  !! Creating price grid for different levels of volatilities:
  ! vol_grid=1
  do i=1,p_vol_num
-      variance_p_innovation1 = (std_u_p * exp(p_vol_grid(i)))**(2)
+      variance_p_innovation1 = (std_u_p * exp(p_vol_grid(1)))**(2)
       ! This is ok, because it's the conditional variance of the innovations to epsilon_r in period t, conditional on observing a realization
       ! of the volatility in that period (r_vol_grid(i) .or. \sigma_{r,t} using the model's notation).
       ! call tauchen(p_num,rho_p, mean_p, variance_p_innovation1, m, p_grid_1(:, i), trans_matrix_p_1(:,:,i))
@@ -933,8 +944,8 @@ end subroutine optimize
 subroutine iterate
 USE param
 DOUBLE PRECISION :: v_valor, convergence, criteria, deviation,deviation_q, b_next, v1_matrix_new(y_num,p_num,p_vol_num), expectation, &
-                    exp_v_excl, exp_v_next, q_def_free_paid_matrix_new(y_num, p_num,p_vol_num), c1_matrix(y_num, p_num,p_vol_num),&
-                    output1_matrix(y_num, p_num,p_vol_num), oil1_matrix(y_num, p_num,p_vol_num),TFP1_matrix(y_num, p_num,p_vol_num)
+                    exp_v_excl, exp_v_next, q_def_free_paid_matrix_new(y_num, p_num,p_vol_num)
+! c1_matrix, output1_matrix, oil1_matrix, TFP1_matrix are now module-level (see module param)
 
 DOUBLE PRECISION, DIMENSION(b_num, y_num, p_num,p_vol_num) :: v0_matrix_new, c0_matrix, oil0_matrix, &
                                             q_paid_matrix_new, output0_matrix, TFP0_matrix
@@ -1458,7 +1469,8 @@ integer :: period_num, i,j, sample_num, default_num, i_y_previous, i_y_current, 
 
 parameter (sample_num =500, period_num=1501)
 DOUBLE PRECISION :: random_matrix(period_num, sample_num, 2), random_vector(1:2*sample_num*period_num), vol(period_num,sample_num), &
-      random_matrix_rw(period_num, 2), random_vector_rw(1:2*period_num),p(period_num,sample_num), p_vol_matrix(period_num,sample_num), &
+      random_matrix_rw(period_num, sample_num, 2), random_vector_rw(1:2*sample_num*period_num), &
+      p(period_num,sample_num), p_vol_matrix(period_num,sample_num), &
      z_shock(period_num,sample_num), b(period_num+1,sample_num), c(period_num,sample_num), oil(period_num,sample_num), price(period_num,sample_num),&
      q(period_num,sample_num), qdef, b_zero,  p_shock(period_num,sample_num),tb(period_num,sample_num), y(period_num,sample_num), &
      q_default_free(period_num,sample_num), aux_real,  q_default_free_new(period_num,sample_num), gdp(period_num,sample_num)
@@ -1486,9 +1498,14 @@ end do
 
 !First column of random_matrix is used to generate rw level shocks
 !Second column of random_matrix is used to generate rw volatility shocks.
-do i=1,period_num
-   random_matrix_rw(i,1)=random_vector_rw(i)
-   random_matrix_rw(i,2)=random_vector_rw(period_num+i)
+!Drawn PER SAMPLE: without the j dimension every simulated panel would share one
+!identical oil-price path, so cross-sample averaging would not reduce price-shock
+!sampling error at all.
+do j=1,sample_num
+   do i=1,period_num
+      random_matrix_rw(i,j,1)=random_vector_rw((j-1)*period_num+i)
+      random_matrix_rw(i,j,2)=random_vector_rw(period_num*sample_num + (j-1)*period_num+i)
+   end do
 end do
 
 
@@ -1561,13 +1578,13 @@ do j=1,sample_num   !SOLVE FOR SAMPLE j
 
 !THE FOLLOWING 4 LINES ARE A WAY OF GETTING A RANDOM DRAW FOR THE INTEREST SHOCK
       i_p_vol_current = 1
-      do WHILE(cdf_matrix_p_vol(i_p_vol_previous, i_p_vol_current) < random_matrix_rw(i,2))
+      do WHILE(cdf_matrix_p_vol(i_p_vol_previous, i_p_vol_current) < random_matrix_rw(i,j,2))
          i_p_vol_current = i_p_vol_current + 1
       end do
       i_p_vol_previous = i_p_vol_current
 
       i_p_current = 1
-      do WHILE(cdf_matrix_p(i_p_previous, i_p_current,i_p_vol_current) < random_matrix_rw(i,1))
+      do WHILE(cdf_matrix_p(i_p_previous, i_p_current,i_p_vol_current) < random_matrix_rw(i,j,1))
          i_p_current = i_p_current + 1
       end do
       i_p_previous = i_p_current
@@ -1589,9 +1606,12 @@ do j=1,sample_num   !SOLVE FOR SAMPLE j
             b(i+1,j) = b_grid(i_b_next)
             q(i,j) = q_fun(i_b_next, i_y_current, i_p_current, i_p_vol_current)
             y(i,j) = scale_y*exp(z_shock(i,j))
-            oil(i,j)=oil_matrix(i_b_next,i_y_current,i_p_current, i_p_vol_current)
-            gdp(i,j)=output_matrix(i_b_next,i_y_current,i_p_current, i_p_vol_current)
-            c(i,j)=c_matrix(i_b_next,i_y_current,i_p_current, i_p_vol_current)
+            ! Allocations are indexed by the debt the country ENTERS with (i_b_current),
+            ! not the debt chosen for next period (i_b_next): see c0_matrix, defined from
+            ! b_initial = b_grid(i_b) in `iterate`.
+            oil(i,j)=oil_matrix(i_b_current,i_y_current,i_p_current, i_p_vol_current)
+            gdp(i,j)=output_matrix(i_b_current,i_y_current,i_p_current, i_p_vol_current)
+            c(i,j)=c_matrix(i_b_current,i_y_current,i_p_current, i_p_vol_current)
             tb(i,j) = gdp(i,j)-c(i,j)
 
             q_default_free(i,j) = q_nodef(i_y_current,i_p_current, i_p_vol_current)
@@ -1606,9 +1626,12 @@ do j=1,sample_num   !SOLVE FOR SAMPLE j
             b(i+1,j) = b_grid(i_b_next)
             q(i,j) = q_fun(i_b_next, i_y_current,i_p_current, i_p_vol_current)
             y(i,j) = scale_y*(EXP(z_shock(i,j))  - max(zero, d0*EXP(z_shock(i,j)) + d1*EXP(z_shock(i,j))**2))
-            gdp(i,j)=output_matrix(i_b_next,i_y_current,i_p_current, i_p_vol_current)
-            oil(i,j)=oil_matrix(i_b_next,i_y_current,i_p_current, i_p_vol_current)
-            c(i,j)=c_matrix(i_b_next,i_y_current,i_p_current, i_p_vol_current)
+            ! Country is in autarky this period, so its allocation is the default-state one,
+            ! which depends on (y,p,sigma) only. c_matrix/oil_matrix/output_matrix at a
+            ! zero-debt index would return the REPAY allocation (incl. new bond proceeds).
+            gdp(i,j)=output1_matrix(i_y_current,i_p_current, i_p_vol_current)
+            oil(i,j)=oil1_matrix(i_y_current,i_p_current, i_p_vol_current)
+            c(i,j)=c1_matrix(i_y_current,i_p_current, i_p_vol_current)
             price(i,j)=exp(p_grid(i_p_current, i_p_vol_current))
             vol(i,j)=p_vol_grid(i_p_vol_current)
 
@@ -1630,9 +1653,12 @@ do j=1,sample_num   !SOLVE FOR SAMPLE j
             b(i+1,j) = b_grid(i_b_next)
             q(i,j) = q_fun(i_b_next, i_y_current,i_p_current, i_p_vol_current)  !q_paid
             y(i,j) = scale_y*(EXP(z_shock(i,j))  - max(zero, d0*EXP(z_shock(i,j)) + d1*EXP(z_shock(i,j))**2))
-            gdp(i,j)=output_matrix(i_b_next,i_y_current,i_p_current, i_p_vol_current)
-            oil(i,j)=oil_matrix(i_b_next,i_y_current,i_p_current, i_p_vol_current)
-            c(i,j)=c_matrix(i_b_next,i_y_current,i_p_current, i_p_vol_current)
+            ! Default is chosen at (i_b_current,...), so c_matrix/oil_matrix/output_matrix
+            ! there already hold the autarky (c1/oil1/output1) values. Indexing by i_b_next
+            ! (= zero debt) would instead return the repay allocation.
+            gdp(i,j)=output_matrix(i_b_current,i_y_current,i_p_current, i_p_vol_current)
+            oil(i,j)=oil_matrix(i_b_current,i_y_current,i_p_current, i_p_vol_current)
+            c(i,j)=c_matrix(i_b_current,i_y_current,i_p_current, i_p_vol_current)
 
            tb(i,j) = gdp(i,j)-c(i,j)
            price(i,j)=exp(p_grid(i_p_current, i_p_vol_current))
@@ -1657,9 +1683,10 @@ do j=1,sample_num   !SOLVE FOR SAMPLE j
              q(i,j) = q_fun(i_b_next, i_y_current,i_p_current, i_p_vol_current)  !q_paid
             y(i,j) = scale_y*exp(z_shock(i,j))
             coupon = (rstar+delta)/(1d+0 +rstar)
-            gdp(i,j)=output_matrix(i_b_next,i_y_current,i_p_current, i_p_vol_current)
-            oil(i,j)=oil_matrix(i_b_next,i_y_current,i_p_current, i_p_vol_current)
-            c(i,j)=c_matrix(i_b_next,i_y_current,i_p_current, i_p_vol_current)
+            ! Indexed by entering debt (i_b_current), not the newly chosen b' (i_b_next).
+            gdp(i,j)=output_matrix(i_b_current,i_y_current,i_p_current, i_p_vol_current)
+            oil(i,j)=oil_matrix(i_b_current,i_y_current,i_p_current, i_p_vol_current)
+            c(i,j)=c_matrix(i_b_current,i_y_current,i_p_current, i_p_vol_current)
             price(i,j)=exp(p_grid(i_p_current, i_p_vol_current))
             vol(i,j)=p_vol_grid(i_p_vol_current)
 

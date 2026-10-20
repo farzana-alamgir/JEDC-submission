@@ -493,9 +493,13 @@ if(p_vol_num < 2) then
       variance_p_innovation = (std_u_p * exp(mean_p_vol) * scale_int)**(2d+0)
       ! scale_int is the fix for the Jensen's inequality
 
-      !call tauchen(y_num,rho, zero, variance_y,m, y_grid, trans_matrix)
-    call tauchen(p_num,rho_p, mean_p, variance_p_innovation, m, p_grid(:, 1), trans_matrix_p(:,:,1))
-     call discretize_AR(rho_p, mean_p , variance_p_innovation, p_grid(:, 1), trans_matrix_p_AR(:,:,1), prob_vector_p(:,1))
+      ! NOTE: previously this called tauchen (filling p_grid(:,1) AND trans_matrix_p(:,:,1))
+      ! and then discretize_AR, whose `z` argument is intent(out). That OVERWROTE the grid
+      ! with Rouwenhorst nodes while leaving Tauchen's transition matrix (built for its own
+      ! wider grid) in place, freezing the oil price. Dead code at p_vol_num=5, but it is
+      ! the branch a p_vol_num=1 run takes -- see the intermediate model. Use discretize_AR
+      ! for BOTH grid and matrix, as the p_vol_num >= 2 branch below does.
+      call discretize_AR(rho_p, mean_p , variance_p_innovation, p_grid(:, 1), trans_matrix_p(:,:,1), prob_vector_p(:,1))
 
       variance_p_level_epsilon_tomorrow = variance_p_innovation
       !variance_r_level_epsilon_tomorrow is the conditional variance of innovations to the world interest rate *tomorrow*, conditional on
