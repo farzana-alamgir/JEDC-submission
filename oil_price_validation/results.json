@@ -1,0 +1,120 @@
+{
+  "parameters": {
+    "center": -0.1126566,
+    "price_persistence": 0.9683596,
+    "mu_h": -4.2718859,
+    "rho_h": 0.6677605,
+    "eta_h": 0.5866213
+  },
+  "analytical": {
+    "mean_log_price": -0.1126566,
+    "sd_log_price": 0.5528774148068639,
+    "persistence": 0.9683596,
+    "mean_innovation_variance": 0.019037245321561366
+  },
+  "direct_simulation": {
+    "mean_log_price": -0.10984717176670848,
+    "sd_log_price": 0.5508969916996822,
+    "persistence": 0.968094050295921
+  },
+  "fortran_max_probability_error": 0.0,
+  "grid_checks": [
+    {
+      "price_nodes": 101,
+      "volatility_nodes": 11,
+      "price_width_sd": 6,
+      "volatility_width_sd": 4.5,
+      "iterations": 388,
+      "mean_log_price": -0.11265659999999847,
+      "sd_log_price": 0.56857524843296,
+      "persistence": 0.9683573898413635,
+      "mean_innovation_variance": 0.019768584646419663,
+      "conditional_mean_rmse": 0.00011812527628690779,
+      "conditional_mean_max_error": 0.2281277336784857,
+      "conditional_variance_relative_rmse": 0.020186434808573545,
+      "price_boundary_mass": 2.4374338266206937e-06,
+      "volatility_boundary_mass": 7.892324447733355e-05
+    },
+    {
+      "price_nodes": 201,
+      "volatility_nodes": 21,
+      "price_width_sd": 6,
+      "volatility_width_sd": 4.5,
+      "iterations": 368,
+      "mean_log_price": -0.11265659999999723,
+      "sd_log_price": 0.5567967726352007,
+      "persistence": 0.9683579229571087,
+      "mean_innovation_variance": 0.019217587742737904,
+      "conditional_mean_rmse": 8.40558984658415e-05,
+      "conditional_mean_max_error": 0.2282057407069873,
+      "conditional_variance_relative_rmse": 0.006346838483428449,
+      "price_boundary_mass": 1.2999956127146423e-06,
+      "volatility_boundary_mass": 2.1534747541711242e-05
+    },
+    {
+      "price_nodes": 401,
+      "volatility_nodes": 41,
+      "price_width_sd": 6,
+      "volatility_width_sd": 4.5,
+      "iterations": 347,
+      "mean_log_price": -0.11265659999999786,
+      "sd_log_price": 0.5538430866177906,
+      "persistence": 0.9683581442729402,
+      "mean_innovation_variance": 0.019081888716657572,
+      "conditional_mean_rmse": 7.696499004731688e-05,
+      "conditional_mean_max_error": 0.22822523772253245,
+      "conditional_variance_relative_rmse": 0.003921980254956045,
+      "price_boundary_mass": 1.066633080545955e-06,
+      "volatility_boundary_mass": 1.172821826859834e-05
+    },
+    {
+      "price_nodes": 401,
+      "volatility_nodes": 41,
+      "price_width_sd": 4,
+      "volatility_width_sd": 4.5,
+      "iterations": 323,
+      "mean_log_price": -0.11265659999999718,
+      "sd_log_price": 0.5523554452043279,
+      "persistence": 0.9682280415488783,
+      "mean_innovation_variance": 0.019081888716657426,
+      "conditional_mean_rmse": 0.0008842127058930524,
+      "conditional_mean_max_error": 0.24397217260942594,
+      "conditional_variance_relative_rmse": 0.032742341989254596,
+      "price_boundary_mass": 0.00016855213446984645,
+      "volatility_boundary_mass": 1.1728218268598254e-05
+    },
+    {
+      "price_nodes": 401,
+      "volatility_nodes": 41,
+      "price_width_sd": 8,
+      "volatility_width_sd": 4.5,
+      "iterations": 361,
+      "mean_log_price": -0.11265659999999837,
+      "sd_log_price": 0.5541159284248758,
+      "persistence": 0.9683595815624255,
+      "mean_innovation_variance": 0.01908188871665762,
+      "conditional_mean_rmse": 7.500654053434175e-06,
+      "conditional_mean_max_error": 0.21317074307369221,
+      "conditional_variance_relative_rmse": 0.002184458943206811,
+      "price_boundary_mass": 8.892170068410529e-09,
+      "volatility_boundary_mass": 1.1728218268598372e-05
+    },
+    {
+      "price_nodes": 401,
+      "volatility_nodes": 41,
+      "price_width_sd": 6,
+      "volatility_width_sd": 5.5,
+      "iterations": 350,
+      "mean_log_price": -0.11265659999999775,
+      "sd_log_price": 0.5541710724364848,
+      "persistence": 0.9683580723029822,
+      "mean_innovation_variance": 0.01910457834598844,
+      "conditional_mean_rmse": 8.028644832644266e-05,
+      "conditional_mean_max_error": 0.36125086017152697,
+      "conditional_variance_relative_rmse": 0.004302584383020784,
+      "price_boundary_mass": 1.1067917970915555e-06,
+      "volatility_boundary_mass": 8.815667057592082e-08
+    }
+  ],
+  "checks_passed": true
+}

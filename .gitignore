@@ -1,3 +1,4 @@
 .DS_Store
 *.kate-swp
-model/graphs_data_sim_dss.txt
+# Per-run simulation dumps (~160MB each, regenerable; exceed GitHub's 100MB limit)
+graphs_data_sim_dss.txt

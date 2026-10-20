@@ -1,7 +1,10 @@
 !**************************************************************************************************
+
+!cd /Users/farzanaalamgir/code/JEDC_submission/model
+
 ! gfortran -O3 -march=native oil_prod_CES.f90 -o oil_prod_CES
-!cd C:\Users\faraz\Desktop\Oil_price_soverreign_default\oil_prod_CES
-! ifort oil_prod_CES.f90 -o main
+!
+! ./oil_prod_CES
 !INCLUDE 'link_fnl_static.h'
 
 MODULE shared_types
@@ -20,7 +23,7 @@ DOUBLE PRECISION :: beta, sigma, b_inf, b_sup, y_inf, y_sup, std_eps,mmax_global
 parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width = 1.5d+0,  rstar = 0.01d+0,  &
      prob_excl_end =0.0833d+0, std_eps = 0.03d+0, rho = 0.9d+0, beta=0.96, alpha=0.3, theta=0.5,&          !A-m has been changed in order to capture the new specification of stealing function
      mean_y = -0.5d+0*std_eps**2,delta = 0.03d+0,  m=4d+0, scale_y=10d+0, d0= -0.246, d1=0.37, mmax_global=100d+0,&
-     std_u_p = 1d+0, std_u_vol= 1d+0, rho_p = 0.98d+0, rho_p_vol = 0.66d+0 ,pprime=3.97d+0,mean_p = 0.12d+0, mean_p_vol = -4.33d+0, eta = 0.44d+0)
+     std_u_p = 1d+0, std_u_vol= 1d+0, rho_p = 0.976d+0, rho_p_vol = 0.678d+0 ,pprime=3.97d+0,mean_p = 0.12d+0, mean_p_vol = -2.166d+0, eta = 0.3323d+0)
 
 CHARACTER(LEN = 10) :: outFormat
 
