@@ -582,6 +582,63 @@ Note both 1e-7 runs stopped at the 1500-sweep cap rather than on tolerance, so e
 is an upper bound on accuracy. Tightening `criteria` (line 1363) and raising the cap
 belongs in step 4, re-establishing the benchmark, and should be documented as a change.
 
+### 4.4g First full solve on the corrected process
+
+Completed: 45 minutes wall clock, VFI converged at sweep 126 (deviation 9.3e-4 against
+`criteria` 1e-3), full 750,000-observation simulation written. Configuration:
+sigma = 0.4, theta = -1.5, alpha = 1.652632e-4, p_num = 225, p_width_sd = 4,
+p_vol_width_sd = 2, common price grid.
+
+**Process reproduction** -- the point of the whole exercise:
+
+| moment | model | target |
+|---|---|---|
+| sd(log oil price) | **0.6462** | 0.646 (analytical) |
+| mean oil import share | **3.54%** of GDP | 3.74% (measured) |
+| corr(oil share, oil price) | **+0.98** | positive; data slope 1-sigma = +0.61 |
+
+The sign of that last row is the one the submitted calibration got backwards: sigma = 2
+implies oil bills *fall* as a share of GDP when oil gets dearer.
+
+**Spreads and defaults:**
+
+| moment | model | data |
+|---|---|---|
+| mean spread, annualised | **492 bp** | ~410 bp |
+| sd spread | 251 bp | |
+| annual default rate | 3.61% | |
+
+The magnitude is now the right order. This speaks to Report 2's Major 6: the submitted
+model delivered 0.5-1.5 bp per 10% oil price move against 6-8 bp in the data; this
+configuration gives **2.7-3.4 bp**, roughly 40-50% of the empirical response rather than
+10-20%.
+
+**The headline state-dependence shrinks sharply:**
+
+| volatility state | d(spread, bp) / d(log oil price) |
+|---|---|
+| low (below median) | +28.5 |
+| high (at or above median) | +35.5 |
+| **ratio** | **1.25x** |
+
+The submitted model reports **~3x** (slopes of 0.15 against 0.05). On the corrected
+process that becomes 1.25x -- consistent with section 3.1, which predicted the 3x was
+substantially an artifact of the volatility-dependent price grid rather than a volatility
+channel.
+
+**Do not over-read this.** Four caveats:
+
+1. The calibration changed at the same time as the grid (sigma 2 -> 0.4, alpha
+   recalibrated, share target 7.99% -> 3.74%), so 3x -> 1.25x is a **joint** effect and
+   cannot yet be attributed to the grid fix alone. Isolating it needs the grid fix at the
+   submitted calibration, which is only feasible on a narrowed grid (section 4.4b).
+2. Only five volatility nodes at +/-2 sd, so the volatility process has limited range;
+   `p_vol_num` and `p_vol_width_sd` are unexplored.
+3. The low/high split here is at the median realised volatility, which need not match the
+   paper's definition.
+4. `criteria` is still 1e-3, which section 4.4f shows is loose enough to move the default
+   frequency by ~5%.
+
 ### 4.5 Still outstanding
 
 - **The forks carry the pre-revision calibration** while the benchmark has been updated — a
