@@ -90,6 +90,11 @@ DOUBLE PRECISION, DIMENSION (y_num, p_num, p_vol_num) :: q_def_free_paid_matrix
 DOUBLE PRECISION, DIMENSION (y_num, p_num, p_vol_num) :: c1_matrix, output1_matrix, &
                                                          oil1_matrix, TFP1_matrix
 
+! Precomputed conditional expectations of the value functions, and the two
+! intermediate contractions used to build them. See precompute_expectations.
+DOUBLE PRECISION, DIMENSION(b_num, y_num, p_num, p_vol_num) :: exp_v_matrix, exp_aux_a, exp_aux_b
+DOUBLE PRECISION, DIMENSION(y_num, p_num, p_vol_num) :: exp_v_excl_matrix, exc_aux_a, exc_aux_b
+
 contains
 
 
@@ -431,6 +436,94 @@ do i = 1, n
    Pi(i,:) = Pi(i,:)/row_sum
 end do
 END SUBROUTINE tauchen_fixed
+
+
+!=====================================================================
+! Conditional expectations of the value functions, by factorized contraction.
+!
+! The quantity needed is, for every (b', y, p, sigma),
+!
+!   E[V(b',y',p',sigma') | y,p,sigma]
+!     = sum_{sigma'} P_s(s,s') sum_{p'} P_p(p,p'|s') sum_{y'} P_y(y,y') V(b',y',p',s')
+!
+! Evaluated as written, that is a triple sum inside the loop over (y,p,sigma)
+! and b', costing b*(y*p*s)^2 per sweep -- QUADRATIC in p_num, so raising p_num
+! from 7 to the ~201 a common grid needs is roughly an 800x increase.
+!
+! The kernel is a product, so the sum separates into three sequential
+! contractions, each reusing the previous one:
+!
+!   A(b',y,p',s') = sum_{y'} P_y(y,y')    V(b',y',p',s')     ! no (p,s) dependence
+!   B(b',y,p ,s') = sum_{p'} P_p(p,p'|s') A(b',y,p',s')
+!   E(b',y,p ,s ) = sum_{s'} P_s(s,s')    B(b',y,p ,s')
+!
+! Cost becomes b*y*p^2*s (the middle step dominates) instead of b*y^2*p^2*s^2,
+! a saving of y_num*p_vol_num ~ 105x at these dimensions.
+!
+! The autarky value v1_matrix carries NO debt index, so its expectation is
+! contracted separately on (y,p,sigma) alone rather than recomputed b_num times.
+!
+! NOTE ON REPRODUCIBILITY: this reorders the summation, and floating-point
+! addition is not associative, so results differ from the unfactorized version
+! at the level of machine rounding. It is not bit-identical by construction.
+!=====================================================================
+SUBROUTINE precompute_expectations
+IMPLICIT NONE
+INTEGER :: iy, iyn, ip, ipn, iv, ivn
+DOUBLE PRECISION :: w
+
+! --- Step 1: contract over next-period endowment ---
+do ivn = 1, p_vol_num
+   do ipn = 1, p_num
+      do iy = 1, y_num
+         exp_aux_a(:, iy, ipn, ivn) = 0d+0
+         exc_aux_a(iy, ipn, ivn)    = 0d+0
+         do iyn = 1, y_num
+            w = trans_matrix(iy, iyn)
+            exp_aux_a(:, iy, ipn, ivn) = exp_aux_a(:, iy, ipn, ivn) &
+                 + w * v_matrix(:, iyn, ipn, ivn)
+            exc_aux_a(iy, ipn, ivn) = exc_aux_a(iy, ipn, ivn) &
+                 + w * v1_matrix(iyn, ipn, ivn)
+         end do
+      end do
+   end do
+end do
+
+! --- Step 2: contract over next-period price, conditional on next volatility ---
+do ivn = 1, p_vol_num
+   do ip = 1, p_num
+      do iy = 1, y_num
+         exp_aux_b(:, iy, ip, ivn) = 0d+0
+         exc_aux_b(iy, ip, ivn)    = 0d+0
+         do ipn = 1, p_num
+            w = trans_matrix_p(ip, ipn, ivn)
+            exp_aux_b(:, iy, ip, ivn) = exp_aux_b(:, iy, ip, ivn) &
+                 + w * exp_aux_a(:, iy, ipn, ivn)
+            exc_aux_b(iy, ip, ivn) = exc_aux_b(iy, ip, ivn) &
+                 + w * exc_aux_a(iy, ipn, ivn)
+         end do
+      end do
+   end do
+end do
+
+! --- Step 3: contract over next-period volatility ---
+do iv = 1, p_vol_num
+   do ip = 1, p_num
+      do iy = 1, y_num
+         exp_v_matrix(:, iy, ip, iv)   = 0d+0
+         exp_v_excl_matrix(iy, ip, iv) = 0d+0
+         do ivn = 1, p_vol_num
+            w = trans_matrix_p_vol(iv, ivn)
+            exp_v_matrix(:, iy, ip, iv) = exp_v_matrix(:, iy, ip, iv) &
+                 + w * exp_aux_b(:, iy, ip, ivn)
+            exp_v_excl_matrix(iy, ip, iv) = exp_v_excl_matrix(iy, ip, iv) &
+                 + w * exc_aux_b(iy, ip, ivn)
+         end do
+      end do
+   end do
+end do
+
+END SUBROUTINE precompute_expectations
 
 !-----------------------------------------------------
 ! Bisection
@@ -1202,6 +1295,11 @@ do WHILE(convergence<0)
 
 coupon = (rstar + delta )/ (1d+0 + rstar)
 
+! All conditional expectations of v_matrix and v1_matrix for this sweep, built
+! by factorized contraction instead of a triple sum per (b',y,p,sigma). See
+! precompute_expectations for the algebra and the cost argument.
+call precompute_expectations
+
 do i_p_vol = 1,p_vol_num
       do i_p = 1,p_num
       p_initial=p_grid(i_p,i_p_vol)
@@ -1211,28 +1309,13 @@ do i_p_vol = 1,p_vol_num
             y_initial = y_grid(i_y)
 
 ! HERE WE COMPUTE THE EXPECTED VALUE FUNCTIONS, AND ALSO THE PRICE FOR EACH POSSIBLE LEVEL OF B_NEXT
+            ! Expectations were built for every (b',y,p,sigma) by
+            ! precompute_expectations above; exp_v_excl has no debt index.
+            exp_v_vector(:)      = exp_v_matrix(:, i_y_global, i_p, i_p_vol)
+            exp_v_excl_vector(:) = exp_v_excl_matrix(i_y_global, i_p, i_p_vol)
+
             do i_b_prime = 1,b_num
-               exp_v_excl = 0d+0
-               exp_v_next = 0d+0
-               do i_p_vol_next =1,p_vol_num
-                  do i_p_next = 1,p_num
-                     do i_y_next=1,y_num
-                        expectation=trans_matrix_p_vol(i_p_vol, i_p_vol_next)*trans_matrix_p(i_p, i_p_next, i_p_vol_next)
-                        exp_v_next = exp_v_next + trans_matrix_p_vol(i_p_vol, i_p_vol_next)*&
-                        trans_matrix_p(i_p, i_p_next, i_p_vol_next)*trans_matrix(i_y_global, i_y_next)*&
-                        v_matrix(i_b_prime, i_y_next, i_p_next, i_p_vol_next)
-
-                        exp_v_excl = exp_v_excl + trans_matrix_p_vol(i_p_vol, i_p_vol_next)*&
-                        trans_matrix_p(i_p, i_p_next, i_p_vol_next)* trans_matrix(i_y_global, i_y_next)*&
-                        v1_matrix(i_y_next, i_p_next, i_p_vol_next)
-                     end do
-                     end do
-               end do
-
-               exp_v_vector(i_b_prime) = exp_v_next
-               exp_v_excl_vector(i_b_prime) = exp_v_excl
                q_vector(i_b_prime) = q_fun(i_b_prime, i_y_global,i_p, i_p_vol)
-
             end do
 
 

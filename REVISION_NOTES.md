@@ -500,6 +500,36 @@ Two further easy wins in the same loop: `exp_v_excl` reads `v1_matrix`, which ha
 index**, so it is recomputed identically `b_num` times; and `expectation` is assigned but never
 used.
 
+**Implemented** as `precompute_expectations`, called once per sweep. Measured on the original
+calibration and the submitted grid path:
+
+| | wall time |
+|---|---|
+| uncached | 240.3 s |
+| + `func_m` cache | 50.5 s |
+| + factorized expectation | **43.5 s** |
+
+Only 14% at `p_num = 7`, which is the honest number — the expectation loop is a modest share of
+runtime at seven price nodes. The saving scales with `y_num·p_vol_num`, so it is what makes
+`p_num = 201` tractable rather than what speeds up the current configuration.
+
+Because the summation is reordered and floating-point addition is not associative, this is **not**
+bit-identical by construction. What was verified:
+
+| quantity | result |
+|---|---|
+| default decisions | **identical** |
+| debt policy actually used (`b_next_matrix`) | **identical** |
+| simulation output, 160MB | **identical (same md5)** |
+| value function | differs ≤ 1.4e-14 relative |
+| consumption | differs ≤ 9.8e-13 relative |
+| `b0_next_matrix_indice` | 4348 of 73,500 index flips |
+
+The policy flips look alarming but are benign: **all 4348 are in states where default is chosen**,
+so the repay policy is computed and then discarded. In every state where it is used it is
+unchanged — which is why the used policy and the simulation are untouched. The flips occur where
+the objective is flat in `b'` to within 1e-14, so `maxloc` picks a different tied index.
+
 ### 4.5 Still outstanding
 
 - **The forks carry the pre-revision calibration** while the benchmark has been updated — a
