@@ -47,10 +47,15 @@ ROOT = Path(__file__).resolve().parent
 # Endowment scale and the oil import share target. ENDOWMENT matches scale_y in
 # the Fortran. SHARE_TARGET is the share implied by the SUBMITTED calibration,
 # used here so the sweep holds the benchmark's own behaviour fixed; it is NOT a
-# measured target. Check it against the `import_gdp` sheet of spread_data.xlsx
-# (loaded at oil_empirical_quarterly_claude.R:141) before using these numbers.
+# measured target. The measured counterpart is 3.74% -- see
+# empirical/estimate_substitution_elasticity.py, which also estimates sigma.
 ENDOWMENT = 10.0
 SHARE_TARGET = 0.0799
+# Measured alternative: 0.0374, the mean oil import share of the paper's own
+# 34-country importer sample (empirical/estimate_substitution_elasticity.py).
+# The default above is kept so the sweep holds the SUBMITTED model's behaviour
+# fixed and the comparison stays like-for-like; set SHARE_TARGET = 0.0374 to
+# recalibrate alpha to the data instead.
 
 SIGMAS = (0.2, 0.3, 0.4, 0.5, 0.6, 0.75, 0.9, 1.0, 1.25, 1.5, 1.75, 2.0)
 
