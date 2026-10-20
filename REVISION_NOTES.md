@@ -348,15 +348,36 @@ fix it was a single constant. The consumption drop at default is 10.3%.
 Both bugs affect consumption volatility, the consumption and output drop at default, `tb/gdp`,
 and any welfare moment built on them.
 
-### 4.3 Still outstanding
+### 4.3 The intermediate model's oil price was frozen
 
-- **The `intermediate` fork's oil price is frozen.** With `p_vol_num=1` the code takes the
-  `p_vol_num < 2` branch, where `tauchen` fills both `p_grid(:,1)` and `trans_matrix_p(:,:,1)`,
-  then `discretize_AR` overwrites the *grid* (`z` is `intent(out)`) while Tauchen's transition
-  matrix survives. The mismatched pair has diagonal 0.9995. Confirmed in its output: the price
-  column takes exactly one value, 1.05745457, across all 750,000 rows, versus 15 distinct values
-  in the benchmark. The intermediate economy is therefore numerically the *basic* economy, and
-  the full-vs-intermediate comparison in Section 6.2 does not isolate the volatility channel.
+With `p_vol_num=1` the code takes the `p_vol_num < 2` branch, where `tauchen` filled **both**
+`p_grid(:,1)` and `trans_matrix_p(:,:,1)`, after which `discretize_AR` overwrote the *grid* — its
+`z` argument is `intent(out)` — with Rouwenhorst nodes (±0.1924), leaving Tauchen's transition
+matrix, built for its own wider ±0.3141 grid, in place. `discretize_AR`'s own matrix went to
+`trans_matrix_p_AR`, which is never read.
+
+The mismatched pair had diagonal **0.9995** instead of **0.9423**, freezing the price: the price
+column of its 750,000-row simulation took exactly one value, 1.05745457. **The intermediate
+economy was numerically the basic (constant-price) economy**, so the full-vs-intermediate
+comparison in Section 6.2 did not isolate the volatility channel at all.
+
+Fixed by using `discretize_AR` for both grid and matrix, as the `p_vol_num >= 2` branch already
+does. The same latent bug is fixed in the benchmark, where it is dead code at `p_vol_num=5` but
+is the branch any `p_vol_num=1` run would take.
+
+**Verified** by re-running the corrected intermediate model to completion:
+
+| | before | after |
+|---|---|---|
+| transition diagonal | 0.9995 | **0.942345** (matches benchmark exactly) |
+| distinct simulated prices | 1 | **7** |
+| price-state indices visited | {3} | **{1,…,7}** |
+| sample 1 vs sample 2 paths | identical | **differ on 1174 / 1500 periods** |
+
+The last row reflects §4.1 and §4.3 together: distinct prices *and* independent paths per panel.
+
+### 4.4 Still outstanding
+
 - **The forks carry the pre-revision calibration** while the benchmark has been updated — a
   price-innovation sd of 0.0156 against 0.127, a factor of 8.1. Any cross-economy comparison run
   now would attribute that level gap to the volatility channel. Nothing records the difference:
