@@ -886,6 +886,30 @@ else
          prob_vector_p(:, i) = prob_vector_p(:, i)/sum(prob_vector_p(:, i))
       end do
 
+      ! The per-volatility-state grids used by working_graphs_dec29.m. Under a
+      ! common grid these are the SAME physical grid; only the kernel differs by
+      ! the volatility state it is conditioned on. Filling them here keeps the
+      ! plotting script consistent with what the model actually solved on --
+      ! without this they stay on the old Rouwenhorst per-state construction and
+      ! the figures plot solved objects against the wrong price axis.
+      do i = 1, p_vol_num
+         p_grid_1(:, i) = p_grid_common
+         p_grid_2(:, i) = p_grid_common
+         p_grid_3(:, i) = p_grid_common
+         p_grid_4(:, i) = p_grid_common
+         p_grid_5(:, i) = p_grid_common
+         call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
+                            std_u_p*exp(p_vol_grid(1)), trans_matrix_p_1(:,:,i))
+         call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
+                            std_u_p*exp(p_vol_grid(2)), trans_matrix_p_2(:,:,i))
+         call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
+                            std_u_p*exp(p_vol_grid(3)), trans_matrix_p_3(:,:,i))
+         call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
+                            std_u_p*exp(p_vol_grid(4)), trans_matrix_p_4(:,:,i))
+         call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
+                            std_u_p*exp(p_vol_grid(5)), trans_matrix_p_5(:,:,i))
+      end do
+
       write(*,*) 'common price grid: sd(log p) =', uncond_sd_log_p, &
                  ' range =', exp(p_grid_common(1)), exp(p_grid_common(p_num))
 
