@@ -44,7 +44,7 @@ parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width 
 !---------------------------------------------------------------------
 LOGICAL :: use_common_p_grid, mean_preserving
 DOUBLE PRECISION :: p_width_sd, p_vol_width_sd
-parameter (use_common_p_grid = .false., mean_preserving = .false., p_width_sd = 3.5d+0, p_vol_width_sd = 2d+0)
+parameter (use_common_p_grid = .true., mean_preserving = .false., p_width_sd = 3d+0, p_vol_width_sd = 2d+0)
 
 ! Memo cache for func_m (see the comment in that function).
 DOUBLE PRECISION :: m_cache_y, m_cache_p, m_cache_val
@@ -63,7 +63,7 @@ INTEGER :: b_num, y_num, quad_num, nout, i_y_global, i_excl_global, p_num, p_vol
      i_b_global, i_default_global, indicator_2, i_b_next, i_b_zero, b_num_interm, counter
 
 
-parameter (b_num= 100, y_num = 21, p_num=7, p_vol_num=5)
+parameter (b_num= 100, y_num = 21, p_num=277, p_vol_num=5)
 ! parameter (b_num= 200, y_num = 50)
 
 DOUBLE PRECISION :: b_grid(1:b_num), y_grid(1:y_num), default_grid(1:2), &
@@ -400,11 +400,13 @@ END FUNCTION normal_cell
 ! Cell edges are midpoints between nodes; the two tails are assigned to the
 ! boundary nodes, as in validate.py's normal_rows.
 !=====================================================================
-SUBROUTINE tauchen_fixed(n, z, rho_ar, mu_z, sd_eps, Pi)
+SUBROUTINE tauchen_fixed(n, z, rho_ar, mu_z, sd_eps, Pi, drift)
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: n
 DOUBLE PRECISION, INTENT(IN) :: z(n), rho_ar, mu_z, sd_eps
+DOUBLE PRECISION, INTENT(IN), OPTIONAL :: drift
 DOUBLE PRECISION, INTENT(OUT) :: Pi(n,n)
+DOUBLE PRECISION :: drift_use
 INTEGER :: i, j
 DOUBLE PRECISION :: cond_mean, row_sum, edge(n+1)
 DOUBLE PRECISION, PARAMETER :: big = 1d+100   ! finite surrogate for infinity
@@ -418,6 +420,9 @@ if (n < 2) then
    return
 end if
 
+drift_use = 0d+0
+if (present(drift)) drift_use = drift
+
 edge(1)   = -big
 edge(n+1) =  big
 do j = 2, n
@@ -425,7 +430,9 @@ do j = 2, n
 end do
 
 do i = 1, n
-   cond_mean = (1d+0 - rho_ar)*mu_z + rho_ar*z(i)
+   ! drift enters the CONDITIONAL mean directly. Folding it into mu_z instead
+   ! would deliver only (1-rho_ar) of it -- 2% at rho_p = 0.98.
+   cond_mean = (1d+0 - rho_ar)*mu_z + rho_ar*z(i) + drift_use
    do j = 1, n
       Pi(i,j) = normal_cell((edge(j)-cond_mean)/sd_eps, (edge(j+1)-cond_mean)/sd_eps)
    end do
@@ -737,7 +744,7 @@ DOUBLE PRECISION :: delta_y, prob_mass, y_pointer, qq, pdf_tirar, cdf_right, cdf
     prob_vector_p_4(p_num,p_vol_num), prob_vector_p_5(p_num,p_vol_num), variance_p_innovation1, variance_p_innovation2,&
     variance_p_innovation3, variance_p_innovation4, variance_p_innovation5, &
     p_grid_common(p_num), var_log_vol, mean_innov_var, uncond_sd_log_p, grid_spacing, sd_log_vol, &
-    v0_innov, mean_p_adj, &
+    v0_innov, mean_p_adj, mp_drift, &
     pv_new(p_num), pvv_new(p_vol_num)
 
     CHARACTER(LEN = 2) :: column_num
@@ -886,8 +893,17 @@ else
       do i = 1, p_vol_num
          ! Same grid in every column: p_grid(i_p, k) no longer depends on k.
          p_grid(:, i) = p_grid_common
+         ! Mean-preserving correction (both reports' lead comment), applied on the
+         ! common grid:  -0.5*[v_k - v0],  v0 = E[v].  It is a drift on the
+         ! conditional mean, so E[p'|p,sigma] stops varying with sigma while the
+         ! conditional dispersion still does.
+         if (mean_preserving) then
+            mp_drift = -0.5d+0*((std_u_p*exp(p_vol_grid(i)))**2 - mean_innov_var)
+         else
+            mp_drift = 0d+0
+         end if
          call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
-                            std_u_p*exp(p_vol_grid(i)), trans_matrix_p(:,:,i))
+                            std_u_p*exp(p_vol_grid(i)), trans_matrix_p(:,:,i), mp_drift)
          ! Stationary distribution of the price chain conditional on this
          ! volatility state, by power iteration on the kernel.
          prob_vector_p(:, i) = 1d+0/dble(p_num)

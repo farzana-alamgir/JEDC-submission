@@ -698,6 +698,89 @@ centre by at most 1.1e-4 in log price, yet the reported statistic swings from +2
 relocation of two sample points. The decomposition cannot be interpreted until the price
 index means the same price in every volatility state, which is the common-grid fix.
 
+## Part 5 — The mean-preserving decomposition: results
+
+Three economies, solved on a **common** price grid (p_num = 277, +/-3 sd) at the
+**submitted** calibration and elasticity (alpha = 0.3, theta = 0.5, rho_p = 0.98,
+mean_p_vol = -4.33, eta = 0.44). All three share the same physical price grid, the same
+average innovation variance v0 = E[v], and the same shock sequence, so differences are
+not sampling error.
+
+| | economy | what volatility does |
+|---|---|---|
+| 1 | full SV | moves both the conditional mean of the level and the dispersion |
+| 2 | mean-preserving SV | moves **only** the dispersion |
+| 3 | constant volatility | nothing; sd fixed at sqrt(E[v]) = 0.018555 |
+
+Economy 2 implements both reports' lead comment exactly: a drift of `-0.5*[v_t - v0]` on
+the conditional mean. **Verified**: `E[p'|p,sigma]` swings +0.0894% across volatility
+states in the full model and **-0.0000%** after the correction.
+
+Implementation note: the drift must enter the **conditional** mean. Folding it into the
+process mean passed to `tauchen_fixed` would deliver only `(1-rho_p)` of it -- 2% at
+rho_p = 0.98.
+
+### 5.1 The decomposition
+
+| channel | spread (bp) | default rate (pp) |
+|---|---|---|
+| **TOTAL** (full SV - constant vol) | **+12.6** | **+0.045** |
+| of which, expected-price (mean) channel | **+43.8** | +0.305 |
+| of which, pure dispersion channel | **-31.2** | -0.260 |
+
+Against a base spread of 408.7 bp, time-varying volatility is worth **+3.1%**.
+
+**The headline: the mean channel is 3.5x the total effect, and the pure dispersion
+channel has the opposite sign.** Nearly all of what the paper attributes to oil price
+*uncertainty* is the mechanical Jensen effect -- higher conditional variance raising the
+conditional mean of the price *level* -- and genuine risk, held mean-preserving, *lowers*
+spreads by 31 bp.
+
+This is precisely the distinction both reports asked for, and the answer is not the one
+the current draft implies. Report 2 wrote "If the pure effect of uncertainty turns out to
+be small, I think it is fine. At least we know why volatility matters here." Here it is
+not merely small; it is negative.
+
+Why dispersion can lower spreads: with the mean held fixed, time-varying risk gives the
+sovereign an option to time its borrowing -- lean on debt when volatility is low, retrench
+when it is high. The value function is convex in the risk level, so variation in v at
+constant E[v] is valuable. The real side contributes almost nothing: E[gdp] differs by
+0.08% across the three economies.
+
+### 5.2 A placebo that disciplines the cross-state results
+
+The constant-volatility economy retains five volatility *indices* that are economically
+identical. Any variation across them is pure simulation noise, which gives a noise floor:
+
+| statistic, range across the 5 states | placebo (noise) | full SV (signal) |
+|---|---|---|
+| mean spread | 2.3 bp | 7.7 bp, and **falling** in volatility |
+| default rate | 0.199 pp | 0.210 pp |
+| mean debt | 0.034 | 0.024 |
+
+**The default-rate and mean-debt patterns across volatility states are inside the noise
+floor** -- the debt range is smaller than the placebo's. So the Section 6.3
+precautionary-borrowing result is **not identified** in the ergodic simulation at this
+calibration. The spread pattern clears the noise floor by about 3x but has the wrong sign.
+
+This does not contaminate section 5.1: those are differences in ergodic means across
+economies driven by the same 750,000 shocks, so the common sampling error differences out.
+It is the *within*-economy, cross-state comparisons that the noise floor invalidates.
+
+### 5.3 What this means for the revision
+
+1. The decomposition is now available and clean, and it answers both reports' lead comment
+   directly.
+2. It says the uncertainty channel, properly isolated, does not raise spreads at the
+   submitted calibration. The paper's interpretation needs to change, or the calibration
+   does -- see section 3.3, where the volatility level is an order of magnitude too small,
+   which is exactly what makes the Jensen term dominate everything else.
+3. Section 6.3's precautionary-borrowing claim needs a different research design. The
+   ergodic cross-state comparison cannot support it; a policy-function or
+   impulse-response comparison at fixed (b, y) would.
+
+---
+
 ### 4.5 Still outstanding
 
 - **The forks carry the pre-revision calibration** while the benchmark has been updated — a
