@@ -639,6 +639,65 @@ channel.
 4. `criteria` is still 1e-3, which section 4.4f shows is loose enough to move the default
    frequency by ~5%.
 
+### 4.6 The headline 3x state-dependence is a measurement artifact
+
+The `mean_preserving` switch implements both reports' lead comment on the **submitted**
+grid and calibration: `discretize_AR` is called with
+`mean_p - 0.5*(v_k - v0)`, v0 = E[v], so the conditional mean of the level stops moving
+with volatility. It is one line, and the economy solves in under a minute.
+
+Running it exposed something more fundamental than the correction itself.
+
+**First, the setup reproduces the paper.** Using the definition in
+`working_graphs_dec29.m` (i_b3 = 44, nodes 2 and 6, median endowment), the benchmark gives
+slopes of 0.0108 / 0.0224 / 0.0322 across volatility states 2/3/4 -- a **ratio of 2.99**,
+i.e. the reported ~3x. So the pipeline is faithful.
+
+**Second, that 3x is the ratio of two price intervals, not an economic response.** The
+slope is `(s6 - s2)/dprice` with `dprice` held fixed at the **vol-3** grid, while nodes 2
+and 6 span a volatility-*dependent* interval because every volatility state has its own
+grid:
+
+| vol | price interval spanned | reported slope | per ACTUAL price unit |
+|---|---|---|---|
+| 2 | 0.136 (1.00x) | 0.0108 | 193.8 bp |
+| 3 | 0.244 (1.80x) | 0.0224 | 224.2 bp |
+| 4 | 0.440 (3.24x) | 0.0322 | 178.5 bp |
+
+**Ratio of price intervals 3.24; ratio of reported slopes 2.99.** Dividing by the interval
+actually traversed leaves 194 / 224 / 179 bp -- no monotone pattern in volatility.
+
+**Third, the statistic is not robust.** The 3x appears at one debt index only:
+
+| i_b | 38 | 40 | 42 | **44** | 46 |
+|---|---|---|---|---|---|
+| ratio | 0.47 | -0.05 | -0.84 | **2.99** | 0.09 |
+
+and OLS on all seven nodes reverses the ordering (0.067 / 0.036 / 0.025, *decreasing*).
+
+**Fourth, fixing the normalisation does not rescue it.** On a balanced sample (endowment
+states non-default at every price node and volatility state, so composition cannot shift),
+the ratio of vol-5 to vol-1 sensitivity is:
+
+| i_b | 38 | 40 | 42 | 44 | 46 |
+|---|---|---|---|---|---|
+| 2-point, normalised | -0.26 | -0.13 | -0.11 | -0.44 | -0.01 |
+| OLS, all nodes | 0.56 | -2.36 | -0.65 | 0.26 | -0.07 |
+
+Sign and direction both flip across debt indices and estimators. There is no stable
+state-dependence to measure in this configuration.
+
+**Why.** With seven nodes whose spacing differs ~10x across volatility states, and a
+denominator taken from one state's grid, the slope is not identified. This is the
+`p_grid` defect of section 3.1 surfacing as the headline number rather than as an
+abstraction.
+
+**Consequence for the decomposition.** The mean-preserving correction moves each grid
+centre by at most 1.1e-4 in log price, yet the reported statistic swings from +2.99 to
++0.08. That is not an economic effect -- it is a broken statistic responding to a
+relocation of two sample points. The decomposition cannot be interpreted until the price
+index means the same price in every volatility state, which is the common-grid fix.
+
 ### 4.5 Still outstanding
 
 - **The forks carry the pre-revision calibration** while the benchmark has been updated — a

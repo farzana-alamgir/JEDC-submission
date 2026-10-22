@@ -23,7 +23,7 @@ DOUBLE PRECISION :: beta, sigma, b_inf, b_sup, y_inf, y_sup, std_eps,mmax_global
 parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width = 1.5d+0,  rstar = 0.01d+0,  &
      prob_excl_end =0.0833d+0, std_eps = 0.03d+0, rho = 0.9d+0, beta=0.96, alpha=0.3, theta=0.5,&          !A-m has been changed in order to capture the new specification of stealing function
      mean_y = -0.5d+0*std_eps**2,delta = 0.03d+0,  m=4d+0, scale_y=10d+0, d0= -0.246, d1=0.37, mmax_global=100d+0,&
-     std_u_p = 1d+0, std_u_vol= 1d+0, rho_p = 0.976d+0, rho_p_vol = 0.678d+0 ,pprime=3.97d+0,mean_p = 0.12d+0, mean_p_vol = -2.166d+0, eta = 0.3323d+0)
+     std_u_p = 1d+0, std_u_vol= 1d+0, rho_p = 0.98d+0, rho_p_vol = 0.66d+0 ,pprime=3.97d+0,mean_p = 0.12d+0, mean_p_vol = -4.33d+0, eta = 0.44d+0)
 
 !---------------------------------------------------------------------
 ! Price-grid discretization switch.
@@ -42,9 +42,9 @@ parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width 
 ! the lowest grid price above alpha**(1/theta) when theta > 0. See
 ! oil_price_validation/elasticity_sweep.py, column max_price_half_width_sd.
 !---------------------------------------------------------------------
-LOGICAL :: use_common_p_grid
+LOGICAL :: use_common_p_grid, mean_preserving
 DOUBLE PRECISION :: p_width_sd, p_vol_width_sd
-parameter (use_common_p_grid = .true., p_width_sd = 3.5d+0, p_vol_width_sd = 2d+0)
+parameter (use_common_p_grid = .false., mean_preserving = .false., p_width_sd = 3.5d+0, p_vol_width_sd = 2d+0)
 
 ! Memo cache for func_m (see the comment in that function).
 DOUBLE PRECISION :: m_cache_y, m_cache_p, m_cache_val
@@ -63,7 +63,7 @@ INTEGER :: b_num, y_num, quad_num, nout, i_y_global, i_excl_global, p_num, p_vol
      i_b_global, i_default_global, indicator_2, i_b_next, i_b_zero, b_num_interm, counter
 
 
-parameter (b_num= 100, y_num = 21, p_num=201, p_vol_num=5)
+parameter (b_num= 100, y_num = 21, p_num=7, p_vol_num=5)
 ! parameter (b_num= 200, y_num = 50)
 
 DOUBLE PRECISION :: b_grid(1:b_num), y_grid(1:y_num), default_grid(1:2), &
@@ -737,6 +737,7 @@ DOUBLE PRECISION :: delta_y, prob_mass, y_pointer, qq, pdf_tirar, cdf_right, cdf
     prob_vector_p_4(p_num,p_vol_num), prob_vector_p_5(p_num,p_vol_num), variance_p_innovation1, variance_p_innovation2,&
     variance_p_innovation3, variance_p_innovation4, variance_p_innovation5, &
     p_grid_common(p_num), var_log_vol, mean_innov_var, uncond_sd_log_p, grid_spacing, sd_log_vol, &
+    v0_innov, mean_p_adj, &
     pv_new(p_num), pvv_new(p_vol_num)
 
     CHARACTER(LEN = 2) :: column_num
@@ -952,12 +953,44 @@ else
 
    else
 
+      ! Average innovation variance of the stochastic-volatility process,
+      !   v0 = E[exp(2*sigma)] = exp(2*mean_p_vol + 2*Var(sigma)),
+      ! used as the reference point for the mean-preserving correction below.
+      v0_innov = exp(2d+0*mean_p_vol &
+                 + 2d+0*(std_u_vol*eta)**(2d+0)/(1d+0 - rho_p_vol**(2d+0)))
+
       do i=1,p_vol_num
          variance_p_innovation = (std_u_p * exp(p_vol_grid(i)))**(2)
          ! This is ok, because it's the conditional variance of the innovations to epsilon_r in period t, conditional on observing a realization
          ! of the volatility in that period (r_vol_grid(i) .or. \sigma_{r,t} using the model's notation).
+
+         !-------------------------------------------------------------
+         ! MEAN-PRESERVING CORRECTION (both referee reports' lead comment).
+         !
+         ! Under the paper's process the conditional mean of the LEVEL is
+         !   E[p'] = exp(m + v/2),
+         ! so a rise in conditional volatility raises it even with the
+         ! conditional mean of log p held fixed. Subtracting half the
+         ! deviation of the conditional variance from its average v0
+         ! removes that, leaving volatility to act only through dispersion:
+         !
+         !   log p_t - pbar = rho*(log p_{t-1} - pbar) - 0.5*[v_t - v0] + e^{sigma_t} u_t
+         !
+         ! discretize_AR takes mu as the process mean and the correction is a
+         ! constant shift of it, so it passes through one-for-one.
+         !
+         ! v0 is the AVERAGE innovation variance E[v], not exp(2*mean_p_vol).
+         ! That keeps the average amount of price risk unchanged, so this
+         ! economy differs from the benchmark only in the timing of risk.
+         !-------------------------------------------------------------
+         if (mean_preserving) then
+            mean_p_adj = mean_p - 0.5d+0*(variance_p_innovation - v0_innov)
+         else
+            mean_p_adj = mean_p
+         end if
+
          !call tauchen(p_num,rho_p, mean_p, variance_p_innovation, m, p_grid(:, i), trans_matrix_p(:,:,i))
-         call discretize_AR(rho_p, mean_p , variance_p_innovation, p_grid(:, i), trans_matrix_p(:,:,i), prob_vector_p(:,i))
+         call discretize_AR(rho_p, mean_p_adj , variance_p_innovation, p_grid(:, i), trans_matrix_p(:,:,i), prob_vector_p(:,i))
       end do
 
    end if
