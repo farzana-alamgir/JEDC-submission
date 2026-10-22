@@ -1,10 +1,11 @@
 !**************************************************************************************************
-!cd /Users/farzanaalamgir/code/JEDC_submission/model/intermediate
 
-! gfortran -O3 -march=native oil_prod_CES_intermediate.f90 -o oil_prod_CES_intermediate
+!cd /Users/farzanaalamgir/code/JEDC_submission/model
+
+! gfortran -O3 -march=native oil_prod_CES.f90 -o oil_prod_CES
 !
-! ./oil_prod_CES_intermediate
-! INCLUDE 'link_fnl_static.h'  ! COMMENTED OUT - IMSL library not needed
+! ./oil_prod_CES
+!INCLUDE 'link_fnl_static.h'
 
 MODULE shared_types
 
@@ -22,7 +23,33 @@ DOUBLE PRECISION :: beta, sigma, b_inf, b_sup, y_inf, y_sup, std_eps,mmax_global
 parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width = 1.5d+0,  rstar = 0.01d+0,  &
      prob_excl_end =0.0833d+0, std_eps = 0.03d+0, rho = 0.9d+0, beta=0.96, alpha=0.3, theta=0.5,&          !A-m has been changed in order to capture the new specification of stealing function
      mean_y = -0.5d+0*std_eps**2,delta = 0.03d+0,  m=4d+0, scale_y=10d+0, d0= -0.246, d1=0.37, mmax_global=100d+0,&
-     std_u_p = 1d+0, std_u_vol= 0d+0, rho_p = 0.98d+0, rho_p_vol = 0.66d+0 ,pprime=3.97d+0,mean_p = 0.12d+0, mean_p_vol = -4.33d+0, eta = 0.44d+0)
+     std_u_p = 1d+0, std_u_vol= 1d+0, rho_p = 0.976d+0, rho_p_vol = 0.678d+0 ,pprime=3.97d+0,mean_p = 0.12d+0, mean_p_vol = -1.961632d+0, eta = 1d-8)
+
+!---------------------------------------------------------------------
+! Price-grid discretization switch.
+!
+! .false. reproduces the submitted behaviour: discretize_AR builds a SEPARATE
+!         Rouwenhorst grid per volatility state, whose half-width scales with
+!         exp(sigma_t). A volatility shock then rescales the price LEVEL, and
+!         the same price index means a different physical price in different
+!         volatility states. See REVISION_NOTES section 3.1.
+! .true.  uses ONE physical log-price grid shared by every volatility state,
+!         with volatility entering only the transition kernel via tauchen_fixed.
+!         This is the process the paper actually specifies.
+!
+! p_width_sd is the grid half-width in unconditional SDs of log price. The
+! usable range interacts with the CES elasticity: an interior oil optimum needs
+! the lowest grid price above alpha**(1/theta) when theta > 0. See
+! oil_price_validation/elasticity_sweep.py, column max_price_half_width_sd.
+!---------------------------------------------------------------------
+LOGICAL :: use_common_p_grid
+DOUBLE PRECISION :: p_width_sd, p_vol_width_sd
+parameter (use_common_p_grid = .true., p_width_sd = 3.5d+0, p_vol_width_sd = 2d+0)
+
+! Memo cache for func_m (see the comment in that function).
+DOUBLE PRECISION :: m_cache_y, m_cache_p, m_cache_val
+INTEGER :: m_cache_excl
+LOGICAL :: m_cache_valid = .false.
 
 CHARACTER(LEN = 10) :: outFormat
 
@@ -36,7 +63,7 @@ INTEGER :: b_num, y_num, quad_num, nout, i_y_global, i_excl_global, p_num, p_vol
      i_b_global, i_default_global, indicator_2, i_b_next, i_b_zero, b_num_interm, counter
 
 
-parameter (b_num= 100, y_num = 21, p_num=7, p_vol_num=1)
+parameter (b_num= 100, y_num = 21, p_num=201, p_vol_num=5)
 ! parameter (b_num= 200, y_num = 50)
 
 DOUBLE PRECISION :: b_grid(1:b_num), y_grid(1:y_num), default_grid(1:2), &
@@ -62,6 +89,12 @@ DOUBLE PRECISION, DIMENSION (y_num, p_num, p_vol_num) :: q_def_free_paid_matrix
 ! is in autarky and c_matrix/oil_matrix/output_matrix do not describe its allocation.
 DOUBLE PRECISION, DIMENSION (y_num, p_num, p_vol_num) :: c1_matrix, output1_matrix, &
                                                          oil1_matrix, TFP1_matrix
+
+! Precomputed conditional expectations of the value functions, and the two
+! intermediate contractions used to build them. See precompute_expectations.
+DOUBLE PRECISION, DIMENSION(b_num, y_num, p_num, p_vol_num) :: exp_v_matrix, exp_aux_a, exp_aux_b
+DOUBLE PRECISION, DIMENSION(b_num, y_num, p_num, p_vol_num) :: q_fun_matrix, q_src
+DOUBLE PRECISION, DIMENSION(y_num, p_num, p_vol_num) :: exp_v_excl_matrix, exc_aux_a, exc_aux_b
 
 contains
 
@@ -324,6 +357,241 @@ z=(x-mu)/sd
 	END IF
 END SUBROUTINE Ncdf
 
+
+!=====================================================================
+! Accurate standard-normal CDF, for the common-grid price discretization.
+!
+! The Ncdf routine above is a Polya-type closed-form approximation with
+! absolute error of order 3e-3 in probability. That is too coarse to build
+! a transition kernel that has to reproduce conditional means and variances,
+! so the common-grid path uses ERFC instead. This matches the independently
+! validated Python kernel in oil_price_validation/validate.py, which uses
+! 0.5*erfc(-t/sqrt(2)).
+!=====================================================================
+! Probability of a standardized normal falling in [lo, hi].
+!
+! Evaluated with ERFC on whichever side keeps both terms small, which avoids the
+! catastrophic cancellation that `normal_cdf(hi) - normal_cdf(lo)` suffers when
+! both CDFs are near 1. Identical in form to normal_cell in
+! oil_price_validation/price_kernel.f90, whose output is checked against the
+! Python kernel to 1e-12.
+DOUBLE PRECISION FUNCTION normal_cell(lo, hi)
+IMPLICIT NONE
+DOUBLE PRECISION, INTENT(IN) :: lo, hi
+DOUBLE PRECISION, PARAMETER :: root2 = 1.41421356237309504880168872420969808d+0
+if (lo >= 0d+0) then
+   normal_cell = 0.5d+0*(ERFC(lo/root2) - ERFC(hi/root2))
+else
+   normal_cell = 0.5d+0*(ERFC(-hi/root2) - ERFC(-lo/root2))
+end if
+normal_cell = max(0d+0, normal_cell)
+END FUNCTION normal_cell
+
+
+!=====================================================================
+! Transition matrix for  z' = (1-rho)*mu + rho*z + sd_eps*eps  on a GIVEN grid.
+!
+! Unlike `tauchen` and `discretize_AR`, the grid is an INPUT, not an output.
+! That is the whole point: one physical price grid shared by every volatility
+! state, with the volatility entering only through sd_eps. With the grid
+! generated per state instead, a change in volatility rescales the price grid
+! and therefore the price LEVEL, which is not the process the paper specifies.
+!
+! Cell edges are midpoints between nodes; the two tails are assigned to the
+! boundary nodes, as in validate.py's normal_rows.
+!=====================================================================
+SUBROUTINE tauchen_fixed(n, z, rho_ar, mu_z, sd_eps, Pi)
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: n
+DOUBLE PRECISION, INTENT(IN) :: z(n), rho_ar, mu_z, sd_eps
+DOUBLE PRECISION, INTENT(OUT) :: Pi(n,n)
+INTEGER :: i, j
+DOUBLE PRECISION :: cond_mean, row_sum, edge(n+1)
+DOUBLE PRECISION, PARAMETER :: big = 1d+100   ! finite surrogate for infinity
+
+if (sd_eps <= 0d+0) then
+   write(*,*) 'tauchen_fixed: sd_eps must be positive, got', sd_eps
+   call exit
+end if
+if (n < 2) then
+   Pi = 1d+0
+   return
+end if
+
+edge(1)   = -big
+edge(n+1) =  big
+do j = 2, n
+   edge(j) = 0.5d+0*(z(j-1) + z(j))
+end do
+
+do i = 1, n
+   cond_mean = (1d+0 - rho_ar)*mu_z + rho_ar*z(i)
+   do j = 1, n
+      Pi(i,j) = normal_cell((edge(j)-cond_mean)/sd_eps, (edge(j+1)-cond_mean)/sd_eps)
+   end do
+   row_sum = sum(Pi(i,:))
+   if (row_sum <= 0d+0) then
+      write(*,*) 'tauchen_fixed: degenerate row', i
+      call exit
+   end if
+   Pi(i,:) = Pi(i,:)/row_sum
+end do
+END SUBROUTINE tauchen_fixed
+
+
+!=====================================================================
+! Conditional expectations of the value functions, by factorized contraction.
+!
+! The quantity needed is, for every (b', y, p, sigma),
+!
+!   E[V(b',y',p',sigma') | y,p,sigma]
+!     = sum_{sigma'} P_s(s,s') sum_{p'} P_p(p,p'|s') sum_{y'} P_y(y,y') V(b',y',p',s')
+!
+! Evaluated as written, that is a triple sum inside the loop over (y,p,sigma)
+! and b', costing b*(y*p*s)^2 per sweep -- QUADRATIC in p_num, so raising p_num
+! from 7 to the ~201 a common grid needs is roughly an 800x increase.
+!
+! The kernel is a product, so the sum separates into three sequential
+! contractions, each reusing the previous one:
+!
+!   A(b',y,p',s') = sum_{y'} P_y(y,y')    V(b',y',p',s')     ! no (p,s) dependence
+!   B(b',y,p ,s') = sum_{p'} P_p(p,p'|s') A(b',y,p',s')
+!   E(b',y,p ,s ) = sum_{s'} P_s(s,s')    B(b',y,p ,s')
+!
+! Cost becomes b*y*p^2*s (the middle step dominates) instead of b*y^2*p^2*s^2,
+! a saving of y_num*p_vol_num ~ 105x at these dimensions.
+!
+! The autarky value v1_matrix carries NO debt index, so its expectation is
+! contracted separately on (y,p,sigma) alone rather than recomputed b_num times.
+!
+! NOTE ON REPRODUCIBILITY: this reorders the summation, and floating-point
+! addition is not associative, so results differ from the unfactorized version
+! at the level of machine rounding. It is not bit-identical by construction.
+!=====================================================================
+SUBROUTINE precompute_expectations
+IMPLICIT NONE
+INTEGER :: iy, iyn, ip, ipn, iv, ivn, ib
+DOUBLE PRECISION :: w, m_const, coup_const
+DOUBLE PRECISION :: acc_by(b_num, y_num), acc_y(y_num)
+
+! --- Step 1: contract over next-period endowment ---
+do ivn = 1, p_vol_num
+   do ipn = 1, p_num
+      do iy = 1, y_num
+         exp_aux_a(:, iy, ipn, ivn) = 0d+0
+         exc_aux_a(iy, ipn, ivn)    = 0d+0
+         do iyn = 1, y_num
+            w = trans_matrix(iy, iyn)
+            exp_aux_a(:, iy, ipn, ivn) = exp_aux_a(:, iy, ipn, ivn) &
+                 + w * v_matrix(:, iyn, ipn, ivn)
+            exc_aux_a(iy, ipn, ivn) = exc_aux_a(iy, ipn, ivn) &
+                 + w * v1_matrix(iyn, ipn, ivn)
+         end do
+      end do
+   end do
+end do
+
+! --- Step 2: contract over next-period price, conditional on next volatility ---
+! Contract over p' with the (b,y) plane as one contiguous block.
+!
+! Indexing this as exp_aux_a(:, iy, ipn, ivn) inside the ipn loop strides by
+! b_num*y_num*8 bytes per step, re-traversing a scattered multi-MB region
+! p_num times for every (iy, ivn). At p_num = 225 that was slow enough that a
+! single call did not finish in ten minutes. Accumulating over the whole
+! contiguous (b,y) slice instead keeps the accumulator in cache and streams
+! the source once per ipn.
+do ivn = 1, p_vol_num
+   do ip = 1, p_num
+      acc_by = 0d+0
+      acc_y  = 0d+0
+      do ipn = 1, p_num
+         w = trans_matrix_p(ip, ipn, ivn)
+         acc_by = acc_by + w * exp_aux_a(:, :, ipn, ivn)
+         acc_y  = acc_y  + w * exc_aux_a(:, ipn, ivn)
+      end do
+      exp_aux_b(:, :, ip, ivn) = acc_by
+      exc_aux_b(:, ip, ivn)    = acc_y
+   end do
+end do
+
+! --- Step 3: contract over next-period volatility ---
+do iv = 1, p_vol_num
+   do ip = 1, p_num
+      acc_by = 0d+0
+      acc_y  = 0d+0
+      do ivn = 1, p_vol_num
+         w = trans_matrix_p_vol(iv, ivn)
+         acc_by = acc_by + w * exp_aux_b(:, :, ip, ivn)
+         acc_y  = acc_y  + w * exc_aux_b(:, ip, ivn)
+      end do
+      exp_v_matrix(:, :, ip, iv)   = acc_by
+      exp_v_excl_matrix(:, ip, iv) = acc_y
+   end do
+end do
+
+
+! --- Bond price: the same contraction applied to the survival-weighted payoff ---
+!
+! q(b',y,p,s) = sum_{s',p',y'} P_s P_p P_y * surv(b',y',p',s')
+!                              * m * (coupon + (1-delta)*q_paid(b',y',p',s'))
+!
+! q_fun evaluated this directly: a 23,625-term triple sum per call, called
+! b_num times per state, i.e. 5.6e10 inner iterations per sweep at p_num = 225.
+! It was the single largest cost and made a sweep take over eleven minutes.
+!
+! CAVEAT -- this changes the update scheme. q_fun read default_decision and
+! q_paid_matrix as they stood at the moment of the call, and both are written
+! DURING the sweep, so the original is Gauss-Seidel in those objects.
+! Precomputing at the top of the sweep makes it Jacobi. The fixed point is the
+! same; the path to it is not, so iterates differ and the sweep count can change.
+m_const = EXP(-rstar)
+coup_const = (rstar + delta)/(1d+0 + rstar)
+do ivn = 1, p_vol_num
+   do ipn = 1, p_num
+      do iyn = 1, y_num
+         do ib = 1, b_num
+            q_src(ib, iyn, ipn, ivn) = &
+                 (1d+0 - default_grid(default_decision(ib, iyn, ipn, ivn))) &
+                 * m_const * (coup_const + (1d+0-delta)*q_paid_matrix(ib, iyn, ipn, ivn))
+         end do
+      end do
+   end do
+end do
+
+do ivn = 1, p_vol_num
+   do ipn = 1, p_num
+      do iy = 1, y_num
+         exp_aux_a(:, iy, ipn, ivn) = 0d+0
+         do iyn = 1, y_num
+            exp_aux_a(:, iy, ipn, ivn) = exp_aux_a(:, iy, ipn, ivn) &
+                 + trans_matrix(iy, iyn) * q_src(:, iyn, ipn, ivn)
+         end do
+      end do
+   end do
+end do
+
+do ivn = 1, p_vol_num
+   do ip = 1, p_num
+      acc_by = 0d+0
+      do ipn = 1, p_num
+         acc_by = acc_by + trans_matrix_p(ip, ipn, ivn) * exp_aux_a(:, :, ipn, ivn)
+      end do
+      exp_aux_b(:, :, ip, ivn) = acc_by
+   end do
+end do
+
+do iv = 1, p_vol_num
+   do ip = 1, p_num
+      acc_by = 0d+0
+      do ivn = 1, p_vol_num
+         acc_by = acc_by + trans_matrix_p_vol(iv, ivn) * exp_aux_b(:, :, ip, ivn)
+      end do
+      q_fun_matrix(:, :, ip, iv) = acc_by
+   end do
+end do
+
+END SUBROUTINE precompute_expectations
+
 !-----------------------------------------------------
 ! Bisection
 !-----------------------------------------------------
@@ -338,6 +606,26 @@ integer, parameter :: itmax_bi=5000
 double precision, intent(in):: p_initial, y_initial
 double precision:: d_bi, m_opt, mmin, mmax,func_m,A
 integer :: iter_bi
+
+!---------------------------------------------------------------------
+! Memo cache.
+!
+! func_m is a pure function of (y_initial, p_initial, i_excl_global): A depends
+! only on y_initial and i_excl_global, and the root condition only on those plus
+! p_initial. Everything else is a compile-time parameter.
+!
+! `optimize` scans b_num = 100 debt choices and calls objective_function for
+! each, and objective_function calls func_m -- but y_initial, p_initial and
+! i_excl_global are module globals that do not change inside that loop. So 99
+! of every 100 bisections repeat work already done. Caching the last result
+! removes them. Results are bit-identical, not approximate: on a hit the stored
+! value is the one the bisection would have recomputed.
+!---------------------------------------------------------------------
+if (m_cache_valid .and. i_excl_global == m_cache_excl .and. &
+    y_initial == m_cache_y .and. p_initial == m_cache_p) then
+   func_m = m_cache_val
+   return
+end if
 
 !Initializing
 mmin = 1e-16
@@ -364,6 +652,21 @@ iter_bi =0
 !     CALL EXIT
 ! end if
 
+! Expand the upper bracket until it actually brackets the root.
+!
+! F(m) = m - (alpha/p)**(1/(1-theta)) * (alpha*m**theta + (1-alpha)*A**theta)**(1/theta)
+! is increasing with F(0) < 0 whenever an interior optimum exists, so bisection
+! needs F(mmax) > 0. The fixed mmax_global = 100 is not enough once the price
+! grid reaches far enough down: at p = 0.118 with A = 13.2 the optimum is near
+! m = 760. Doubling from mmax_global keeps the bracket tight in ordinary states
+! -- which preserves the precision of the fixed 1e-2 stopping rule -- while
+! still covering the extremes.
+do while (mmax < 1d+12 .and. &
+          mmax - ((alpha/exp(p_initial))**(1./(1.-theta))) &
+                 *(alpha*mmax**theta+(1-alpha)*(A**theta))**(1./theta) < zero)
+   mmax = mmax*2d+0
+end do
+
 do while(iter_bi .le. itmax_bi .and. d_bi .ge. tol_bi)
 m_opt=(mmin+mmax)/2.
 d_bi= m_opt-((alpha/exp(p_initial))**(1./(1.-theta)))*(alpha*m_opt**theta+(1-alpha)*(A**theta))**(1./theta)
@@ -385,8 +688,17 @@ func_m=m_opt
 if (d_bi .ge. tol_bi) then
 print *, 'iterations exceeded at bisection'
 print*, 'd_bi', d_bi
+print*, 'y_initial', y_initial, ' p_initial', exp(p_initial)
+print*, 'An interior oil optimum needs p > alpha**(1/theta) =', alpha**(1d+0/theta)
 call exit
 end if
+
+! Store only a converged result, so a failed solve can never be served from cache.
+m_cache_y     = y_initial
+m_cache_p     = p_initial
+m_cache_excl  = i_excl_global
+m_cache_val   = m_opt
+m_cache_valid = .true.
 
 
 end function func_m
@@ -423,7 +735,9 @@ DOUBLE PRECISION :: delta_y, prob_mass, y_pointer, qq, pdf_tirar, cdf_right, cdf
     prob_vector_p_vol(p_vol_num), prob_vector_p(p_num,p_vol_num), variance_p_vol, variance_p_innovation, exp_p(p_num, p_vol_num), &
     prob_vector_p_1(p_num,p_vol_num), prob_vector_p_2(p_num,p_vol_num), prob_vector_p_3(p_num,p_vol_num),&
     prob_vector_p_4(p_num,p_vol_num), prob_vector_p_5(p_num,p_vol_num), variance_p_innovation1, variance_p_innovation2,&
-    variance_p_innovation3, variance_p_innovation4, variance_p_innovation5
+    variance_p_innovation3, variance_p_innovation4, variance_p_innovation5, &
+    p_grid_common(p_num), var_log_vol, mean_innov_var, uncond_sd_log_p, grid_spacing, sd_log_vol, &
+    pv_new(p_num), pvv_new(p_vol_num)
 
     CHARACTER(LEN = 2) :: column_num
     CHARACTER(LEN = 1) :: fileName0
@@ -440,10 +754,48 @@ if(p_vol_num < 2) then
    prob_vector_p_vol= 1d+0
 
  else
+  if (use_common_p_grid) then
+   !------------------------------------------------------------------
+   ! Explicit volatility grid with a MATCHING kernel.
+   !
+   ! The submitted path below has the same defect that froze the price in the
+   ! intermediate model: tauchen fills p_vol_grid (+/-m*sd, spacing 0.904 here)
+   ! AND trans_matrix_p_vol, then discretize_AR overwrites the GRID with
+   ! Rouwenhorst nodes (+/-sqrt(n-1)*sd, spacing 0.452) while its own matrix
+   ! goes to trans_matrix_p_vol_AR, which is never read. The surviving Tauchen
+   ! matrix was built for cells twice as wide as the grid actually has, so it
+   ! puts too much mass on the diagonal and the volatility process comes out
+   ! more persistent than calibrated. Unlike the price case this one is LIVE in
+   ! the benchmark (p_vol_num = 5).
+   !------------------------------------------------------------------
+   sd_log_vol = sqrt(variance_p_vol/(1d+0 - rho_p_vol**(2d+0)))
+   do i = 1, p_vol_num
+      p_vol_grid(i) = mean_p_vol - p_vol_width_sd*sd_log_vol &
+           + 2d+0*p_vol_width_sd*sd_log_vol*dble(i-1)/dble(p_vol_num-1)
+   end do
+   call tauchen_fixed(p_vol_num, p_vol_grid, rho_p_vol, mean_p_vol, &
+                      sqrt(variance_p_vol), trans_matrix_p_vol)
+   prob_vector_p_vol = 1d+0/dble(p_vol_num)
+   do j = 1, 20000
+      pvv_new = matmul(prob_vector_p_vol, trans_matrix_p_vol)
+      if (maxval(abs(pvv_new - prob_vector_p_vol)) < 1d-14) then
+         prob_vector_p_vol = pvv_new
+         exit
+      end if
+      prob_vector_p_vol = pvv_new
+   end do
+   prob_vector_p_vol = prob_vector_p_vol/sum(prob_vector_p_vol)
+   if (sqrt(variance_p_vol) < 0.5d+0*(p_vol_grid(2)-p_vol_grid(1))) then
+      write(*,*) '*** WARNING: p_vol_num too small / p_vol_width_sd too wide:'
+      write(*,*) '*** volatility innovation sd is under half a grid cell.'
+   end if
+
+  else
     !call tauchen(y_num,rho, zero, variance_y,m, y_grid, trans_matrix)
     call tauchen(p_vol_num,rho_p_vol, mean_p_vol, variance_p_vol,m, p_vol_grid, trans_matrix_p_vol)
 
    call discretize_AR(rho_p_vol, mean_p_vol , variance_p_vol, p_vol_grid, trans_matrix_p_vol_AR, prob_vector_p_vol)
+  end if
 
    do i=1,p_vol_num
       cdf_matrix_p_vol(i,1) = trans_matrix_p_vol(i,1)
@@ -494,11 +846,10 @@ if(p_vol_num < 2) then
 
       ! NOTE: previously this called tauchen (filling p_grid(:,1) AND trans_matrix_p(:,:,1))
       ! and then discretize_AR, whose `z` argument is intent(out). That OVERWROTE the grid
-      ! with Rouwenhorst nodes (+/-2.449*sig_z) while leaving Tauchen's transition matrix
-      ! (built for its own wider +/-4*sig_z grid) in place. The mismatched pair had diagonal
-      ! ~0.9992 instead of ~0.9423, which froze the oil price: every row of the simulated
-      ! output carried the same price. Use discretize_AR for BOTH grid and matrix, matching
-      ! the p_vol_num >= 2 branch and the benchmark model.
+      ! with Rouwenhorst nodes while leaving Tauchen's transition matrix (built for its own
+      ! wider grid) in place, freezing the oil price. Dead code at p_vol_num=5, but it is
+      ! the branch a p_vol_num=1 run takes -- see the intermediate model. Use discretize_AR
+      ! for BOTH grid and matrix, as the p_vol_num >= 2 branch below does.
       call discretize_AR(rho_p, mean_p , variance_p_innovation, p_grid(:, 1), trans_matrix_p(:,:,1), prob_vector_p(:,1))
 
       variance_p_level_epsilon_tomorrow = variance_p_innovation
@@ -509,13 +860,107 @@ if(p_vol_num < 2) then
 
 else
 
-   do i=1,p_vol_num
-      variance_p_innovation = (std_u_p * exp(p_vol_grid(i)))**(2)
-      ! This is ok, because it's the conditional variance of the innovations to epsilon_r in period t, conditional on observing a realization
-      ! of the volatility in that period (r_vol_grid(i) .or. \sigma_{r,t} using the model's notation).
-       !call tauchen(p_num,rho_p, mean_p, variance_p_innovation, m, p_grid(:, i), trans_matrix_p(:,:,i))
-      call discretize_AR(rho_p, mean_p , variance_p_innovation, p_grid(:, i), trans_matrix_p(:,:,i), prob_vector_p(:,i))
-   end do
+   if (use_common_p_grid) then
+
+      !------------------------------------------------------------------
+      ! ONE physical log-price grid, shared by every volatility state.
+      !
+      ! Width is set from the UNCONDITIONAL sd of log p, integrating over the
+      ! volatility process:
+      !     E[v] = E[exp(2*x)] = exp(2*mean_p_vol + 2*Var(x)),  x = log sd_t
+      !     Var(x) = eta^2 / (1 - rho_p_vol^2)
+      !     sd(log p) = sqrt( E[v] / (1 - rho_p^2) )
+      ! Volatility then enters ONLY through the conditional sd in the kernel,
+      ! so the price index means the same physical price in every state.
+      !------------------------------------------------------------------
+      var_log_vol        = (std_u_vol*eta)**(2d+0) / (1d+0 - rho_p_vol**(2d+0))
+      mean_innov_var     = exp(2d+0*mean_p_vol + 2d+0*var_log_vol)
+      uncond_sd_log_p    = sqrt(mean_innov_var / (1d+0 - rho_p**(2d+0)))
+
+      do i = 1, p_num
+         p_grid_common(i) = mean_p - p_width_sd*uncond_sd_log_p &
+              + 2d+0*p_width_sd*uncond_sd_log_p*dble(i-1)/dble(p_num-1)
+      end do
+
+      do i = 1, p_vol_num
+         ! Same grid in every column: p_grid(i_p, k) no longer depends on k.
+         p_grid(:, i) = p_grid_common
+         call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
+                            std_u_p*exp(p_vol_grid(i)), trans_matrix_p(:,:,i))
+         ! Stationary distribution of the price chain conditional on this
+         ! volatility state, by power iteration on the kernel.
+         prob_vector_p(:, i) = 1d+0/dble(p_num)
+         do j = 1, 20000
+            pv_new = matmul(prob_vector_p(:, i), trans_matrix_p(:,:,i))
+            if (maxval(abs(pv_new - prob_vector_p(:, i))) < 1d-14) then
+               prob_vector_p(:, i) = pv_new
+               exit
+            end if
+            prob_vector_p(:, i) = pv_new
+         end do
+         prob_vector_p(:, i) = prob_vector_p(:, i)/sum(prob_vector_p(:, i))
+      end do
+
+      ! The per-volatility-state grids used by working_graphs_dec29.m. Under a
+      ! common grid these are the SAME physical grid; only the kernel differs by
+      ! the volatility state it is conditioned on. Filling them here keeps the
+      ! plotting script consistent with what the model actually solved on --
+      ! without this they stay on the old Rouwenhorst per-state construction and
+      ! the figures plot solved objects against the wrong price axis.
+      do i = 1, p_vol_num
+         p_grid_1(:, i) = p_grid_common
+         p_grid_2(:, i) = p_grid_common
+         p_grid_3(:, i) = p_grid_common
+         p_grid_4(:, i) = p_grid_common
+         p_grid_5(:, i) = p_grid_common
+         call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
+                            std_u_p*exp(p_vol_grid(1)), trans_matrix_p_1(:,:,i))
+         call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
+                            std_u_p*exp(p_vol_grid(2)), trans_matrix_p_2(:,:,i))
+         call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
+                            std_u_p*exp(p_vol_grid(3)), trans_matrix_p_3(:,:,i))
+         call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
+                            std_u_p*exp(p_vol_grid(4)), trans_matrix_p_4(:,:,i))
+         call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
+                            std_u_p*exp(p_vol_grid(5)), trans_matrix_p_5(:,:,i))
+      end do
+
+      write(*,*) 'common price grid: sd(log p) =', uncond_sd_log_p, &
+                 ' range =', exp(p_grid_common(1)), exp(p_grid_common(p_num))
+
+      !------------------------------------------------------------------
+      ! Resolution check. The grid must span the UNCONDITIONAL range while
+      ! still resolving a one-period move, whose sd is exp(p_vol_grid(k)) and
+      ! is smallest in the lowest volatility state. If the node spacing is not
+      ! comfortably below that sd, the conditional distribution collapses onto
+      ! a single node and the chain is frozen in low-volatility states -- the
+      ! same pathology, arrived at from the opposite direction.
+      !------------------------------------------------------------------
+      grid_spacing = p_grid_common(2) - p_grid_common(1)
+      write(*,*) 'grid spacing =', grid_spacing
+      do i = 1, p_vol_num
+         write(*,*) '  vol state', i, ' cond sd =', std_u_p*exp(p_vol_grid(i)), &
+                    ' sd/spacing =', std_u_p*exp(p_vol_grid(i))/grid_spacing
+      end do
+      if (std_u_p*exp(p_vol_grid(1)) < 2d+0*grid_spacing) then
+         write(*,*) '*** WARNING: p_num too small for this price process.'
+         write(*,*) '*** The lowest-volatility conditional sd is under 2 grid cells,'
+         write(*,*) '*** so that state cannot move. Raise p_num (the standalone'
+         write(*,*) '*** validation in oil_price_validation uses 201 price nodes)'
+         write(*,*) '*** or narrow p_width_sd.'
+      end if
+
+   else
+
+      do i=1,p_vol_num
+         variance_p_innovation = (std_u_p * exp(p_vol_grid(i)))**(2)
+         ! This is ok, because it's the conditional variance of the innovations to epsilon_r in period t, conditional on observing a realization
+         ! of the volatility in that period (r_vol_grid(i) .or. \sigma_{r,t} using the model's notation).
+         !call tauchen(p_num,rho_p, mean_p, variance_p_innovation, m, p_grid(:, i), trans_matrix_p(:,:,i))
+         call discretize_AR(rho_p, mean_p , variance_p_innovation, p_grid(:, i), trans_matrix_p(:,:,i), prob_vector_p(:,i))
+      end do
+
+   end if
 
  !! Creating price grid for different levels of volatilities:
  ! vol_grid=1
@@ -967,6 +1412,11 @@ do WHILE(convergence<0)
 
 coupon = (rstar + delta )/ (1d+0 + rstar)
 
+! All conditional expectations of v_matrix and v1_matrix for this sweep, built
+! by factorized contraction instead of a triple sum per (b',y,p,sigma). See
+! precompute_expectations for the algebra and the cost argument.
+call precompute_expectations
+
 do i_p_vol = 1,p_vol_num
       do i_p = 1,p_num
       p_initial=p_grid(i_p,i_p_vol)
@@ -976,28 +1426,13 @@ do i_p_vol = 1,p_vol_num
             y_initial = y_grid(i_y)
 
 ! HERE WE COMPUTE THE EXPECTED VALUE FUNCTIONS, AND ALSO THE PRICE FOR EACH POSSIBLE LEVEL OF B_NEXT
+            ! Expectations were built for every (b',y,p,sigma) by
+            ! precompute_expectations above; exp_v_excl has no debt index.
+            exp_v_vector(:)      = exp_v_matrix(:, i_y_global, i_p, i_p_vol)
+            exp_v_excl_vector(:) = exp_v_excl_matrix(i_y_global, i_p, i_p_vol)
+
             do i_b_prime = 1,b_num
-               exp_v_excl = 0d+0
-               exp_v_next = 0d+0
-               do i_p_vol_next =1,p_vol_num
-                  do i_p_next = 1,p_num
-                     do i_y_next=1,y_num
-                        expectation=trans_matrix_p_vol(i_p_vol, i_p_vol_next)*trans_matrix_p(i_p, i_p_next, i_p_vol_next)
-                        exp_v_next = exp_v_next + trans_matrix_p_vol(i_p_vol, i_p_vol_next)*&
-                        trans_matrix_p(i_p, i_p_next, i_p_vol_next)*trans_matrix(i_y_global, i_y_next)*&
-                        v_matrix(i_b_prime, i_y_next, i_p_next, i_p_vol_next)
-
-                        exp_v_excl = exp_v_excl + trans_matrix_p_vol(i_p_vol, i_p_vol_next)*&
-                        trans_matrix_p(i_p, i_p_next, i_p_vol_next)* trans_matrix(i_y_global, i_y_next)*&
-                        v1_matrix(i_y_next, i_p_next, i_p_vol_next)
-                     end do
-                     end do
-               end do
-
-               exp_v_vector(i_b_prime) = exp_v_next
-               exp_v_excl_vector(i_b_prime) = exp_v_excl
-               q_vector(i_b_prime) = q_fun(i_b_prime, i_y_global,i_p, i_p_vol)
-
+               q_vector(i_b_prime) = q_fun_matrix(i_b_prime, i_y_global, i_p, i_p_vol)
             end do
 
 
@@ -1043,7 +1478,7 @@ do i_p_vol = 1,p_vol_num
             output0_matrix(i_b, i_y, i_p, i_p_vol)=(((1-alpha)*TFP0_matrix(i_b, i_y, i_p, i_p_vol)**theta)+(alpha*oil0_matrix(i_b, i_y, i_p, i_p_vol)**theta))**(1./theta)
 
                c0_matrix(i_b, i_y, i_p, i_p_vol)=output0_matrix(i_b, i_y, i_p, i_p_vol)- b_initial * coupon +(b_grid(i_b_optimal0)-&
-               (1d+0 - delta)*b_initial)* q_fun(i_b_optimal0, i_y,i_p,i_p_vol)-exp(p_initial)*oil0_matrix(i_b, i_y, i_p, i_p_vol)
+               (1d+0 - delta)*b_initial)* q_fun_matrix(i_b_optimal0, i_y,i_p,i_p_vol)-exp(p_initial)*oil0_matrix(i_b, i_y, i_p, i_p_vol)
 !
 
                ! NOW, CHECK IF FOR THIS COMBINATION (b_initial,y_initial, i_r, i_r_vol) IT IS OPTIMAL TO DEFAULT OR NOT
@@ -1069,7 +1504,7 @@ do i_p_vol = 1,p_vol_num
                   c_matrix(i_b, i_y,i_p, i_p_vol) = c0_matrix(i_b,i_y,i_p, i_p_vol)
 
 
-                  q_paid_matrix_new(i_b, i_y,i_p, i_p_vol) =  q_fun( i_b_optimal0, i_y,i_p, i_p_vol)
+                  q_paid_matrix_new(i_b, i_y,i_p, i_p_vol) =  q_fun_matrix(i_b_optimal0, i_y,i_p, i_p_vol)
 !
 
                end if
@@ -1140,7 +1575,7 @@ WRITE(17, *) counter
                WRITE(10, '(F6.2)') default_grid(default_decision(i_b, i_y,i_p, i_p_vol))
 
 
-               WRITE(11, '(F15.11)') q_fun(i_b, i_y,i_p, i_p_vol)
+               WRITE(11, '(F15.11)') q_fun_matrix(i_b, i_y,i_p, i_p_vol)
 
                WRITE(12, *) b_next_matrix(i_b, i_y,i_p, i_p_vol)
 
@@ -1191,88 +1626,59 @@ end subroutine iterate
 subroutine solve_q_nodef
 USE param
 DOUBLE PRECISION :: dev, criterion_q_nodef, q_nodef_new(y_num,p_num,p_vol_num), coupon_nodef,&
-SDF_matrix(y_num,p_num, p_vol_num, y_num, p_num, p_vol_num), argument
+argument, sdf_value, q_nodef_scalar, q_nodef_scalar_new
 INTEGER :: i_y, i_p, i_p_vol, i_y_next, i_p_vol_next, i_p_next
 
-! 1. First, compute the SDF_matrix
-do i_p_vol = 1,p_vol_num
-   do i_p = 1,p_num
-      do i_y = 1,y_num
-         y_initial = y_grid(i_y)
-
-         do i_p_vol_next = 1,p_vol_num
-            do i_p_next = 1,p_num
-               do i_y_next = 1,y_num
-
-                  argument = (rstar)
-
-                  SDF_matrix(i_y_next,i_p_next,i_p_vol_next,i_y,i_p,i_p_vol)= EXP(-argument)
-
-               end do
-            end do
-         end do
-      end do
-   end do
-end do
+! 1. The stochastic discount factor.
+!
+! argument is identically rstar, so every element of what used to be a rank-6
+! SDF_matrix(y,p,s,y,p,s) held the same number. That array is 6.9e8 doubles
+! (5.6 GB) at p_num = 251, which simply cannot be allocated, so it is replaced
+! by the scalar it always was. If a state-dependent SDF is introduced later --
+! Referee 1's Major 5 asks about risk-averse lenders -- this is where it goes,
+! and it should then be stored as a function of the states it actually varies
+! over, not as a full rank-6 product space.
+argument  = rstar
+sdf_value = EXP(-argument)
 
 !1.5 Intermediate step: compute the Expected SDF (I don't need it here, but I wanted for the simulations)
-expected_SDF_matrix(i_y, i_p, i_p_vol) = 0d+0
+! The expected SDF. With a constant SDF and transition rows that each sum to
+! one, the triple sum is identically sdf_value, so the (y*p*s)^2 loop that used
+! to accumulate it -- 5.6e8 terms at p_num = 225 -- is replaced by an assignment.
+expected_SDF_matrix = sdf_value
 
-do i_p_vol = 1,p_vol_num
-   do i_p = 1,p_num
-      do i_y = 1,y_num
-         y_initial = y_grid(i_y)
-         do i_p_vol_next = 1,p_vol_num
-            do i_p_next = 1,p_num
-               do i_y_next = 1,y_num
-                 expected_SDF_matrix(i_y, i_p, i_p_vol) = expected_SDF_matrix(i_y, i_p, i_p_vol) + &
-                 SDF_matrix(i_y_next,i_p_next,i_p_vol_next,i_y,i_p, i_p_vol) *&
-                 trans_matrix_p_vol(i_p_vol, i_p_vol_next)* trans_matrix_p(i_p, i_p_next, i_p_vol_next)*&
-                 trans_matrix(i_y, i_y_next)
-               end do
-            end do
-         end do
-      end do
-   end do
-end do
-
-
-!2. Iterate on the q_nodef
+!2. Iterate on q_nodef
+!
+! q(s) = sum_s' P(s,s') * sdf * (coupon + (1-delta)*q(s'))
+!
+! sdf and coupon are constants and every transition row sums to one, so the
+! right-hand side does not depend on s: q is the SAME NUMBER in every state.
+! The original loop rediscovered that by summing over the full (y,p,sigma)
+! product space on every sweep -- (y*p*s)^2 = 2.8e8 terms per sweep at
+! p_num = 225, times ~300 sweeps -- to produce one scalar.
+!
+! The scalar recursion below is the same sequence from the same starting point
+! with the same stopping rule, so it reproduces the previous value. Note that
+! value is not the exact fixed point: stopping on a per-step change of 1e-6
+! with a contraction factor of sdf*(1-delta) ~ 0.96 leaves a residual error of
+! about 2.4e-5. The exact root is
+!     q = sdf*coupon / (1 - sdf*(1-delta))
+! which here is 0.9888588 against the iterate's 0.9888352. Tightening
+! criterion_q_nodef, or using the closed form, is a separate decision because
+! it would move the benchmark.
 
 dev = 10d+0
 criterion_q_nodef = 1d-6
-q_nodef = 0d+0
+q_nodef_scalar = 0d+0
+coupon_nodef = (rstar + delta )/ (1d+0 + rstar)
 
 do while(dev > criterion_q_nodef)
-   q_nodef_new = 0d+0
-   dev = 0d+0
-   !calculate long-term bond price
-
-   do i_p_vol = 1,p_vol_num
-      do i_p = 1,p_num
-         do i_y = 1,y_num
-            y_initial = y_grid(i_y)
-            do i_p_vol_next = 1,p_vol_num
-               do i_p_next = 1,p_num
-                  do i_y_next = 1,y_num
-                     coupon_nodef = (rstar + delta )/ (1d+0 + rstar)
-
-                     q_nodef_new(i_y, i_p, i_p_vol) = q_nodef_new(i_y, i_p, i_p_vol) + &
-                     SDF_matrix(i_y_next,i_p_next,i_p_vol_next,i_y,i_p, i_p_vol) *&
-                     (coupon_nodef+(1d+0-delta)*q_nodef(i_y_next,i_p_next,i_p_vol_next))*&
-                     trans_matrix_p_vol(i_p_vol, i_p_vol_next)*&
-                     trans_matrix_p(i_p, i_p_next, i_p_vol_next)*trans_matrix(i_y, i_y_next)
-                  end do
-               end do
-            end do
-            dev = max(abs(q_nodef_new(i_y,i_p,i_p_vol)-q_nodef(i_y,i_p,i_p_vol)), dev)
-
-         end do
-      end do
-   end do
-   q_nodef = q_nodef_new
-
+   q_nodef_scalar_new = sdf_value*(coupon_nodef + (1d+0-delta)*q_nodef_scalar)
+   dev = abs(q_nodef_scalar_new - q_nodef_scalar)
+   q_nodef_scalar = q_nodef_scalar_new
 end do
+
+q_nodef = q_nodef_scalar
 
 !3. Save q_nodef and SDF_matrix
 
@@ -1289,21 +1695,13 @@ do i_p_vol = 1,p_vol_num
    end do
 end do
 
-do i_p_vol = 1,p_vol_num
-   do i_p = 1,p_num
-      do i_y = 1,y_num
-         do i_p_vol_next = 1,p_vol_num
-            do i_p_next = 1,p_num
-               do i_y_next = 1,y_num
-
-                  write(20, *) SDF_matrix(i_y_next,i_p_next,i_p_vol_next,i_y,i_p, i_p_vol)
-
-               end do
-            end do
-         end do
-      end do
-   end do
-end do
+! The SDF is a single constant, so write it once rather than dumping the same
+! number over the whole (y,p,sigma)^2 product space. That loop wrote 5.6e8
+! identical lines at p_num = 225 -- roughly 12 GB, and formatting them was
+! consuming ~76% of total runtime, which is what stalled the first attempts at
+! a large-grid solve. At the submitted p_num = 7 it was 14 MB of one repeated
+! value. Nothing reads this file: working_graphs_dec29.m never references it.
+write(20, *) sdf_value
 
 close(20)
 close(21)
@@ -1496,11 +1894,11 @@ do j=1,sample_num
    end do
 end do
 
-!First column of random_matrix is used to generate rw level shocks
-!Second column of random_matrix is used to generate rw volatility shocks.
-!Drawn PER SAMPLE: without the j dimension every simulated panel would share one
-!identical oil-price path, so cross-sample averaging would not reduce price-shock
-!sampling error at all.
+!First column of random_matrix_rw is used to generate oil price level shocks
+!Second column of random_matrix_rw is used to generate oil price volatility shocks.
+!These are drawn PER SAMPLE: without the j dimension every simulated panel would
+!share one identical oil-price path, so cross-sample averaging would not reduce
+!price-shock sampling error at all.
 do j=1,sample_num
    do i=1,period_num
       random_matrix_rw(i,j,1)=random_vector_rw((j-1)*period_num+i)
@@ -1607,8 +2005,8 @@ do j=1,sample_num   !SOLVE FOR SAMPLE j
             q(i,j) = q_fun(i_b_next, i_y_current, i_p_current, i_p_vol_current)
             y(i,j) = scale_y*exp(z_shock(i,j))
             ! Allocations are indexed by the debt the country ENTERS with (i_b_current),
-            ! not the debt chosen for next period (i_b_next): see c0_matrix, defined from
-            ! b_initial = b_grid(i_b) in `iterate`.
+            ! not by the debt it chooses for next period (i_b_next): see c0_matrix at the
+            ! b_initial = b_grid(i_b) definition in `iterate`.
             oil(i,j)=oil_matrix(i_b_current,i_y_current,i_p_current, i_p_vol_current)
             gdp(i,j)=output_matrix(i_b_current,i_y_current,i_p_current, i_p_vol_current)
             c(i,j)=c_matrix(i_b_current,i_y_current,i_p_current, i_p_vol_current)
@@ -1626,9 +2024,10 @@ do j=1,sample_num   !SOLVE FOR SAMPLE j
             b(i+1,j) = b_grid(i_b_next)
             q(i,j) = q_fun(i_b_next, i_y_current,i_p_current, i_p_vol_current)
             y(i,j) = scale_y*(EXP(z_shock(i,j))  - max(zero, d0*EXP(z_shock(i,j)) + d1*EXP(z_shock(i,j))**2))
-            ! Country is in autarky this period, so its allocation is the default-state one,
-            ! which depends on (y,p,sigma) only. c_matrix/oil_matrix/output_matrix at a
-            ! zero-debt index would return the REPAY allocation (incl. new bond proceeds).
+            ! Country is in autarky this period, so its allocation is the default-state
+            ! one, which depends on (y,p,sigma) only. c_matrix/oil_matrix/output_matrix
+            ! at a zero-debt index would return the REPAY allocation (incl. new bond
+            ! proceeds) and overstate consumption.
             gdp(i,j)=output1_matrix(i_y_current,i_p_current, i_p_vol_current)
             oil(i,j)=oil1_matrix(i_y_current,i_p_current, i_p_vol_current)
             c(i,j)=c1_matrix(i_y_current,i_p_current, i_p_vol_current)
@@ -1654,8 +2053,8 @@ do j=1,sample_num   !SOLVE FOR SAMPLE j
             q(i,j) = q_fun(i_b_next, i_y_current,i_p_current, i_p_vol_current)  !q_paid
             y(i,j) = scale_y*(EXP(z_shock(i,j))  - max(zero, d0*EXP(z_shock(i,j)) + d1*EXP(z_shock(i,j))**2))
             ! Default is chosen at (i_b_current,...), so c_matrix/oil_matrix/output_matrix
-            ! there already hold the autarky (c1/oil1/output1) values. Indexing by i_b_next
-            ! (= zero debt) would instead return the repay allocation.
+            ! there already hold the autarky (c1/oil1/output1) values. Indexing by
+            ! i_b_next (= zero debt) would instead return the repay allocation.
             gdp(i,j)=output_matrix(i_b_current,i_y_current,i_p_current, i_p_vol_current)
             oil(i,j)=oil_matrix(i_b_current,i_y_current,i_p_current, i_p_vol_current)
             c(i,j)=c_matrix(i_b_current,i_y_current,i_p_current, i_p_vol_current)

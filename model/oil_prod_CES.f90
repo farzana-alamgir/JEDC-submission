@@ -21,7 +21,7 @@ DOUBLE PRECISION :: beta, sigma, b_inf, b_sup, y_inf, y_sup, std_eps,mmax_global
      p_vol_inf, p_vol_sup, std_u_p, std_u_vol, rho_p, rho_p_vol, mean_p, mean_p_vol, std_p_vol,eta
 
 parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width = 1.5d+0,  rstar = 0.01d+0,  &
-     prob_excl_end =0.0833d+0, std_eps = 0.03d+0, rho = 0.9d+0, beta=0.96, alpha=1.652632d-4, theta=-1.5d+0,&          !A-m has been changed in order to capture the new specification of stealing function
+     prob_excl_end =0.0833d+0, std_eps = 0.03d+0, rho = 0.9d+0, beta=0.96, alpha=0.3, theta=0.5,&          !A-m has been changed in order to capture the new specification of stealing function
      mean_y = -0.5d+0*std_eps**2,delta = 0.03d+0,  m=4d+0, scale_y=10d+0, d0= -0.246, d1=0.37, mmax_global=100d+0,&
      std_u_p = 1d+0, std_u_vol= 1d+0, rho_p = 0.976d+0, rho_p_vol = 0.678d+0 ,pprime=3.97d+0,mean_p = 0.12d+0, mean_p_vol = -2.166d+0, eta = 0.3323d+0)
 
@@ -44,7 +44,7 @@ parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width 
 !---------------------------------------------------------------------
 LOGICAL :: use_common_p_grid
 DOUBLE PRECISION :: p_width_sd, p_vol_width_sd
-parameter (use_common_p_grid = .true., p_width_sd = 4d+0, p_vol_width_sd = 2d+0)
+parameter (use_common_p_grid = .true., p_width_sd = 3.5d+0, p_vol_width_sd = 2d+0)
 
 ! Memo cache for func_m (see the comment in that function).
 DOUBLE PRECISION :: m_cache_y, m_cache_p, m_cache_val
@@ -63,7 +63,7 @@ INTEGER :: b_num, y_num, quad_num, nout, i_y_global, i_excl_global, p_num, p_vol
      i_b_global, i_default_global, indicator_2, i_b_next, i_b_zero, b_num_interm, counter
 
 
-parameter (b_num= 100, y_num = 21, p_num=225, p_vol_num=5)
+parameter (b_num= 100, y_num = 21, p_num=201, p_vol_num=5)
 ! parameter (b_num= 200, y_num = 50)
 
 DOUBLE PRECISION :: b_grid(1:b_num), y_grid(1:y_num), default_grid(1:2), &
@@ -651,6 +651,21 @@ iter_bi =0
 ! print*, 'increase mmax', mmax
 !     CALL EXIT
 ! end if
+
+! Expand the upper bracket until it actually brackets the root.
+!
+! F(m) = m - (alpha/p)**(1/(1-theta)) * (alpha*m**theta + (1-alpha)*A**theta)**(1/theta)
+! is increasing with F(0) < 0 whenever an interior optimum exists, so bisection
+! needs F(mmax) > 0. The fixed mmax_global = 100 is not enough once the price
+! grid reaches far enough down: at p = 0.118 with A = 13.2 the optimum is near
+! m = 760. Doubling from mmax_global keeps the bracket tight in ordinary states
+! -- which preserves the precision of the fixed 1e-2 stopping rule -- while
+! still covering the extremes.
+do while (mmax < 1d+12 .and. &
+          mmax - ((alpha/exp(p_initial))**(1./(1.-theta))) &
+                 *(alpha*mmax**theta+(1-alpha)*(A**theta))**(1./theta) < zero)
+   mmax = mmax*2d+0
+end do
 
 do while(iter_bi .le. itmax_bi .and. d_bi .ge. tol_bi)
 m_opt=(mmin+mmax)/2.
