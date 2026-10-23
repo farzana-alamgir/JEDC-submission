@@ -87,6 +87,16 @@ b_num = length(b_grid);
 p_vol_num = length(p_vol_grid);
 p_num = length(p_grid)/p_vol_num;
 
+% Price nodes used throughout for the "low price" / "high price" contrast.
+% These were hardcoded as 2 and 6, which bracket the grid only when p_num = 7:
+% at p_num = 277 nodes 2 and 6 sit at 0.4% and 1.8% of the grid -- both deep in
+% the left tail, so the contrast collapses and every low-vs-high comparison
+% becomes meaningless. Defined by RELATIVE position instead, reducing to exactly
+% 2 and 6 when p_num = 7.
+i_p_low  = max(1,     round(1 + (1/6)*(p_num-1)));   % 16.7% of the grid
+i_p_high = min(p_num, round(1 + (5/6)*(p_num-1)));   % 83.3% of the grid
+fprintf('price-node contrast: low = %d, high = %d (of %d)\n', i_p_low, i_p_high, p_num);
+
 p_grid_matrix=reshape(p_grid, p_num, p_vol_num);
 p_grid_1_matrix=reshape(p_grid_1, p_num, p_vol_num);
 p_grid_2_matrix=reshape(p_grid_2, p_num, p_vol_num);
@@ -285,7 +295,7 @@ debt_output1=0.25*b_grid./mean_output1;
 consumption1=cons_matrix;
 value1=v_matrix;
 output1=output_matrix;
-dprice_matrix_3=exp(p_grid_3_matrix(6,:))-exp(p_grid_3_matrix(2,:));
+dprice_matrix_3=exp(p_grid_3_matrix(i_p_high,:))-exp(p_grid_3_matrix(i_p_low,:));
 dvol_matrix=exp(p_vol_grid(4))-exp(p_vol_grid(3));
 pdf_p_matrix1 = zeros(p_vol_num,p_num); %will have r across the columns, and r_vol as the different rows
 
@@ -347,7 +357,7 @@ value_full=value_full(:);
 load oil_bm.mat
 
 % Price difference for slope calculation
-dprice = exp(p_grid_3_matrix(6,3)) - exp(p_grid_3_matrix(2,3));
+dprice = exp(p_grid_3_matrix(i_p_high,3)) - exp(p_grid_3_matrix(i_p_low,3));
 
 % Mean debt index
 i_b3 = 44;
@@ -364,8 +374,8 @@ for vol_idx = 1:3
     i_vol = vol_states(vol_idx);
     
     % Spreads at low price (p=2) and high price (p=6)
-    spread_p2 = squeeze(spread_matrix(i_b3, :, 2, i_vol));
-    spread_p6 = squeeze(spread_matrix(i_b3, :, 6, i_vol));
+    spread_p2 = squeeze(spread_matrix(i_b3, :, i_p_low, i_vol));
+    spread_p6 = squeeze(spread_matrix(i_b3, :, i_p_high, i_vol));
     
     % Simple slope: ∆Spread / ∆Price
     slopes_all(:, vol_idx) = (spread_p6 - spread_p2) ./ dprice;
@@ -432,8 +442,8 @@ output_vals = cell(1, 3);
 for d_idx = 1:3
     i_b = debt_indices(d_idx);
     
-    spread_p2 = squeeze(spread_matrix(i_b, :, 2, i_vol));
-    spread_p6 = squeeze(spread_matrix(i_b, :, 6, i_vol));
+    spread_p2 = squeeze(spread_matrix(i_b, :, i_p_low, i_vol));
+    spread_p6 = squeeze(spread_matrix(i_b, :, i_p_high, i_vol));
     
     slopes_debt(:, d_idx) = (spread_p6 - spread_p2) ./ dprice;
     output_vals{d_idx} = squeeze(output_matrix(i_b, :, 4, i_vol));
@@ -508,11 +518,11 @@ i_vol_low = 2;
 i_y_mid = 11;  % Middle income level
 
 % Compute x and y values
-x_low_price_a = b_grid ./ mean(output_matrix(:, i_y_mid, 2, i_vol_low));
-y_low_price_a = b_grid(b_next_matrix(:, i_y_mid, 2, i_vol_low)) ./ mean(output_matrix(:, i_y_mid, 2, i_vol_low));
+x_low_price_a = b_grid ./ mean(output_matrix(:, i_y_mid, i_p_low, i_vol_low));
+y_low_price_a = b_grid(b_next_matrix(:, i_y_mid, i_p_low, i_vol_low)) ./ mean(output_matrix(:, i_y_mid, i_p_low, i_vol_low));
 
-x_high_price_a = b_grid ./ mean(output_matrix(:, i_y_mid, 6, i_vol_low));
-y_high_price_a = b_grid(b_next_matrix(:, i_y_mid, 6, i_vol_low)) ./ mean(output_matrix(:, i_y_mid, 6, i_vol_low));
+x_high_price_a = b_grid ./ mean(output_matrix(:, i_y_mid, i_p_high, i_vol_low));
+y_high_price_a = b_grid(b_next_matrix(:, i_y_mid, i_p_high, i_vol_low)) ./ mean(output_matrix(:, i_y_mid, i_p_high, i_vol_low));
 
 % Plot
 h1 = plot(x_low_price_a, y_low_price_a, '-', 'LineWidth', 3, 'Color', color_low_price);
@@ -546,11 +556,11 @@ figure('Position', [100, 100, 800, 600]);
 i_vol_high = 4;
 
 % Compute x and y values
-x_low_price_b = b_grid ./ mean(output_matrix(:, i_y_mid, 2, i_vol_high));
-y_low_price_b = b_grid(b_next_matrix(:, i_y_mid, 2, i_vol_high)) ./ mean(output_matrix(:, i_y_mid, 2, i_vol_high));
+x_low_price_b = b_grid ./ mean(output_matrix(:, i_y_mid, i_p_low, i_vol_high));
+y_low_price_b = b_grid(b_next_matrix(:, i_y_mid, i_p_low, i_vol_high)) ./ mean(output_matrix(:, i_y_mid, i_p_low, i_vol_high));
 
-x_high_price_b = b_grid ./ mean(output_matrix(:, i_y_mid, 6, i_vol_high));
-y_high_price_b = b_grid(b_next_matrix(:, i_y_mid, 6, i_vol_high)) ./ mean(output_matrix(:, i_y_mid, 6, i_vol_high));
+x_high_price_b = b_grid ./ mean(output_matrix(:, i_y_mid, i_p_high, i_vol_high));
+y_high_price_b = b_grid(b_next_matrix(:, i_y_mid, i_p_high, i_vol_high)) ./ mean(output_matrix(:, i_y_mid, i_p_high, i_vol_high));
 
 % Plot
 h1 = plot(x_low_price_b, y_low_price_b, '-', 'LineWidth', 3, 'Color', color_low_price);

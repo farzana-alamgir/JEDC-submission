@@ -53,6 +53,14 @@ an identical corrected-model solve (`p_num = 25`), the original script from the
 
 Together these took a single economy from "did not finish in 2.5 hours" to **~25 seconds**.
 
+5. **Price-node indices made relative to the grid.** The "low price" / "high price"
+   contrast used in Figures 3, 6a and 6b (and in `dprice`) was hardcoded to nodes 2 and 6.
+   Those bracket the grid only at `p_num = 7`; at `p_num = 277` they sit at **0.4% and
+   1.8%** of the grid, both deep in the left tail, so the contrast collapses and the
+   low-vs-high comparison becomes meaningless. Now defined by relative position
+   (16.7% and 83.3%), which reduces to exactly 2 and 6 when `p_num = 7` -- verified, the
+   baseline figures stay pixel-identical -- and gives nodes **47 and 231** at `p_num = 277`.
+
 One substantive edit, not output-neutral and documented in the script: FIGURE2's
 intermediate series is indexed `squeeze(spread2(:,11,4,1))`. The corrected
 constant-volatility economy carries `p_vol_num = 5` with all states identical (rather than
