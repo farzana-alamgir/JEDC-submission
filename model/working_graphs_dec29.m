@@ -213,6 +213,14 @@ for i_vol = 1:p_vol_num
         end
     end
 end
+% i_matrix depends on no loop index, but was recomputed inside the INNERMOST
+% loop below: a reciprocal of the whole b*y*p*v array plus a logical-indexed
+% NaN assignment, 2,908,500 times over, i.e. ~8e12 element operations. At
+% p_num = 7 that is 5e9 and merely slow; at p_num = 277 it never finishes.
+% Hoisted here. Output is identical -- it was the same array every time.
+i_matrix = 1./q_matrix;
+i_matrix(default_matrix==1) = nan;
+
 for i_y=1:y_num
     for i_p = 1:p_num
         for i_p_vol =1:p_vol_num
@@ -222,8 +230,6 @@ for i_y=1:y_num
             %yield_rf(i_y,i_p, i_p_vol) = coupon_matrix(i_p,i_p_vol)/q_def_free_matrix(i_y,i_p,i_p_vol) - delta;
             
             for i_b=1:b_num
-                i_matrix=1./q_matrix;
-                i_matrix(default_matrix==1)=nan;
                 yield_rf(i_b,i_y,i_p, i_p_vol) = coupon_matrix(i_p,i_p_vol)/q_def_free_matrix(i_b,i_y,i_p,i_p_vol) - delta;
                 yield_rf_new(i_b,i_y, i_p, i_p_vol) = coupon_matrix(i_p,i_p_vol)/q_def_free_new_matrix(i_b,i_y,i_p,i_p_vol) - delta;
                 yield_long(i_b, i_y,i_p, i_p_vol) = coupon_matrix(i_p,i_p_vol)*i_matrix(i_b,i_y,i_p,i_p_vol) - delta;
@@ -271,7 +277,7 @@ dy1 =0.25*b_grid/mean(scale_y*exp(y_grid));
 y1=scale_y*exp(y_grid);
 spread1=spread_matrix;
 %fprintf('DEBUG: After assignment, spread1 size = ['); fprintf('%d ', size(spread1)); fprintf(']\n');
-mean_output1=mean(mean(mean(mean(output_matrix))));
+mean_output1=mean(output_matrix(:));   % dimension-agnostic; identical to the nested means
 debt_output1=0.25*b_grid./mean_output1;
 consumption1=cons_matrix;
 value1=v_matrix;
@@ -764,7 +770,8 @@ load oil_intermediate.mat %(=intermediate=vol constant at mean, but level changi
 dy2 =0.25*b_grid/mean(scale_y*exp(y_grid));
 y2=scale_y*exp(y_grid);
 spread2=spread_matrix;
-mean_output2=mean(mean(mean(output_matrix)))
+mean_output2=mean(output_matrix(:));   % was 3 nested means, which leaves a 4-D array
+                                       % whenever p_vol_num > 1 in the comparison economy
 debt_output2=0.25*b_grid./mean_output2;
 consumption2=cons_matrix;
 value2=v_matrix;
@@ -831,7 +838,7 @@ load oil_basic %(=oil price level and vol both are constant)
 dy3 =0.25*b_grid/mean(scale_y*exp(y_grid));
 y3=scale_y*exp(y_grid);
 spread3=spread_matrix;
-mean_output3=mean(mean(output_matrix));
+mean_output3=mean(output_matrix(:));   % dimension-agnostic
 debt_output3=0.25*b_grid./mean_output3;
 consumption3=cons_matrix;
 value3=v_matrix;
