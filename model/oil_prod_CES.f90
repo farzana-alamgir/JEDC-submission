@@ -44,7 +44,7 @@ parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width 
 !---------------------------------------------------------------------
 LOGICAL :: use_common_p_grid, mean_preserving
 DOUBLE PRECISION :: p_width_sd, p_vol_width_sd
-parameter (use_common_p_grid = .true., mean_preserving = .false., p_width_sd = 3d+0, p_vol_width_sd = 2d+0)
+parameter (use_common_p_grid = .true., mean_preserving = .false., p_width_sd = 6d+0, p_vol_width_sd = 2d+0)
 
 ! Memo cache for func_m (see the comment in that function).
 DOUBLE PRECISION :: m_cache_y, m_cache_p, m_cache_val
@@ -63,7 +63,7 @@ INTEGER :: b_num, y_num, quad_num, nout, i_y_global, i_excl_global, p_num, p_vol
      i_b_global, i_default_global, indicator_2, i_b_next, i_b_zero, b_num_interm, counter
 
 
-parameter (b_num= 100, y_num = 21, p_num=277, p_vol_num=5)
+parameter (b_num= 100, y_num = 21, p_num=549, p_vol_num=5)
 ! parameter (b_num= 200, y_num = 50)
 
 DOUBLE PRECISION :: b_grid(1:b_num), y_grid(1:y_num), default_grid(1:2), &

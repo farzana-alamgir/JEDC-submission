@@ -87,15 +87,6 @@ b_num = length(b_grid);
 p_vol_num = length(p_vol_grid);
 p_num = length(p_grid)/p_vol_num;
 
-% Price nodes used throughout for the "low price" / "high price" contrast.
-% These were hardcoded as 2 and 6, which bracket the grid only when p_num = 7:
-% at p_num = 277 nodes 2 and 6 sit at 0.4% and 1.8% of the grid -- both deep in
-% the left tail, so the contrast collapses and every low-vs-high comparison
-% becomes meaningless. Defined by RELATIVE position instead, reducing to exactly
-% 2 and 6 when p_num = 7.
-i_p_low  = max(1,     round(1 + (1/6)*(p_num-1)));   % 16.7% of the grid
-i_p_high = min(p_num, round(1 + (5/6)*(p_num-1)));   % 83.3% of the grid
-fprintf('price-node contrast: low = %d, high = %d (of %d)\n', i_p_low, i_p_high, p_num);
 
 p_grid_matrix=reshape(p_grid, p_num, p_vol_num);
 p_grid_1_matrix=reshape(p_grid_1, p_num, p_vol_num);
@@ -281,6 +272,17 @@ clear all
 %fprintf('DEBUG: Loading oil_bm.mat from: %s\n', which('oil_bm.mat'));
 %% Loading the benchmark/full model
 load oil_bm.mat
+
+% Price nodes for the "low price" / "high price" contrast in Figures 3, 6a, 6b.
+% Hardcoded as 2 and 6 originally, which bracket the grid only at p_num = 7; at
+% p_num = 549 those sit at 0.2% and 0.9% of the grid, both deep in the left
+% tail, so the contrast collapses. Defined by RELATIVE position instead, which
+% reduces to exactly 2 and 6 when p_num = 7.
+% Defined HERE, after the clear/reload, so it is never saved into oil_*.mat.
+i_p_low  = max(1,     round(1 + (1/6)*(p_num-1)));
+i_p_high = min(p_num, round(1 + (5/6)*(p_num-1)));
+fprintf('price-node contrast: low = %d, high = %d of %d  (prices %.4f and %.4f)\n', ...
+        i_p_low, i_p_high, p_num, exp(p_grid_matrix(i_p_low,3)), exp(p_grid_matrix(i_p_high,3)));
 %fprintf('DEBUG: After load, spread_matrix size = ['); fprintf('%d ', size(spread_matrix)); fprintf(']\n');
 % scale_y=10;
 % dy =0.25*b_grid/mean(scale_y*exp(y_grid));
