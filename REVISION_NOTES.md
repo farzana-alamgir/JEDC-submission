@@ -797,3 +797,513 @@ It is the *within*-economy, cross-state comparisons that the noise floor invalid
   which `optimize` evaluates 100× per call, but its result depends only on `(y, p, excl)`, all
   constant across the b-loop. That is roughly 1.5M bisections per VFI sweep to produce 294
   distinct values. Hoisting it into a precomputed table would remove most of the runtime.
+
+---
+
+## Part 6 — Figure 3 was dividing by a grid the model never solved on
+
+**Symptom.** Figures 2–7 kept disagreeing with the submitted versions even after
+the ±6 sd grid was restored.
+
+**Cause.** `compute_grid` builds the common price grid, then assigns
+`p_grid_1..p_grid_5 = p_grid_common`. But the *legacy* per-state blocks
+(`call discretize_AR(..., p_grid_k, ...)`, five of them) sit **after** that
+assignment and ran unconditionally, overwriting it with per-state Rouwenhorst
+grids.
+
+`working_graphs_dec29.m` takes the Figure 3 price interval from `p_grid_3`
+(lines 314 and 376), so the denominator came from the overwritten grid:
+
+| quantity | before | after |
+|---|---|---|
+| `p_grid_3` support (logs) | [−1.42899, 1.66899] | [−0.43947, 0.67947] |
+| `dprice` | 2.771870 | 0.862354 |
+
+The model solved on [−0.43947, 0.67947]. Every Figure 3 slope was therefore
+understated by a factor of **3.213**.
+
+**Fix.** `oil_prod_CES.f90`: the five legacy blocks are now wrapped in
+`if (.not. use_common_p_grid) then ... end if`.
+
+**No re-solve was needed.** `p_grid_1..5`, `trans_matrix_p_1..5` and
+`prob_vector_p_1..5` appear only in their declarations, the legacy
+`discretize_AR` calls, and `WRITE` statements — they never enter the Bellman
+operator or the bond-pricing recursion (verified by grep). `tm_p`, which drives
+Figure 4d, is built from `graphs_trans_matrix_p.txt` column 1, i.e. the real
+solution transition matrix. `trans_matrix_p_1..5` are loaded by the plotting
+script but never used after assignment.
+
+So the existing solutions stand, and only the auxiliary grid files were
+rebuilt — as each economy's **own** `p_grid`, in `wrun_bm`, `wrun_cv`,
+`wrun_mp` (originals kept as `*.prefix_bak`). `wrun_basic` has `p_num = 1` and
+its figures are discarded by `run_all.sh`, so it was left untouched.
+Cross-check before reuse: `max|p_grid_bm − p_grid_cv| = 7.6e−08`.
+
+**Corrected Figure 3** (`i_b = 44`, b = 8.808; slopes in bp per unit price):
+
+| `i_y` | output | low vol | mean vol | high vol | high/low |
+|---|---|---|---|---|---|
+| 10 | 6.434 | 1199 | 1214 | 1238 | 1.032 |
+| 11 | 6.612 | 568 | 586 | 604 | 1.064 |
+| 12 | 6.802 | 279 | 294 | 309 | 1.109 |
+| 13 | 6.989 | 145 | 154 | 164 | **1.133** |
+| 15 | 7.385 | 65 | 67 | 70 | 1.076 |
+| 18 | 8.019 | 40 | 40 | 41 | 1.029 |
+| 21 | 8.716 | 29 | 29 | 29 | 1.003 |
+
+`i_y ≤ 9` is the default region at this debt level (`i_matrix` is set to `NaN`
+where `default_matrix == 1`), so the slope is undefined there.
+
+Both qualitative features of the submitted Figure 3 survive: the slope falls
+steeply in output, and it is **ordered in volatility at every output level**
+(high > mean > low). What does not survive is the magnitude — the gap is
+3–13%, not the published 3×. That is the same conclusion as Part B.2, reached
+independently: the 3× was a measurement artifact of comparing slopes computed
+over per-state price intervals of different widths.
+
+**Units caution.** `spread_matrix = 4*(yield_long - yield_rf_new)` is a decimal
+annualised rate, not basis points. Reading it as bp makes a 1200 bp spread look
+like 0.12 bp and the model look degenerate. Multiply by 1e4 for bp.
+
+**Still outstanding:** `FIGURE_decomposition.jpg` and Tables 4–5 were produced
+on the superseded ±3 sd grid and have not yet been regenerated.
+
+---
+
+## Part 7 — the baseline we were comparing against was the wrong file
+
+The revised figures kept "not matching the submitted ones". The reference was
+wrong.
+
+`model/FIGURE*.jpg` is **not** the figure set in `oil_price_JIE.pdf` for six of
+the ten figures. Extracting the embedded JPEG streams from the paper and
+pixel-diffing (mean absolute greyscale difference, 938x1250):
+
+| figure | `model/*.jpg` vs paper | rebuild of c24560d vs paper |
+|---|---|---|
+| FIGURE2  | 0.000 | not produced |
+| FIGURE3  | **6.899** | **0.000** |
+| FIGURE4a | **3.228** | **0.000** |
+| FIGURE4b | **3.106** | **0.000** |
+| FIGURE4c | **4.322** | **0.000** |
+| FIGURE4d | **5.122** | **0.000** |
+| FIGURE5  | **2.304** | **0.000** |
+| FIGURE6a | 0.000 | 0.000 |
+| FIGURE6b | 0.000 | 0.000 |
+| FIGURE7  | 0.000 | not produced |
+
+The rebuild is `git show c24560d:model/oil_prod_CES.f90` compiled with
+`gfortran -O3` (3m56s, `p_num = 7`) and plotted with
+`git show c24560d:model/working_graphs_dec29.m`, both unmodified. It reproduces
+the paper **exactly** — `d = 0.000`, zero pixels differing — on all eight
+figures it produces. The solver and the plotting pipeline are therefore
+faithful to the submission; nothing in them is broken.
+
+The paper's figures are now archived at
+`results/figures_submitted_from_paper/` and are the reference to use.
+
+### Why the ±6 sd figures still differ from the paper — and should
+
+The only calibration difference between c24560d and the current benchmark is
+`p_num: 7 -> 549`. Everything else — alpha, theta, rho_p, mean_p, eta,
+rho_p_vol, mean_p_vol, delta, b_num, y_num, b_grid — is identical. What changed
+is the *discretization*, and that is the point of the revision.
+
+The submitted code builds the solution grid **per volatility state**
+(`oil_prod_CES.f90:504` at c24560d): `p_grid(:,i)` uses
+`variance_p_innovation = (std_u_p*exp(p_vol_grid(i)))**2`, so each state gets a
+grid of a different width. The auxiliary `p_grid_3` is built with
+`variance_p_innovation3` for every `i` — a single vol-state-3 grid.
+
+Figure 3 then differences spreads across price **indices 2 and 6 of the
+per-state grid** but divides all three curves by the **single vol-3** `dprice`.
+Measured price intervals at indices 2→6:
+
+| vol state | own interval | ratio to vol 3 |
+|---|---|---|
+| 2 | 0.1357 | 0.556 |
+| 3 | 0.2441 | 1.000 |
+| 4 | 0.4404 | 1.804 |
+
+`0.4404 / 0.1357 = 3.245`. The high-volatility curve is inflated 1.80x and the
+low-volatility curve deflated 0.556x by the common denominator alone. This is
+the Part B.2 artifact, now confirmed from the source rather than inferred.
+
+On the common grid, where every volatility state is differenced over the *same*
+price interval, the ordering survives — high > mean > low at every output
+level — but the gap is 3-13%, not the published ~1.8x at the left edge.
+
+---
+
+## Part 8 — hardcoded price indices, and what actually happens to Figure 4d
+
+Two literals in the plotting script were written for a 7-node price grid and
+were never remapped when `p_num` went to 549. They are *positions*, not prices.
+
+| line | literal | meaning at `p_num = 7` | meaning at `p_num = 549` |
+|---|---|---|---|
+| 333 | `output_matrix(i_b3,:,2,3)` | low price | node 2 of 549, near the floor |
+| 693–705 | `exp_prices` at 5, 6, 7 | the **top three** prices | nodes 5–7, near the **bottom** |
+
+The second one is why `FIGURE4d` came out blank: all three curves sat near
+p ≈ 0.65, below the hardcoded y-axis floor of 1.
+
+Fixed with a remapper inserted after `i_p_low`/`i_p_high`, identity at
+`p_num = 7`:
+
+```matlab
+pidx = @(k) min(p_num, max(1, round(1 + ((k-1)/6)*(p_num-1))));
+```
+
+`pidx(2,5,6,7) = 92, 366, 458, 549` at `p_num = 549`. Applied in
+`script_bm.m`, `script_bm_price.m`, `script_intermediate.m`, `script_basic.m`.
+The same block now values tomorrow's price on **tomorrow's** grid
+(`exp(p_grid_matrix)`) rather than on `p_grid_matrices{i_vol}`, today's state's
+grid — identical under the common grid, but correct in general.
+
+### Figure 4d in the paper is the per-state grid, not an expectation
+
+With `rho_p = 0.98`, `E[p'|p] ≈ p`. The submitted Figure 4d plots
+`exp_prices(i_p, v)` against volatility, and those values are almost exactly
+the **grid nodes themselves**:
+
+| | vol 1 | vol 2 | vol 3 | vol 4 | vol 5 |
+|---|---|---|---|---|---|
+| submitted Fig 4d, `i_p = 7` | 1.1844 | 1.2318 | 1.3217 | 1.5002 | 1.8839 |
+| grid node `exp(p_grid_v(7))` | 1.1856 | 1.2340 | 1.3259 | 1.5085 | 1.9021 |
+
+So the published "expected oil price rises steeply with volatility" (+17% to
++58%) is the statement that **node 7 of a wider grid is a higher price**. It is
+the same fixed-index-across-per-state-grids artifact as Figure 3.
+
+Holding the *price* fixed instead of the *index* — which is what the common
+grid does — the effect collapses to the true Jensen lift. The conditional sd of
+log price ranges over 0.0042–0.0425, so `exp(sd^2/2) - 1` is at most
+**+0.09%**, and the regenerated Figure 4d is flat at exactly that.
+
+Intermediate case, for the record: valuing tomorrow's price on tomorrow's grid
+but still starting from a fixed *index*, the swing is +9.9% / +20.8% / +33.0%
+at `i_p` = 5 / 6 / 7 — still mostly the starting-price artifact.
+
+**Consequence for the paper.** The mean (Jensen) channel is not a quantitatively
+meaningful force here; this is independently consistent with the
+mean-preserving decomposition, which put the mean channel at **−3.5 bp**
+against **+26.1 bp** for pure dispersion. The mechanism survives through
+dispersion, not through the expected level. Figure 4d as published should not
+be used as evidence for the mean channel.
+
+---
+
+## Part 9 — three more defects, and what the results actually say
+
+The revised Figures 2, 3 and 7 appeared to invert the paper's results. Two of
+the three inversions were bugs; one is real and is about the elasticity.
+
+### (a) Figure 2 — hardcoded price index 4
+
+`script_bm.m:961-963` plotted `spread1(:,11,4,3)` and `spread2(:,11,4,1)`.
+Index 4 is the **mean** price on the submitted 7-node grid; on the 549-node
+grid it is p ~ 0.645, near the floor. Full and Intermediate were drawn at cheap
+oil while Basic sat at its single mean price of 1.1324, which put Full lowest.
+
+Fixed with `pidx(4) = 275`. At matched state (p = 1.1324, b = 8.808, i_y = 11):
+
+| economy | spread | q |
+|---|---|---|
+| full | **1223.3 bp** | 0.5597 |
+| intermediate | 1206.4 bp | 0.5630 |
+| basic | 1019.5 bp | 0.6028 |
+
+Full > Intermediate > Basic — the paper's ordering. Figure 2 now shows it.
+
+### (b) Figure 7 — the welfare measure had its sign backwards
+
+`welfare_gain = 100*((Va-Vf)./Vf)*scale_y`. Utility is CRRA with
+`sigma = 2` (`oil_prod_CES.f90:23`), so the value function is **negative**
+(`v_matrix` runs -5.30 to -4.13). Dividing a positive numerator by a negative
+`Vf` flips the sign: a genuine welfare **gain** printed as a loss. It disagreed
+with the correct measure at **21 of 21** output states. The `*scale_y` factor
+(=10) is also not part of any welfare measure.
+
+Correct consumption equivalent, `lambda = (Va/Vf)^(1/(1-sigma)) - 1`:
+
+| | mean V | published | correct CEV |
+|---|---|---|---|
+| full | -4.82193 | — | — |
+| full -> intermediate | -4.82047 | -0.301 | **+0.0301%** |
+| full -> basic | -4.82022 | -0.357 | **+0.0357%** |
+
+The alternative economies have higher V at 21/21 output states. Removing oil
+price uncertainty is welfare-improving, as the paper claims.
+
+Note the decomposition: removing *stochastic volatility alone* delivers
++0.0301%, which is **84%** of the +0.0357% from removing all oil price
+uncertainty. Time-varying volatility, not the price level risk, is what costs
+welfare. That is a result in the paper's favour.
+
+### (c) Figure 7 legend labels are swapped — in the submitted script too
+
+`/tmp/sub.m:937-946`: `h1` plots `welfare_gain_full_to_base` but the legend
+calls it 'Full to Intermediate'; `h2` plots `..._to_int`, labelled 'Full to
+Basic'. Present at commit c24560d, so **the published Figure 7 is mislabelled**.
+
+### (d) Spreads falling in volatility — this one is real, and it is sigma
+
+At a fixed price, debt and output, spread **falls** across volatility states:
+
+| vol state | 1 | 2 | 3 | 4 | 5 |
+|---|---|---|---|---|---|
+| spread (bp) | 1293.5 | 1258.1 | 1223.3 | 1199.8 | 1186.9 |
+
+Mechanism: output is **convex** in the oil price (`d2(output)/dp2 = +9.02`;
+output at p = 0.70 / 1.13 / 1.90 is 6.4475 / 5.7861 / 5.4103 — the marginal
+damage falls). With `sigma = 2` the oil share `s(p) = alpha^2 / p` **falls** as
+p rises: the economy substitutes away from oil, so high-price damage is
+bounded. Jensen then makes expected output **rise** with volatility
+(5.78325 -> 5.78418 from vol 1 to vol 5), which lowers default risk and the
+spread.
+
+This flips with the elasticity. For `sigma < 1`, `s(p) = alpha^sigma p^(1-sigma)`
+**rises** with p, the oil bill is unbounded, output is concave, and volatility
+raises spreads. The paper's own import panel gives **sigma ~ 0.39, 95% CI
+[0.23, 0.56]**, which rejects `sigma = 2`
+(`empirical/estimate_substitution_elasticity.py`).
+
+So the sign of the central result is governed by sigma — exactly the parameter
+both referees questioned.
+
+### Figure 3 state dependence survives, at 13% not 3x
+
+At `i_b = 44` (b = 8.808, debt/GDP 38%) the high/low slope ratio peaks at
+**1.133** and exceeds 1 at **12 of 12** output states where the spread is
+finite. The ordering is right everywhere; the gap is small. It is larger at
+lower debt (1.69 at b = 3.89) but the slopes there are 2-3 bp and economically
+trivial, and it reverses above b ~ 12.
+
+Because a 13% gap is invisible on the published axes, the slopes are plotted on
+a log scale with a companion ratio panel in
+`results/figures_corrected/same_grid_fraction/FIGURE3_detail.jpg`.
+
+---
+
+## Part 10 — Figures 6a/6b and the ripple in 4c
+
+### 6a/6b are not a bug: it is the width of the price contrast
+
+Both figures contrast "Low Oil Price" against "High Oil Price" at `i_p_low` /
+`i_p_high`. The submitted 7-node run contrasted p = 1.0120 vs 1.2562, a ratio
+of **1.24**. Fraction mode on the +/-6 sd grid keeps the same relative grid
+positions (nodes 92 and 458 of 549), which is p = 0.776 vs 1.638 — a ratio of
+**2.11**. A contrast twice as wide separates the two policy functions and
+pushes their default thresholds apart (1.70 vs 1.88), where the paper's nearly
+coincide.
+
+In `same_prices` mode, which pins the contrast to the submitted price levels,
+Figure 6a closely reproduces the paper: curves essentially overlapping, default
+threshold ~1.78 against the paper's ~1.78.
+
+**Use `same_prices` for the figures that contrast two price levels** (3, 5, 6a,
+6b) when the point is comparability with the submission. `same_grid_fraction`
+answers a different question — same relative position on a wider grid.
+
+### The ripple in Figure 4c is Tauchen aliasing
+
+Figure 4c plots `spread_matrix(44,11,:,3)` across all 549 price nodes. It rises
+overall (0.0643 -> 0.1962) but falls at 22.3% of steps, in a visible ripple.
+Ruled out first:
+
+- **not the debt policy** — `b_next` takes only **2** distinct values over the
+  549 price nodes, and a down-step is no more likely right after a policy jump
+  (0.286 vs 0.221, n = 7)
+- **not the default set** — its size changes at **1** of 548 price steps
+
+It is the price discretization. With `rho_p = 0.98` and a grid step of 0.002042
+in logs, advancing one node shifts the conditional mean by `rho` nodes, so it
+slips `(1 - rho)` of a node each step and realigns with the grid every
+`1/(1-rho) = 50` nodes. The series should therefore carry
+`p_num*(1-rho) = 549*0.02 = 11.0` cycles.
+
+**Observed: exactly 11** (12 local maxima). Amplitude is 5.06% of the trend.
+
+This is a regression from this revision, not a defect in the submitted model:
+the submitted code discretized with `discretize_AR` (Rouwenhorst), which matches
+an AR(1) exactly at any `rho`; `tauchen_fixed` was introduced here because the
+common grid and the mean-preserving drift need a grid that is *imposed* rather
+than implied. Tauchen aliases at near-unit-root persistence on a fine grid.
+
+It does not change any sign or ordering reported above — all of those were
+computed at single grid points or as ratios at matched nodes, and the ripple is
+5% of a trend that moves by a factor of three. But Figure 4c should not be
+published with a visible 11-cycle ripple. Options, cheapest first: plot a
+moving average and say so; coarsen the price grid for this figure only; or
+restore a Rouwenhorst discretization and reintroduce the mean-preserving drift
+through the probabilities rather than the grid.
+
+The published 7-node Figure 4c is not free of this either — it shows the same
+non-monotonicity as a dip between p = 1.13 and 1.19, merely undersampled.
+
+---
+
+## Part 11 — full audit of the plotting script for stale price indices
+
+Swept every figure block for literals indexing the price dimension, the only
+dimension whose size changed (`p_num` 7 -> 549; `b_num`, `y_num`, `p_vol_num`
+are unchanged).
+
+| figure | price indexing | verdict |
+|---|---|---|
+| FIGURE2 | literal `4` | **was broken** — fixed, `pidx(4) = 275` |
+| FIGURE3 | `i_p_low`/`i_p_high`; x-axis literal `2` | **was broken** — fixed, `pidx(2)` |
+| FIGURE4a | `oil_matrix(i_b,i_y,:,i_vol)` — all nodes | clean |
+| FIGURE4b | `output_matrix(i_b,i_y,:,i_vol)` — all nodes | clean |
+| FIGURE4c | `spread_matrix(i_b,i_y,:,i_vol)` — all nodes | clean (but see the Part 10 ripple) |
+| FIGURE4d | literals `7`, `5`, `6`, `7` | **was broken** — fixed, `pidx` |
+| FIGURE5 | `i_p_low`/`i_p_high`; x-axis literal `4` | **was broken** — fixed, `pidx(4)` |
+| FIGURE6a | `i_p_low`/`i_p_high` | clean |
+| FIGURE6b | `i_p_low`/`i_p_high` | clean |
+| FIGURE7 | none (integrates over all prices) | clean on indices; sign + legend fixed in Part 9 |
+
+No bare literal `7` survives outside the `pidx`-guarded 4d block.
+
+Corrected Figure 5 in `same_prices` mode now tracks the paper closely: same
+axes, same ordering (High > Mean > Low debt), green peaking at 0.32 against the
+paper's 0.305. The Mean Debt curve is steeper than published (0.20 vs 0.061),
+which is a genuine consequence of the finer grid rather than an indexing fault.
+
+### Summary of every defect found in this revision
+
+| # | defect | where | status |
+|---|---|---|---|
+| 1 | legacy blocks overwrote the common grid | `oil_prod_CES.f90` | fixed |
+| 2 | wrong baseline: `model/FIGURE*.jpg` is not the paper | — | paper figures archived |
+| 3 | per-state price intervals, one denominator | Fig 3 (published) | documented, 3.245x |
+| 4 | fixed index across per-state grids | Fig 4d (published) | documented, +58% -> +0.09% |
+| 5 | hardcoded price index 4 | Fig 2 | fixed |
+| 6 | hardcoded price index 2 | Fig 3 x-axis | fixed |
+| 7 | hardcoded price indices 5/6/7 | Fig 4d | fixed |
+| 8 | hardcoded price index 4 | Fig 5 x-axis | fixed |
+| 9 | welfare divided by a negative value function | Fig 7 | fixed |
+| 10 | welfare legend labels swapped (also in submission) | Fig 7 | fixed |
+| 11 | Tauchen aliasing, 11 cycles | Fig 4c | diagnosed, not yet fixed |
+
+Items 3, 4 and 10 are present in the submitted paper. Items 1, 5-9 and 11 were
+introduced or exposed by the move to `p_num = 549`.
+
+---
+
+## Part 12 — Figure 4c de-aliased (cosmetic), and why the proper fix matters
+
+### What was done
+
+`FIGURE4c` is now plotted as a local **cubic** fit over a 101-node window
+(two aliasing periods), with the raw series drawn underneath in grey so the
+smoothing is always visible. Near the ends the window truncates and the cubic
+is refitted on the available points, so the **full price range is retained** --
+a fixed centred window discarded 50 nodes at each end, 18% of the range,
+including the steep rise at the top.
+
+| series | cycles | detrended sd | down-steps | range |
+|---|---|---|---|---|
+| raw | 11 | 0.00668 | 122/548 | 0.0643 -> 0.1962 |
+| smoothed | 7 | 0.00456 | 78/548 | 0.0655 -> 0.1962 |
+
+Max deviation from raw 9.1% of the trend. A plain boxcar of one period nulls
+the artifact frequency more sharply (sd 0.00163) but biases this steeply convex
+schedule by 16.3% and truncates the ends, so the local cubic was preferred.
+
+### This is cosmetic, and there is a substantive reason to do better
+
+The artifact is in the **solved transition matrix**, not in the plotting. Its
+conditional mean departs from the exact AR(1) law by up to 1.4e-3 (0.7 of a
+grid node) and its **conditional standard deviation wobbles by 1.26%** across
+the price grid.
+
+That last number is not only a cosmetic concern. The mean-preserving
+decomposition manipulates precisely the conditional variance -- the drift
+applied is `-0.5*((std_u_p*exp(h_i))^2 - mean_innov_var)`. Imposing that drift
+on a discretisation whose realised conditional variance already wobbles 1.26%
+means the experiment is exact in intent but not in realisation. The reported
++26.1 bp dispersion and -3.5 bp mean channels inherit that error. It is almost
+certainly far smaller than the gap between those two numbers, but it has not
+been bounded.
+
+### The proper fix
+
+Match the conditional moments exactly on the imposed common grid: after
+computing the Tauchen cell probabilities for each row, tilt them with two
+parameters solved by Newton so that `sum(p_j z_j)` and
+`sum(p_j z_j^2) - mean^2` hit the exact AR(1) targets. Roughly 30 lines in
+`tauchen_fixed`, then a re-solve of all four economies (~90 min each).
+
+Rouwenhorst, the usual remedy at `rho = 0.98`, is not available here: it
+matches an AR(1) exactly but *determines its own grid*, and the whole point of
+this revision is a grid shared across volatility states.
+
+Beyond removing the ripple, this would let the response letter state that the
+discretisation matches the conditional mean and variance of the oil price
+process exactly at every node, so the mean-preserving experiment is exact by
+construction -- which is the cleanest possible answer to the referees' lead
+comment.
+
+---
+
+## Part 13 — the contrast interval decides the answer; use `same_prices`
+
+Figure 3's three curves were overlapping because of the **width of the price
+contrast**, not because the state dependence is absent.
+
+| contrast | prices | dp | ratio high/low: max | median | >1 at |
+|---|---|---|---|---|---|
+| `fraction` | 0.7760 -> 1.6383 | 0.8624 | **1.13** | 1.055 | 12/12 |
+| `price` | 1.0119 -> 1.2564 | 0.2445 | **4.44** | 1.116 | 8/11 |
+
+Slopes at the peak: `fraction` gives 145 / 154 / 164 bp; `price` gives
+**7 / 16 / 29 bp** — a more than fourfold separation.
+
+The reason is economic, not cosmetic. `fraction` keeps the submitted *relative
+grid positions*, but on a grid 3.5x wider that becomes a chord spanning a
+**2.1x change in the oil price**. A chord that long is not a derivative: the
+price move dominates and swamps the volatility effect. `price` measures across
+a 24% price change around the mean, which is a local derivative and is what the
+submitted run actually computed (`dp` = 0.2445 against the submission's
+0.2441 — essentially identical).
+
+**`results/figures_corrected/same_prices/` is the final figure set.**
+`same_grid_fraction/` is kept as a robustness cut. The choice also makes 6a/6b
+and 5 line up with the paper (Parts 10 and 11).
+
+### Figure 3's axis
+
+`ylim([0, 0.09])` is inherited from the submitted script, where slopes ran
+0.002-0.092. Under the narrow contrast the slopes away from the default
+boundary are an order of magnitude smaller (0.0007-0.004), so that scale
+crushed all three curves onto one line. Figure 3 now autoscales in `price`
+mode to `3 x median(slope)`, and the ordering Low < Mean < High is visible
+across the whole range.
+
+`FIGURE3_detail.jpg` is rebuilt on the narrow contrast: panel (a) the three
+slopes, panel (b) the high/low ratio, peaking at 4.44.
+
+One honest caveat for the text: below output ~6.2 the ratio dips to 0.85, so
+the state dependence reverses close to the default boundary. It holds at 8 of
+the 11 output states where the slope is finite and positive.
+
+---
+
+## Open items
+
+1. **Figure 3 finetuning** (cosmetic, parked). Two things to tidy when we come
+   back to it: `xlim([5.5, 8])` leaves the left third of the panel empty
+   because the low-output states are in default and the slope is `NaN` there;
+   and the narrow-contrast curve is V-shaped (falling to a minimum around
+   output 7.2, then rising to output 8) where the submitted figure declines
+   monotonically. The ordering Low < Mean < High holds throughout, so this is
+   presentation, not substance — but the rise at high output is worth
+   understanding before the figure is final.
+2. **sigma = 0.39 re-run.** Decides the sign of the volatility-spread
+   relationship. Feasible on the current grid (ceiling p < 71 against a grid
+   max of 1.97) but implies `alpha ~ 0.0013`. Suggest a fast common-grid solve
+   at moderate `p_num` to establish the sign before committing to 549 nodes.
+3. **Moment-matched discretization.** Removes the Figure 4c aliasing at source
+   and makes the mean-preserving experiment exact by construction. ~30 lines in
+   `tauchen_fixed` plus a re-solve of four economies.

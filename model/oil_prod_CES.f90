@@ -1011,7 +1011,14 @@ else
 
    end if
 
- !! Creating price grid for different levels of volatilities:
+ !! Creating price grid for different levels of volatilities.
+ !! SKIPPED under the common grid: these legacy blocks rebuild p_grid_1..p_grid_5
+ !! with per-state Rouwenhorst grids and would OVERWRITE the common-grid values
+ !! assigned above. working_graphs_dec29.m takes dprice from p_grid_3, so leaving
+ !! them in place makes the figures divide by a price interval from a grid the
+ !! model never solved on.
+ if (.not. use_common_p_grid) then
+
  ! vol_grid=1
  do i=1,p_vol_num
       variance_p_innovation1 = (std_u_p * exp(p_vol_grid(1)))**(2)
@@ -1056,6 +1063,8 @@ do i=1,p_vol_num
       ! call tauchen(p_num,rho_p, mean_p, variance_p_innovation5, m, p_grid_5(:, i), trans_matrix_p_5(:,:,5))
       call discretize_AR(rho_p, mean_p , variance_p_innovation5, p_grid_5(:, i), trans_matrix_p_5(:,:,i), prob_vector_p_5(:,i))
    end do
+
+ end if
 
    do i=1,p_vol_num
 
