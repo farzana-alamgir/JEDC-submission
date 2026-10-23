@@ -133,8 +133,11 @@ yield_long       = zeros(b_num, y_num, p_num, p_vol_num);
 yield_rf         = zeros(b_num, y_num, p_num, p_vol_num);
 yield_rf_new     = zeros(b_num, y_num, p_num, p_vol_num);
 tm_p             = zeros(p_num, p_num, p_vol_num);
-value_full       = zeros(1, y_num);
-value_full_debt  = zeros(1, y_num);
+% NOT preallocated here: value_full and value_full_debt. They are assigned far
+% below, AFTER this workspace is saved and cleared, so creating them here only
+% writes zeros into oil_*.mat. Those then reload as 1-by-y_num rows and turn the
+% welfare gain into a y_num-by-y_num broadcast. They are 21 elements; growing
+% them costs nothing.
 dev_matrix = zeros(b_num,y_num, p_num, p_vol_num);
 q_paid_matrix = zeros(b_num,y_num, p_num, p_vol_num);
 q_def_free_new_matrix = zeros(b_num, y_num,p_num, p_vol_num);

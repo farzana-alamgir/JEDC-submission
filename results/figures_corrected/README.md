@@ -30,15 +30,21 @@ most directly affected.
 
 ## Plotting fixes (all verified output-neutral)
 
-Running the pipeline on `submitted-baseline` reproduces all ten published figures
-**pixel-identically** both before and after each of these, so none of them alters results:
+Two independent checks confirm these are output-neutral: (i) on `submitted-baseline`
+inputs the pipeline reproduces all ten published figures **pixel-identically**; and (ii) on
+an identical corrected-model solve (`p_num = 25`), the original script from the
+`submitted-baseline` tag and the fixed script produce **all ten figures pixel-identically**
+(maxdiff 0.0). The second check is what caught the `value_full` defect noted below.
 
 1. ASCII `load` replaced by a `textscan` reader. MATLAB's `load` is not the bottleneck it
    appeared to be (2 s for a 219 MB file), but the reader is kept for robustness.
-2. **Eight arrays preallocated** — `spread_matrix`, `spread_matrix_rw`, `yield_long`,
-   `yield_rf`, `yield_rf_new`, `tm_p`, `value_full`, `value_full_debt` were assigned inside
-   a 2.9-million-iteration loop without being created first, so MATLAB grew and copied them
-   on every pass.
+2. **Six arrays preallocated** — `spread_matrix`, `spread_matrix_rw`, `yield_long`,
+   `yield_rf`, `yield_rf_new`, `tm_p` were assigned inside a 2.9-million-iteration loop
+   without being created first, so MATLAB grew and copied them on every pass.
+   `value_full` and `value_full_debt` are deliberately **not** preallocated: they are
+   assigned after this workspace is saved and cleared, so creating them early writes zeros
+   into `oil_*.mat`, which reload as `1×y_num` rows and turn the welfare gain into a
+   `y_num×y_num` broadcast of `-Inf`. That corrupted FIGURE7 in an earlier pass.
 3. **`i_matrix` hoisted out of the loop nest.** `i_matrix = 1./q_matrix` plus a
    logical-indexed NaN assignment — over the whole b×y×p×v array — ran inside the
    *innermost* loop, i.e. ~8e12 element operations. This was the dominant cost.
