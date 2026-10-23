@@ -19,15 +19,13 @@ physical price in each volatility state. A volatility shock therefore rescaled t
 *level*, not only its dispersion. This was not the process written in the paper. Correcting
 it, and then performing the decomposition the referees requested, we find:
 
-> **Time-varying oil price volatility raises mean spreads by 12.6 bp (+3.1%). Of this,
-> +43.8 bp is the expected-price (Jensen) channel and −31.2 bp is the pure dispersion
-> channel. The mean channel is 3.5× the total effect, and genuine mean-preserving risk
-> *lowers* spreads.**
+> **Time-varying oil price volatility raises mean spreads by 22.6 bp (+5.8%). Of this,
+> +26.1 bp is the pure dispersion channel and −3.5 bp the expected-price (Jensen)
+> channel. The genuine uncertainty channel accounts for essentially the whole effect; the
+> mechanical Jensen term is negligible.**
 
-Report 2 anticipated this possibility: *"If the pure effect of uncertainty turns out to be
-small, I think it is fine. At least we know why volatility matters here."* At our
-calibration it is not merely small — it is negative. We therefore revise the paper's
-interpretation rather than defend the original claim.
+This *supports* the paper's mechanism. Report 2 asked whether the effect is uncertainty or
+arithmetic; on the corrected process it is uncertainty.
 
 ---
 
@@ -53,21 +51,24 @@ Two implementation points matter and are easy to get wrong:
 1. The correction must enter the **conditional** mean. Folding it into the process mean
    delivers only `(1 − ρ_p)` of it — **2%** at ρ_p = 0.98.
 2. It must be applied on a **common** price grid, or it corrects a term worth 0.089% while
-   leaving a grid artifact worth tens of percent untouched (Part B).
+   leaving a grid artifact worth tens of percent untouched (Part B). The grid must also be
+   **wide enough**: a grid spanning only ±3 SDs truncates the high-volatility states and
+   reverses the sign of the decomposition (see A.3).
 
 **Validation** (Table 4, Figure D panel a): `E[p_{t+1} | p, σ]` swings **+0.0894%** across
 volatility states in the full model and **−0.0000%** after the correction.
 
 ### ✅ A.2 The decomposition
 
-Four economies, all on the **same** physical price grid (277 nodes, ±3 sd), all with the
-**same** average innovation variance, all driven by the **same** shocks:
+Four economies, all on the **same** physical price grid (549 nodes, ±6 sd, prices
+[0.644, 1.973]), all with the **same** average innovation variance, all driven by the
+**same** shocks:
 
 | economy | mean spread (bp) | sd spread | default rate (%) | mean debt |
 |---|---|---|---|---|
-| full SV | 421.3 | 226.9 | 3.436 | 6.370 |
-| mean-preserving SV | 377.5 | 199.9 | 3.131 | 6.416 |
-| constant volatility | 408.7 | 217.2 | 3.391 | 6.391 |
+| full SV | 411.2 | 219.3 | 3.420 | 6.381 |
+| mean-preserving SV | 414.7 | 223.6 | 3.382 | 6.392 |
+| constant volatility | 388.6 | 200.5 | 3.197 | 6.425 |
 | constant price | 391.4 | 256.8 | 3.114 | 6.545 |
 
 *(Table 1. The constant-price economy fixes p at **E[p] = 1.1324**, the mean, not the
@@ -77,32 +78,44 @@ median `exp(p̄) = 1.1275` — this is R2 Major 2, addressed in Part C.)*
 
 | channel | spread (bp) | default (pp) | mean debt |
 |---|---|---|---|
-| **TOTAL** — time-varying volatility (full − constant vol) | **+12.6** | +0.045 | −0.021 |
-| of which **expected-price (mean)** (full − mean-preserving) | **+43.8** | +0.305 | −0.046 |
-| of which **pure dispersion** (mean-preserving − constant vol) | **−31.2** | −0.260 | **+0.025** |
-| oil price variation at all (constant vol − constant price) | +17.3 | +0.277 | — |
+| **TOTAL** — time-varying volatility (full − constant vol) | **+22.6** | +0.222 | −0.044 |
+| of which **pure dispersion** (mean-preserving − constant vol) | **+26.1** | +0.185 | −0.033 |
+| of which **expected-price (mean)** (full − mean-preserving) | **−3.5** | +0.037 | −0.011 |
+| oil price variation at all (constant vol − constant price) | −2.8 | +0.084 | — |
+
+Base spread in the constant-volatility economy is 388.6 bp, so the total effect is **+5.8%**.
 
 ### A.3 Interpretation
 
-The mean channel is **3.5× the total**, and the pure dispersion channel has the **opposite
-sign**. Nearly everything the submitted draft attributes to oil price *uncertainty* is the
-Jensen effect of conditional variance on the conditional mean of the price *level*.
+The pure dispersion channel accounts for **more than the whole** total effect, and the
+mechanical Jensen term is small and slightly negative. So the draft's central claim —
+that *uncertainty* about oil prices, not merely their expected level, raises sovereign
+spreads — survives the decomposition the referees asked for.
 
-Why mean-preserving dispersion *lowers* spreads: the mechanism is financial, not real.
-E[output] differs by only 0.08% across the three economies. Time-varying risk, with the
-mean held fixed, gives the sovereign an **option to time its borrowing** — lean on debt
-when volatility is low, retrench when high. The value function is convex in the risk level,
-so variation in v at constant E[v] is valuable.
+**An earlier version of this response reported the opposite** (mean channel +43.8, dispersion
+−31.2). That was computed on a price grid spanning only ±3 unconditional SDs, which
+truncated the high-volatility states — precisely the states whose price distributions
+extend furthest, and therefore precisely where the dispersion channel operates. On a grid
+spanning ±6 SDs, matching the reach of the submitted per-state grids, the sign reverses.
+The lesson is that the grid width is not a numerical detail here: it determines which
+channel the decomposition attributes the effect to.
 
 ### ✅ A.4 Does precautionary borrowing survive? (R1 Major 2, second part)
 
 > *"Once this mean effect is removed, any remaining increase in borrowing would reflect a
 > precautionary response to greater oil price risk itself."*
 
-**Yes.** The pure dispersion channel raises mean debt by **+0.0246** (+0.39%), while the
-mean channel *lowers* it by −0.0455. So the borrowing response to risk per se survives the
-correction — but see Part B.3, where we show the *cross-state* version of this claim is not
-identified.
+**No — the sign reverses.** On the corrected grid the pure dispersion channel *lowers*
+mean debt by **−0.0334**, and the mean channel lowers it by a further −0.0107. Isolated
+oil-price risk therefore induces precautionary **saving**, not the precautionary borrowing
+emphasised in Section 6.3.
+
+Two caveats, both pointing the same way. First, Part B.3 shows the *cross-state* version
+of the borrowing claim is inside the simulation noise floor. Second, these are
+cross-economy differences in ergodic means, which are far better identified than the
+cross-state comparison but are still small relative to the level of debt (≈0.5%).
+Section 6.3 needs a policy-function or impulse-response design at fixed (b, y) before any
+version of the claim can be sustained.
 
 ### ◐ A.5 Caveat: the correction is exact only at one step
 
