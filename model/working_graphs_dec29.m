@@ -795,14 +795,20 @@ end
 for i_y =1:y_num
     
     acum_1_inter=0;
-%     for i_p_vol = 1:p_vol_num
+    % The loop over volatility states was commented out. With the intermediate
+    % economy at p_vol_num = 1 that is harmless -- one state, pdf_p_vol(1) = 1 --
+    % but i_p_vol was then whatever an earlier loop left behind, and the term is
+    % still scaled by pdf_p_vol(i_p_vol). At p_vol_num = 5 that returns roughly a
+    % fifth of the expected value and the welfare gain explodes (-930% observed).
+    % Restored; identical when p_vol_num = 1.
+    for i_p_vol = 1:p_vol_num
         acum_2_inter=0;
         for i_p =1:p_num
             acum_2_inter = acum_2_inter + pdf_p_matrix2(i_p_vol,i_p)* v_matrix(i_b_welfare2,i_y,i_p,i_p_vol);
         end
         
         acum_1_inter=acum_1_inter + acum_2_inter * pdf_p_vol(i_p_vol);
-%     end
+    end
     
     value_inter(i_y) = acum_1_inter;
 end
@@ -818,14 +824,14 @@ i_b_welfare_debt2=i_b_mean; % the level of debt at which welfare gains are compu
 for i_y =1:y_num
     
     acum_1_inter_debt=0;
-%     for i_p_vol = 1:p_vol_num
+     for i_p_vol = 1:p_vol_num
         acum_2_inter_debt=0;
         for i_p =1:p_num
             acum_2_inter_debt = acum_2_inter_debt + pdf_p_matrix2(i_p_vol,i_p)* v_matrix(i_b_welfare_debt2,i_y,i_p,i_p_vol);
         end
         
         acum_1_inter_debt=acum_1_inter_debt + acum_2_inter_debt * pdf_p_vol(i_p_vol);
-%     end
+     end
     
     value_inter_debt(i_y) = acum_1_inter_debt;
 end
@@ -863,14 +869,14 @@ end
 for i_y =1:y_num
     
     acum_1_basic=0;
-%     for i_p_vol = 1:p_vol_num
+     for i_p_vol = 1:p_vol_num
         acum_2_basic=0;
         for i_p =1:p_num
             acum_2_basic = acum_2_basic + pdf_p_matrix3(i_p_vol,i_p)* v_matrix(i_b_welfare3,i_y,i_p,i_p_vol);
         end
         
         acum_1_basic=acum_1_basic + acum_2_basic * pdf_p_vol(i_p_vol);
-%     end
+     end
     
     value_basic(i_y) = acum_1_basic;
 end
@@ -886,14 +892,14 @@ i_b_welfare_debt3=i_b_mean; % the level of debt at which welfare gains are compu
 for i_y =1:y_num
     
     acum_1_basic_debt=0;
-%     for i_p_vol = 1:p_vol_num
+     for i_p_vol = 1:p_vol_num
         acum_2_basic_debt=0;
         for i_p =1:p_num
             acum_2_basic_debt = acum_2_basic_debt + pdf_p_matrix3(i_p_vol,i_p)* v_matrix(i_b_welfare_debt3,i_y,i_p,i_p_vol);
         end
         
         acum_1_basic_debt=acum_1_basic_debt + acum_2_basic_debt * pdf_p_vol(i_p_vol);
-%     end
+     end
     
     value_basic_debt(i_y) = acum_1_basic_debt;
 end
