@@ -279,8 +279,22 @@ load oil_bm.mat
 % tail, so the contrast collapses. Defined by RELATIVE position instead, which
 % reduces to exactly 2 and 6 when p_num = 7.
 % Defined HERE, after the clear/reload, so it is never saved into oil_*.mat.
-i_p_low  = max(1,     round(1 + (1/6)*(p_num-1)));
-i_p_high = min(p_num, round(1 + (5/6)*(p_num-1)));
+% CONTRAST_MODE selects how the two prices are chosen:
+%   'fraction' - 16.7% and 83.3% of the grid (reduces to nodes 2 and 6 at p_num=7)
+%   'price'    - the nodes nearest the prices the SUBMITTED figures contrasted,
+%                so the corrected figures differ only because the MODEL changed
+% Read from the environment: a plain variable would not survive the clear all
+% that precedes this block.
+CONTRAST_MODE = getenv('CONTRAST_MODE');
+if isempty(CONTRAST_MODE), CONTRAST_MODE = 'fraction'; end
+if strcmp(CONTRAST_MODE,'price')
+    tgt_lo = 1.0120; tgt_hi = 1.2562;          % submitted vol-3 grid, nodes 2 and 6
+    [~, i_p_low ] = min(abs(exp(p_grid_matrix(:,3)) - tgt_lo));
+    [~, i_p_high] = min(abs(exp(p_grid_matrix(:,3)) - tgt_hi));
+else
+    i_p_low  = max(1,     round(1 + (1/6)*(p_num-1)));
+    i_p_high = min(p_num, round(1 + (5/6)*(p_num-1)));
+end
 fprintf('price-node contrast: low = %d, high = %d of %d  (prices %.4f and %.4f)\n', ...
         i_p_low, i_p_high, p_num, exp(p_grid_matrix(i_p_low,3)), exp(p_grid_matrix(i_p_high,3)));
 %fprintf('DEBUG: After load, spread_matrix size = ['); fprintf('%d ', size(spread_matrix)); fprintf(']\n');

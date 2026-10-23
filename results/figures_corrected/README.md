@@ -1,67 +1,68 @@
 # Figures 2–7 on the corrected model
 
-Regenerated from three economies solved on a **common** price grid (277 nodes, ±3 sd) at
-the **submitted** calibration and elasticity. Your published figures in `model/` are
-untouched; these are a parallel set for comparison.
+Two variants of the same figures, differing only in which two prices the
+"low price" / "high price" contrast uses in Figures 3, 6a and 6b.
 
-| `.mat` | economy | notes |
-|---|---|---|
-| `oil_bm` | full stochastic volatility | |
-| `oil_intermediate` | constant volatility | σ fixed at √E[v] = 0.018555, the benchmark's *average* innovation sd |
-| `oil_basic` | constant price | p fixed at **E[p] = 1.1324**, the mean — not the median 1.1275 (R2 Major 2) |
+| directory | low price | high price | nodes (of 549) |
+|---|---|---|---|
+| `same_prices/` | **1.0119** | **1.2564** | 222, 328 |
+| `same_grid_fraction/` | 0.7760 | 1.6383 | 92, 458 |
 
-All three share one physical price grid and the same average innovation variance, so the
-ladder no longer confounds "less risk" with "cheaper oil".
+The submitted figures contrast **1.0120 and 1.2562** (nodes 2 and 6 of the
+7-node vol-3 grid). So `same_prices/` is the like-for-like set: any visual
+difference from the published figures is the **model**, not a different axis.
+`same_grid_fraction/` keeps the original 16.7% / 83.3% grid positions, which at
+549 nodes span a wider and arguably more representative range.
 
-## What changed versus the published figures
+Switch with the `CONTRAST_MODE` environment variable (`price` or `fraction`,
+default `fraction`).
 
-Every figure differs (mean pixel difference 1.8–7.9). The differences come from the model,
-not the plotting:
+## The model behind them
 
-- **the price index now means the same price in every volatility state.** Previously each
-  state had its own grid, so a volatility shock rescaled the price *level*. This is what
-  made Figure 3's slope ratio a measurement artifact (see `RESPONSE_TO_REFEREES.md` Part B).
-- **two simulation bugs fixed**: all 500 panels previously shared one oil-price path, and
-  default-period consumption was read at the wrong debt index.
-- **the comparison economies are matched** on grid, average risk, and average price level.
+Three economies on a **common** price grid at the **submitted** calibration and
+elasticity (α = 0.3, θ = 0.5, ρ_p = 0.98, mean_p_vol = −4.33, η = 0.44):
 
-Figure 3 changes most (meandiff 7.9), which is expected: it is the figure the grid defect
-most directly affected.
+| `.mat` | economy |
+|---|---|
+| `oil_bm` | full stochastic volatility |
+| `oil_intermediate` | constant volatility, σ = √E[v] = 0.018556 |
+| `oil_basic` | constant price at **E[p] = 1.1324**, the mean, not the median 1.1275 (R2 Major 2) |
 
-## Plotting fixes (all verified output-neutral)
+Grid: 549 nodes spanning ±6 sd, prices **[0.644, 1.973]**. That deliberately
+matches the reach of the submitted per-state grids, **[0.668, 1.902]** — the old
+highest-volatility grid extended to 5.6 unconditional SDs, so a narrower common
+grid would truncate the price range and change every figure for the wrong reason.
+Resolution ratio is 2.0 in the lowest-volatility state.
 
-Two independent checks confirm these are output-neutral: (i) on `submitted-baseline`
-inputs the pipeline reproduces all ten published figures **pixel-identically**; and (ii) on
-an identical corrected-model solve (`p_num = 25`), the original script from the
-`submitted-baseline` tag and the fixed script produce **all ten figures pixel-identically**
-(maxdiff 0.0). The second check is what caught the `value_full` defect noted below.
+## Plotting fixes
 
-1. ASCII `load` replaced by a `textscan` reader. MATLAB's `load` is not the bottleneck it
-   appeared to be (2 s for a 219 MB file), but the reader is kept for robustness.
-2. **Six arrays preallocated** — `spread_matrix`, `spread_matrix_rw`, `yield_long`,
-   `yield_rf`, `yield_rf_new`, `tm_p` were assigned inside a 2.9-million-iteration loop
-   without being created first, so MATLAB grew and copied them on every pass.
-   `value_full` and `value_full_debt` are deliberately **not** preallocated: they are
-   assigned after this workspace is saved and cleared, so creating them early writes zeros
-   into `oil_*.mat`, which reload as `1×y_num` rows and turn the welfare gain into a
-   `y_num×y_num` broadcast of `-Inf`. That corrupted FIGURE7 in an earlier pass.
-3. **`i_matrix` hoisted out of the loop nest.** `i_matrix = 1./q_matrix` plus a
-   logical-indexed NaN assignment — over the whole b×y×p×v array — ran inside the
-   *innermost* loop, i.e. ~8e12 element operations. This was the dominant cost.
-4. **`mean_output1/2/3` made dimension-agnostic** (`mean(X(:))`). The nested-`mean` forms
-   collapsed only as many dimensions as the original economies happened to have.
+Each is verified output-neutral two ways: on `submitted-baseline` inputs the
+pipeline reproduces all ten published figures **pixel-identically**; and on an
+identical corrected solve, the original script from the `submitted-baseline` tag
+and the fixed script agree pixel-identically.
 
-Together these took a single economy from "did not finish in 2.5 hours" to **~25 seconds**.
+1. ASCII `load` replaced by a `textscan` reader.
+2. **Six arrays preallocated** (`spread_matrix`, `spread_matrix_rw`,
+   `yield_long`, `yield_rf`, `yield_rf_new`, `tm_p`) — they were assigned inside
+   a multi-million-iteration loop without being created first.
+   `value_full`/`value_full_debt` are deliberately **not** preallocated: they are
+   assigned after the workspace is saved and cleared, so creating them early
+   wrote zeros into `oil_*.mat`, which reload as rows and turned the welfare gain
+   into a `y_num×y_num` broadcast of `−Inf`.
+3. **`i_matrix` hoisted out of the loop nest** — `1./q_matrix` plus a
+   logical-indexed NaN assignment over the whole array, recomputed on every one
+   of ~2.9M iterations. This was the dominant cost.
+4. **`mean_output1/2/3` made dimension-agnostic** (`mean(X(:))`).
+5. **Three commented-out `for i_p_vol` loops restored** in the welfare blocks.
+   With `p_vol_num = 1` they were harmless; at 5 they returned about a fifth of
+   the intended value and the welfare gain read −930%.
+6. **Price-node contrast made relative to the grid** (see above), defined after
+   the clear/reload so it is never written into `oil_*.mat`.
 
-5. **Price-node indices made relative to the grid.** The "low price" / "high price"
-   contrast used in Figures 3, 6a and 6b (and in `dprice`) was hardcoded to nodes 2 and 6.
-   Those bracket the grid only at `p_num = 7`; at `p_num = 277` they sit at **0.4% and
-   1.8%** of the grid, both deep in the left tail, so the contrast collapses and the
-   low-vs-high comparison becomes meaningless. Now defined by relative position
-   (16.7% and 83.3%), which reduces to exactly 2 and 6 when `p_num = 7` -- verified, the
-   baseline figures stay pixel-identical -- and gives nodes **47 and 231** at `p_num = 277`.
+Together these took a single economy from "did not finish in 2.5 hours" to well
+under a minute of plotting time.
 
-One substantive edit, not output-neutral and documented in the script: FIGURE2's
-intermediate series is indexed `squeeze(spread2(:,11,4,1))`. The corrected
-constant-volatility economy carries `p_vol_num = 5` with all states identical (rather than
-`p_vol_num = 1`), so index 1 is its single volatility level.
+One substantive edit, documented in the script: FIGURE2's intermediate series is
+indexed `squeeze(spread2(:,11,4,1))`, because the corrected constant-volatility
+economy carries `p_vol_num = 5` with all states identical rather than
+`p_vol_num = 1`.
