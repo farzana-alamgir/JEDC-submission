@@ -120,6 +120,21 @@ output_matrix = zeros(b_num,y_num, p_num, p_vol_num);
 
 
 b_next_matrix = zeros(b_num,y_num, p_num, p_vol_num);
+
+% Preallocation. These eight were assigned inside the 4-deep loop below without
+% ever being created first, so MATLAB grew and copied them on every one of the
+% b_num*y_num*p_num*p_vol_num iterations -- O(n^2). Harmless at p_num = 7
+% (73,500 elements); at p_num = 277 (2,908,500) it dominates everything and a
+% single economy takes hours. Preallocating is output-neutral: the loop fills
+% every element, and unfilled entries were zero under growth too.
+spread_matrix    = zeros(b_num, y_num, p_num, p_vol_num);
+spread_matrix_rw = zeros(b_num, y_num, p_num, p_vol_num);
+yield_long       = zeros(b_num, y_num, p_num, p_vol_num);
+yield_rf         = zeros(b_num, y_num, p_num, p_vol_num);
+yield_rf_new     = zeros(b_num, y_num, p_num, p_vol_num);
+tm_p             = zeros(p_num, p_num, p_vol_num);
+value_full       = zeros(1, y_num);
+value_full_debt  = zeros(1, y_num);
 dev_matrix = zeros(b_num,y_num, p_num, p_vol_num);
 q_paid_matrix = zeros(b_num,y_num, p_num, p_vol_num);
 q_def_free_new_matrix = zeros(b_num, y_num,p_num, p_vol_num);

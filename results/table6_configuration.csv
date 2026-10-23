@@ -1,0 +1,19 @@
+item,value
+price nodes (p_num),277
+volatility nodes (p_vol_num),5
+price grid half-width (sd),3.0
+grid common across vol states,yes
+"sd(log p), unconditional",0.162090 (grid)
+price range,"[0.8524, 1.4914]"
+grid spacing,0.002027
+alpha,0.3
+theta,0.5
+elasticity 1/(1-theta),2.0
+rho_p,0.98
+rho_p_vol,0.66
+mean_p_vol,-4.33
+eta,0.44
+mean_p,0.12
+v0 used in the correction,E[v] = 3.44312e-04
+constant-vol economy sd,0.018555 = sqrt(E[v])
+constant-price economy price,"1.132409 = E[p], not the median 1.1275"

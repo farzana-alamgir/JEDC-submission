@@ -1,0 +1,5 @@
+economy,mean_spread_bp,sd_spread_bp,default_rate_pct,mean_debt,mean_price
+full_SV,421.3,226.9,3.4357,6.3704,1.13195
+mean_preserving_SV,377.5,199.9,3.1307,6.4159,1.13215
+constant_volatility,408.7,217.2,3.3909,6.3913,1.13236
+constant_price,391.4,256.8,3.1136,6.5450,1.13241
