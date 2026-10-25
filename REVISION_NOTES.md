@@ -1945,3 +1945,111 @@ Both calibrations are re-solving with the tight tolerance:
 Everything reported before Part 24 carries the 1e-2 oil demand error. The
 decomposition is the most exposed, since it is a +/-20 bp comparison and the
 error is of the same order as several of the channels.
+
+---
+
+## Part 25 — results with the oil-demand error removed
+
+### sigma = 2 (alpha = 0.3, theta = 0.5), corrected volatility, relative 1d-10 bisection
+
+| economy | spread | se | default %/yr | GDP | oil share | debt |
+|---|---|---|---|---|---|---|
+| constant price | 277.6 | 0.72 | 2.197 | 5.6559 | 0.0655 | 6.4860 |
+| constant volatility | 432.2 | 1.15 | 3.364 | 6.2550 | 0.0985 | 6.3786 |
+| mean-preserving | 428.3 | 1.18 | 3.391 | 6.2852 | 0.0993 | 6.3589 |
+| full stochastic volatility | 431.9 | 1.17 | 3.403 | 6.2670 | 0.0988 | 6.3613 |
+
+| channel | tight tol | t | loose tol (1e-2) |
+|---|---|---|---|
+| **oil price risk** (const vol − const price) | **+154.6** | **166.9** | +148.6 |
+| TOTAL time-varying volatility | **−0.3** | **−0.6** | −1.7 |
+| of which dispersion | **−4.0** | −7.6 | **+3.2** |
+| of which mean (Jensen) | **+3.7** | +10.0 | **−4.9** |
+
+**Both sub-channels flip sign when the oil-demand tolerance is tightened.**
+That is the warning in Part 24 realised: these are +/-4 bp effects and the old
+1e-2 absolute tolerance was a 0.6%-2% error in oil demand, comfortably large
+enough to swamp them. They are **not reliably signed by this model** and should
+not be reported with a sign.
+
+What survives every change of discretisation, grid, and tolerance:
+
+- **oil price risk raises mean spreads by about +155 bp (+56%)**, t = 167
+- **the time-varying-volatility channel is zero**: −0.3 bp with se 0.51, i.e.
+  statistically indistinguishable from no effect
+
+### sigma = 0.39 with oil essential (alpha = 0.02) does not converge
+
+Stopped at iteration 189. The value function error oscillates around 0.5 with
+no downward trend:
+
+```
+  t039 (sigma=0.39)   iter  21  41  61  81 101 121 141 161 181
+                      err  .57 .63 .54 .52 .45 .53 .46 .53 .27
+  t2   (sigma=2.00)   iter  21  41  61  81 101 121
+                      err  .088 .038 .016 .0074 .0034 .0020
+```
+
+sigma = 2 converges geometrically; sigma = 0.39 with essential oil does not
+converge at all. The likely cause is the default decision cycling: under strong
+complementarity with a 26% oil share and a price grid reaching p = 10.17, the
+oil bill approaches output in the upper states, so small changes in the value
+function flip the default set, which flips the bond price schedule, which flips
+the value function back.
+
+This is the trilemma from Part 23 appearing as a numerical failure rather than
+an infeasibility: oil essential + complementarity + realistic oil price
+volatility is not merely hard to calibrate, it does not solve.
+
+## Part 26 — the final model numbers
+
+Everything below is sigma = 2, corrected `exp(h/2)` volatility, relative 1d-10
+oil-demand bisection, plain Tauchen, `p_width_sd = 3.5`. Figures in
+`results/figures_final/`, tables in `results/tables_final/`.
+
+**The process matches the data.** Simulated quarterly sd of the log oil price
+is **12.61%** against **14.47%** in `empirical/oil_qtrly.xlsx`.
+
+**Spreads.**
+
+| channel | bp | t |
+|---|---|---|
+| **oil price risk** (constant vol − constant price) | **+154.6** | **166.9** |
+| time-varying volatility (full − constant vol) | −0.3 | −0.6 |
+
+**Simulated regression**, the analog of equation (1):
+
+| | bp per sd | % of a sd of d spread |
+|---|---|---|
+| oil price change | **+16.71** | **+9.54%** |
+| volatility | −0.360 | −0.206% |
+
+**Welfare**, consumption equivalent at mean debt:
+
+| | CEV |
+|---|---|
+| full -> intermediate (remove time-varying volatility) | **+0.0038%** |
+| full -> basic (remove all oil price risk) | **−3.2451%** |
+
+### What the model now says, and it is not the paper's story
+
+1. **Oil price risk matters a great deal for spreads**: +154.6 bp, +56%,
+   t = 167. This is large, precisely estimated and robust to every change of
+   grid, discretisation and tolerance made in this revision.
+2. **Time-varying volatility does not matter for spreads**: −0.3 bp against a
+   standard error of 0.51.
+3. **Removing oil price risk makes the sovereign worse off by 3.2% of
+   consumption**, because output is convex in the oil price at sigma = 2, so
+   price dispersion raises expected output by about 10% (GDP 6.267 with risk
+   against 5.656 without). The borrowing-cost loss is smaller than the output
+   gain.
+
+Point 3 contradicts the paper's headline welfare gain of +1.1%, and it is not a
+numerical artifact: it follows directly from substitutability. At sigma = 2 the
+economy buys cheap oil when prices are low and substitutes away when they are
+high, so it gains from dispersion.
+
+The natural fix -- recalibrate to sigma < 1, where oil is a complement -- is
+**closed**: with oil essential (alpha = 0.02, 26% share) the model does not
+converge (Part 25), and with oil non-essential (alpha = 0.00056) every channel
+is zero because output is just the endowment (Part 22).

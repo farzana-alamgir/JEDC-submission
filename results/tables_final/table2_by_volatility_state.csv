@@ -1,0 +1,11 @@
+economy,vol_state,mean_spread_bp,n_obs
+full_SV,1,436.2,30588
+full_SV,2,434.1,108483
+full_SV,3,431.8,169066
+full_SV,4,429.6,109899
+full_SV,5,427.4,31441
+constant_volatility,1,432.5,89553
+constant_volatility,2,432.6,90044
+constant_volatility,3,433.2,89707
+constant_volatility,4,431.2,90486
+constant_volatility,5,431.3,90229
