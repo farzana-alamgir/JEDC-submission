@@ -1,0 +1,15 @@
+moment,value
+corr(spread; oil price),0.0954855
+corr(spread; oil volatility),-0.0103269
+corr(oil price; oil volatility),0.0137434
+corr(d spread; d log oil price),0.0845515
+corr(d spread; oil volatility),-0.00316688
+OLS d_spread on d_log_oil_price (bp),116.185
+OLS d_spread on oil volatility (bp),-14.6997
+standardised effect of oil price change (bp per sd),14.6407
+standardised effect of volatility (bp per sd),-0.531733
+effect of volatility across its full range (bp),-2.09074
+sd(d spread) bp,173.164
+sd(d log oil price),0.126012
+sd(oil price),0.968048
+mean oil volatility exp(h/2),0.120216

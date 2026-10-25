@@ -42,9 +42,40 @@ parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width 
 ! the lowest grid price above alpha**(1/theta) when theta > 0. See
 ! oil_price_validation/elasticity_sweep.py, column max_price_half_width_sd.
 !---------------------------------------------------------------------
-LOGICAL :: use_common_p_grid, mean_preserving
+!---------------------------------------------------------------------
+! VOLATILITY CONVENTION. The stochvol package parameterises
+!     y_t = exp(h_t/2) * eps_t,
+! so h is the log VARIANCE and the conditional STANDARD DEVIATION is
+! exp(h/2). The submitted code used exp(h) as the standard deviation,
+! which at mean_p_vol = -4.33 gives 1.32% per quarter against 11.47% under
+! exp(h/2). The real oil price in empirical/oil_qtrly.xlsx has a quarterly
+! log-change standard deviation of 14.47% over 1995-2019, so exp(h) makes
+! the model's oil price about 8x too smooth and its most volatile state
+! still 3x below the data's average. Every aggregate below is therefore
+! E[exp(h)] = exp(mu_h + var_h/2), not E[exp(2h)] = exp(2*mu_h + 2*var_h).
+!---------------------------------------------------------------------
+LOGICAL :: use_common_p_grid, mean_preserving, use_moment_matching, constant_vol
 DOUBLE PRECISION :: p_width_sd, p_vol_width_sd
-parameter (use_common_p_grid = .true., mean_preserving = .false., p_width_sd = 6d+0, p_vol_width_sd = 2d+0)
+parameter (use_moment_matching = .true.)
+parameter (constant_vol = .false.)
+!---------------------------------------------------------------------
+! R2 major comment 3. In the submitted model a country in default keeps
+! importing oil at the world price with no friction; the only direct cost of
+! default is the endowment loss. The referee notes that the motivating example
+! (Sri Lanka's difficulty paying for fuel imports ahead of its 2022 default)
+! and the cited literature (Mendoza and Yue 2012, where losing imported inputs
+! is precisely what makes default costly) both suggest oil access should be
+! disrupted in default.
+!
+! Modelled as a proportional premium on the imported oil price while the
+! country is in default or excluded: p_eff = p * (1 + oil_disruption). The
+! country still optimises its oil demand, it just faces a worse price, so the
+! CES first-order condition and func_m are unchanged. oil_disruption = 0
+! reproduces the submitted model exactly.
+!---------------------------------------------------------------------
+DOUBLE PRECISION :: oil_disruption
+parameter (oil_disruption = 0d+0)
+parameter (use_common_p_grid = .true., mean_preserving = .false., p_width_sd = 3.5d+0, p_vol_width_sd = 2d+0)
 
 ! Memo cache for func_m (see the comment in that function).
 DOUBLE PRECISION :: m_cache_y, m_cache_p, m_cache_val
@@ -400,6 +431,122 @@ END FUNCTION normal_cell
 ! Cell edges are midpoints between nodes; the two tails are assigned to the
 ! boundary nodes, as in validate.py's normal_rows.
 !=====================================================================
+!=====================================================================
+! Exponentially tilt a discrete distribution so it matches a target mean and
+! variance EXACTLY, keeping the support fixed.
+!
+! Why this is needed. Tauchen integrates the normal density over fixed grid
+! cells. With rho_p = 0.98 the conditional mean advances by rho of a grid node
+! per node, so it slips (1-rho) of a node each step and realigns with the cell
+! edges every 1/(1-rho) = 50 nodes. The realised conditional moments therefore
+! oscillate: measured on the 549-node grid the conditional mean departs from
+! the exact AR(1) law by up to 1.4e-3 (0.7 of a node) and the conditional sd
+! wobbles by 1.26%, putting an 11-cycle ripple into the bond price schedule.
+!
+! That is not merely cosmetic here. The mean-preserving experiment manipulates
+! the conditional variance directly, so imposing a drift on a kernel whose own
+! variance already wobbles 1.26% makes the experiment exact in intent but not
+! in realisation.
+!
+! Rouwenhorst would match an AR(1) exactly at any rho, but it DETERMINES its
+! own grid, and the whole point of this revision is a grid shared across
+! volatility states. Tilting fixes the moments on an imposed grid instead.
+!
+! Solves for (lam1, lam2) in q_j ~ p_j exp(lam1 z_j + lam2 z_j^2) by Newton.
+! The Jacobian is the covariance matrix of (z, z^2) under q, hence symmetric
+! positive semi-definite, and convergence is quadratic. Returns ok = .false.
+! without modifying p when the targets are not attainable on this support --
+! which happens near the grid edges, where the conditional mean of the
+! underlying process lies outside the grid altogether.
+!=====================================================================
+SUBROUTINE match_moments(n, z, p, m_target, v_target, ok)
+IMPLICIT NONE
+INTEGER, INTENT(IN) :: n
+DOUBLE PRECISION, INTENT(IN) :: z(n), m_target, v_target
+DOUBLE PRECISION, INTENT(INOUT) :: p(n)
+LOGICAL, INTENT(OUT) :: ok
+DOUBLE PRECISION :: lam1, lam2, u(n), q(n), w(n), wmax, sd
+DOUBLE PRECISION :: e1, e2, j11, j12, j22, r1, r2, det, d1, d2, rn, rn_try, step
+DOUBLE PRECISION :: lam1_try, lam2_try, e1_try, e2_try
+INTEGER :: it, ls
+DOUBLE PRECISION, PARAMETER :: tol = 1d-13
+INTEGER, PARAMETER :: maxit = 80
+
+ok = .false.
+if (m_target <= z(1) .or. m_target >= z(n)) return
+if (v_target <= 0d+0) return
+
+! Work in the STANDARDISED variable u = (z - m_target)/sd, matching
+! E[u] = 0 and E[u^2] = 1.
+!
+! The obvious basis (z, z^2) is nearly collinear here: the conditional sd is
+! 0.0132 against a grid spanning 1.12, so over the range carrying any mass
+! z^2 is almost an affine function of z. The Newton Jacobian is then the
+! near-singular covariance matrix of two nearly identical regressors, the
+! steps blow up, the iteration exhausts maxit and silently leaves the row at
+! plain Tauchen -- which is exactly what happened on the first attempt.
+! Standardising makes u and u^2 well separated over the support that matters.
+sd = sqrt(v_target)
+u  = (z - m_target)/sd
+
+lam1 = 0d+0
+lam2 = 0d+0
+e1   = 0d+0
+e2   = 0d+0
+rn   = -1d+0
+do it = 1, maxit
+   if (rn < 0d+0) then                       ! evaluate at the current lambdas
+      w    = lam1*u + lam2*u*u
+      wmax = maxval(w)
+      q    = p*exp(w - wmax)
+      if (sum(q) <= 0d+0) return
+      q  = q/sum(q)
+      e1 = sum(q*u)
+      e2 = sum(q*u*u)
+      rn = abs(e1) + abs(e2 - 1d+0)
+   end if
+   r1 = e1
+   r2 = e2 - 1d+0
+   if (abs(r1) <= tol .and. abs(r2) <= tol) then
+      p  = q
+      ok = .true.
+      return
+   end if
+   j11 = e2 - e1*e1
+   j12 = sum(q*u*u*u)     - e1*e2
+   j22 = sum(q*u*u*u*u)   - e2*e2
+   det = j11*j22 - j12*j12
+   if (abs(det) < 1d-14) return
+   d1 = ( j22*r1 - j12*r2)/det
+   d2 = (-j12*r1 + j11*r2)/det
+   ! Backtracking: the tilt enters an exponential, so a full Newton step can
+   ! collapse all mass onto one node. Accept only a step that reduces the
+   ! residual.
+   step = 1d+0
+   do ls = 1, 40
+      lam1_try = lam1 - step*d1
+      lam2_try = lam2 - step*d2
+      w    = lam1_try*u + lam2_try*u*u
+      wmax = maxval(w)
+      q    = p*exp(w - wmax)
+      if (sum(q) > 0d+0) then
+         q  = q/sum(q)
+         e1_try = sum(q*u)
+         e2_try = sum(q*u*u)
+         rn_try = abs(e1_try) + abs(e2_try - 1d+0)
+         if (rn_try < rn) then
+            lam1 = lam1_try; lam2 = lam2_try
+            e1 = e1_try; e2 = e2_try; rn = rn_try
+            exit
+         end if
+      end if
+      step = 0.5d+0*step
+   end do
+   if (ls > 40) return                        ! no downhill step exists
+end do
+END SUBROUTINE match_moments
+
+
 SUBROUTINE tauchen_fixed(n, z, rho_ar, mu_z, sd_eps, Pi, drift)
 IMPLICIT NONE
 INTEGER, INTENT(IN) :: n
@@ -409,6 +556,8 @@ DOUBLE PRECISION, INTENT(OUT) :: Pi(n,n)
 DOUBLE PRECISION :: drift_use
 INTEGER :: i, j
 DOUBLE PRECISION :: cond_mean, row_sum, edge(n+1)
+LOGICAL :: tilted
+INTEGER :: n_tilt_ok, n_tilt_fail
 DOUBLE PRECISION, PARAMETER :: big = 1d+100   ! finite surrogate for infinity
 
 if (sd_eps <= 0d+0) then
@@ -422,6 +571,8 @@ end if
 
 drift_use = 0d+0
 if (present(drift)) drift_use = drift
+n_tilt_ok   = 0
+n_tilt_fail = 0
 
 edge(1)   = -big
 edge(n+1) =  big
@@ -442,7 +593,25 @@ do i = 1, n
       call exit
    end if
    Pi(i,:) = Pi(i,:)/row_sum
+
+   ! Match the conditional mean and variance exactly. Near the grid edges the
+   ! targets are unattainable on this support; there we keep the plain Tauchen
+   ! row, which is the best available and carries almost no ergodic mass.
+   if (use_moment_matching) then
+      call match_moments(n, z, Pi(i,:), cond_mean, sd_eps*sd_eps, tilted)
+      if (tilted) then
+         n_tilt_ok = n_tilt_ok + 1
+      else
+         n_tilt_fail = n_tilt_fail + 1
+      end if
+   end if
 end do
+
+if (use_moment_matching) then
+   write(*,'(a,f10.6,a,i6,a,i6)') ' tauchen_fixed: sd_eps=', sd_eps, &
+        '  moment matching ok on ', n_tilt_ok, ' of ', n_tilt_ok + n_tilt_fail
+   flush(6)
+end if
 END SUBROUTINE tauchen_fixed
 
 
@@ -607,7 +776,16 @@ function func_m(y_initial,p_initial)
 !DOUBLE PRECISION function func_m(x)
 
 implicit none
-double precision, parameter :: tol_bi=1e-2
+! RELATIVE bisection tolerance. The old value was an ABSOLUTE 1e-2 on both the
+! residual and the bracket width. Oil demand is order 0.5-1.6, so that is a
+! 0.6%-2% error in m, and it propagates into output, consumption, the value
+! function and every spread. It is visible as a staircase in FIGURE4a/4b once
+! the scale makes it large enough (sigma = 0.39, where m ~ 0.52).
+!
+! It must be RELATIVE: the upper bracket expands up to 1d+12 at very low prices,
+! where double precision resolves the bracket only to ~1d+12*2**-52 ~ 2e-4, so a
+! flat absolute 1e-10 would be unreachable and would trip the exit below.
+double precision, parameter :: tol_bi=1d-10
 integer, parameter :: itmax_bi=5000
 !double precision, intent(in):: x1,x2
 double precision, intent(in):: p_initial, y_initial
@@ -666,7 +844,7 @@ iter_bi =0
 ! needs F(mmax) > 0. The fixed mmax_global = 100 is not enough once the price
 ! grid reaches far enough down: at p = 0.118 with A = 13.2 the optimum is near
 ! m = 760. Doubling from mmax_global keeps the bracket tight in ordinary states
-! -- which preserves the precision of the fixed 1e-2 stopping rule -- while
+! -- which keeps the relative stopping rule cheap -- while
 ! still covering the extremes.
 do while (mmax < 1d+12 .and. &
           mmax - ((alpha/exp(p_initial))**(1./(1.-theta))) &
@@ -674,7 +852,8 @@ do while (mmax < 1d+12 .and. &
    mmax = mmax*2d+0
 end do
 
-do while(iter_bi .le. itmax_bi .and. d_bi .ge. tol_bi)
+m_opt=(mmin+mmax)/2.
+do while(iter_bi .le. itmax_bi .and. d_bi .ge. tol_bi*max(1d+0, abs(m_opt)))
 m_opt=(mmin+mmax)/2.
 d_bi= m_opt-((alpha/exp(p_initial))**(1./(1.-theta)))*(alpha*m_opt**theta+(1-alpha)*(A**theta))**(1./theta)
 
@@ -692,7 +871,7 @@ func_m=m_opt
 ! print*, 'm_opt', m_opt
 ! print*, 'd_bi', d_bi
 
-if (d_bi .ge. tol_bi) then
+if (d_bi .ge. tol_bi*max(1d+0, abs(m_opt))) then
 print *, 'iterations exceeded at bisection'
 print*, 'd_bi', d_bi
 print*, 'y_initial', y_initial, ' p_initial', exp(p_initial)
@@ -793,9 +972,31 @@ if(p_vol_num < 2) then
       prob_vector_p_vol = pvv_new
    end do
    prob_vector_p_vol = prob_vector_p_vol/sum(prob_vector_p_vol)
+
+   !------------------------------------------------------------------
+   ! INTERMEDIATE economy: the oil price level still moves, its volatility
+   ! does not. Volatility is held at the level that reproduces the
+   ! UNCONDITIONAL variance of the price innovation in the SV economy,
+   !
+   !     E[exp(2h)] = exp(2*mu_h + 2*var_h)   =>   h_const = mu_h + var_h
+   !
+   ! which is -4.33 + 0.343 = -3.987 at this calibration -- the value the
+   ! existing wrun_cv run uses. Matching the variance rather than the mean of h
+   ! is what makes "full vs intermediate" isolate TIME-VARIATION in volatility
+   ! rather than its level.
+   !------------------------------------------------------------------
+   if (constant_vol) then
+      p_vol_grid         = mean_p_vol + 0.5d+0*sd_log_vol**(2d+0)
+      trans_matrix_p_vol = 1d+0/dble(p_vol_num)
+      prob_vector_p_vol  = 1d+0/dble(p_vol_num)
+      write(*,'(a,f12.6)') ' constant_vol: h held at ', p_vol_grid(1)
+   end if
+
+   if (.not. constant_vol) then
    if (sqrt(variance_p_vol) < 0.5d+0*(p_vol_grid(2)-p_vol_grid(1))) then
       write(*,*) '*** WARNING: p_vol_num too small / p_vol_width_sd too wide:'
       write(*,*) '*** volatility innovation sd is under half a grid cell.'
+   end if
    end if
 
   else
@@ -840,7 +1041,26 @@ close(2)
 !Next, do it for p_level:
 if(p_vol_num < 2) then
    if(p_num < 2) then
-      p_grid = mean_p
+      !------------------------------------------------------------------
+      ! BASIC economy: the oil price is constant. Pin it at the ERGODIC MEAN
+      ! of the SV economy,
+      !
+      !     E[p] = exp( mean_p + 0.5*Var(log p) ),
+      !
+      ! NOT at exp(mean_p). Var(log p) = Var(innovation)/(1 - rho_p^2), with
+      ! the innovation variance evaluated at the variance-matched volatility
+      ! h = mu_h + var_h (the same level the intermediate economy uses).
+      !
+      ! Without this the constant-price economy faces a CHEAPER average oil
+      ! bill than the full model -- exp(0.12) = 1.1275 against E[p] = 1.1324 --
+      ! and the welfare comparison would pick up a lower price level rather
+      ! than the absence of uncertainty. 0.12435 is the value the existing
+      ! wrun_basic run uses.
+      !------------------------------------------------------------------
+      var_log_vol    = (std_u_vol*eta)**(2d+0)/(1d+0 - rho_p_vol**(2d+0))
+      mean_innov_var = std_u_p**(2d+0)*exp(mean_p_vol + 0.5d+0*var_log_vol)
+      p_grid = mean_p + 0.5d+0*mean_innov_var/(1d+0 - rho_p**(2d+0))
+      write(*,'(a,f12.6)') ' basic: log price pinned at ', p_grid(1,1)
       trans_matrix_p = 1d+0
       cdf_matrix_p= 1d+0
       prob_vector_p= 1d+0
@@ -849,7 +1069,9 @@ if(p_vol_num < 2) then
    else
 
       scale_int = exp(0.5d+0 * eta**(2d+0)/(1d+0 - rho_p_vol**(2d+0)))
-      variance_p_innovation = (std_u_p * exp(mean_p_vol) * scale_int)**(2d+0)
+      ! E[exp(h)] under the exp(h/2) convention (see header note)
+      variance_p_innovation = std_u_p**(2d+0) * exp(mean_p_vol &
+           + 0.5d+0*eta**(2d+0)/(1d+0 - rho_p_vol**(2d+0)))
       ! scale_int is the fix for the Jensen's inequality
 
       ! NOTE: previously this called tauchen (filling p_grid(:,1) AND trans_matrix_p(:,:,1))
@@ -882,7 +1104,7 @@ else
       ! so the price index means the same physical price in every state.
       !------------------------------------------------------------------
       var_log_vol        = (std_u_vol*eta)**(2d+0) / (1d+0 - rho_p_vol**(2d+0))
-      mean_innov_var     = exp(2d+0*mean_p_vol + 2d+0*var_log_vol)
+      mean_innov_var     = std_u_p**(2d+0)*exp(mean_p_vol + 0.5d+0*var_log_vol)
       uncond_sd_log_p    = sqrt(mean_innov_var / (1d+0 - rho_p**(2d+0)))
 
       do i = 1, p_num
@@ -898,12 +1120,12 @@ else
          ! conditional mean, so E[p'|p,sigma] stops varying with sigma while the
          ! conditional dispersion still does.
          if (mean_preserving) then
-            mp_drift = -0.5d+0*((std_u_p*exp(p_vol_grid(i)))**2 - mean_innov_var)
+            mp_drift = -0.5d+0*((std_u_p*exp(p_vol_grid(i)/2d+0))**2 - mean_innov_var)
          else
             mp_drift = 0d+0
          end if
          call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
-                            std_u_p*exp(p_vol_grid(i)), trans_matrix_p(:,:,i), mp_drift)
+                            std_u_p*exp(p_vol_grid(i)/2d+0), trans_matrix_p(:,:,i), mp_drift)
          ! Stationary distribution of the price chain conditional on this
          ! volatility state, by power iteration on the kernel.
          prob_vector_p(:, i) = 1d+0/dble(p_num)
@@ -931,15 +1153,15 @@ else
          p_grid_4(:, i) = p_grid_common
          p_grid_5(:, i) = p_grid_common
          call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
-                            std_u_p*exp(p_vol_grid(1)), trans_matrix_p_1(:,:,i))
+                            std_u_p*exp(p_vol_grid(1)/2d+0), trans_matrix_p_1(:,:,i))
          call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
-                            std_u_p*exp(p_vol_grid(2)), trans_matrix_p_2(:,:,i))
+                            std_u_p*exp(p_vol_grid(2)/2d+0), trans_matrix_p_2(:,:,i))
          call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
-                            std_u_p*exp(p_vol_grid(3)), trans_matrix_p_3(:,:,i))
+                            std_u_p*exp(p_vol_grid(3)/2d+0), trans_matrix_p_3(:,:,i))
          call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
-                            std_u_p*exp(p_vol_grid(4)), trans_matrix_p_4(:,:,i))
+                            std_u_p*exp(p_vol_grid(4)/2d+0), trans_matrix_p_4(:,:,i))
          call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
-                            std_u_p*exp(p_vol_grid(5)), trans_matrix_p_5(:,:,i))
+                            std_u_p*exp(p_vol_grid(5)/2d+0), trans_matrix_p_5(:,:,i))
       end do
 
       write(*,*) 'common price grid: sd(log p) =', uncond_sd_log_p, &
@@ -947,7 +1169,7 @@ else
 
       !------------------------------------------------------------------
       ! Resolution check. The grid must span the UNCONDITIONAL range while
-      ! still resolving a one-period move, whose sd is exp(p_vol_grid(k)) and
+      ! still resolving a one-period move, whose sd is exp(p_vol_grid(k)/2d+0) and
       ! is smallest in the lowest volatility state. If the node spacing is not
       ! comfortably below that sd, the conditional distribution collapses onto
       ! a single node and the chain is frozen in low-volatility states -- the
@@ -956,10 +1178,10 @@ else
       grid_spacing = p_grid_common(2) - p_grid_common(1)
       write(*,*) 'grid spacing =', grid_spacing
       do i = 1, p_vol_num
-         write(*,*) '  vol state', i, ' cond sd =', std_u_p*exp(p_vol_grid(i)), &
-                    ' sd/spacing =', std_u_p*exp(p_vol_grid(i))/grid_spacing
+         write(*,*) '  vol state', i, ' cond sd =', std_u_p*exp(p_vol_grid(i)/2d+0), &
+                    ' sd/spacing =', std_u_p*exp(p_vol_grid(i)/2d+0)/grid_spacing
       end do
-      if (std_u_p*exp(p_vol_grid(1)) < 2d+0*grid_spacing) then
+      if (std_u_p*exp(p_vol_grid(1)/2d+0) < 2d+0*grid_spacing) then
          write(*,*) '*** WARNING: p_num too small for this price process.'
          write(*,*) '*** The lowest-volatility conditional sd is under 2 grid cells,'
          write(*,*) '*** so that state cannot move. Raise p_num (the standalone'
@@ -972,11 +1194,11 @@ else
       ! Average innovation variance of the stochastic-volatility process,
       !   v0 = E[exp(2*sigma)] = exp(2*mean_p_vol + 2*Var(sigma)),
       ! used as the reference point for the mean-preserving correction below.
-      v0_innov = exp(2d+0*mean_p_vol &
-                 + 2d+0*(std_u_vol*eta)**(2d+0)/(1d+0 - rho_p_vol**(2d+0)))
+      v0_innov = std_u_p**(2d+0)*exp(mean_p_vol &
+                 + 0.5d+0*(std_u_vol*eta)**(2d+0)/(1d+0 - rho_p_vol**(2d+0)))
 
       do i=1,p_vol_num
-         variance_p_innovation = (std_u_p * exp(p_vol_grid(i)))**(2)
+         variance_p_innovation = (std_u_p * exp(p_vol_grid(i)/2d+0))**(2)
          ! This is ok, because it's the conditional variance of the innovations to epsilon_r in period t, conditional on observing a realization
          ! of the volatility in that period (r_vol_grid(i) .or. \sigma_{r,t} using the model's notation).
 
@@ -1021,7 +1243,7 @@ else
 
  ! vol_grid=1
  do i=1,p_vol_num
-      variance_p_innovation1 = (std_u_p * exp(p_vol_grid(1)))**(2)
+      variance_p_innovation1 = (std_u_p * exp(p_vol_grid(1)/2d+0))**(2)
       ! This is ok, because it's the conditional variance of the innovations to epsilon_r in period t, conditional on observing a realization
       ! of the volatility in that period (r_vol_grid(i) .or. \sigma_{r,t} using the model's notation).
       ! call tauchen(p_num,rho_p, mean_p, variance_p_innovation1, m, p_grid_1(:, i), trans_matrix_p_1(:,:,i))
@@ -1030,7 +1252,7 @@ else
 
  !vol_grid=2
  do i=1,p_vol_num
-      variance_p_innovation2 = (std_u_p * exp(p_vol_grid(2)))**(2)
+      variance_p_innovation2 = (std_u_p * exp(p_vol_grid(2)/2d+0))**(2)
       ! This is ok, because it's the conditional variance of the innovations to epsilon_r in period t, conditional on observing a realization
       ! of the volatility in that period (r_vol_grid(i) .or. \sigma_{r,t} using the model's notation).
       ! call tauchen(p_num,rho_p, mean_p, variance_p_innovation2, m, p_grid_2(:, i), trans_matrix_p_2(:,:,2))
@@ -1039,7 +1261,7 @@ else
 
  !vol_grid=3
 do i=1,p_vol_num
-      variance_p_innovation3 = (std_u_p * exp(p_vol_grid(3)))**(2)
+      variance_p_innovation3 = (std_u_p * exp(p_vol_grid(3)/2d+0))**(2)
       ! This is ok, because it's the conditional variance of the innovations to epsilon_r in period t, conditional on observing a realization
       ! of the volatility in that period (r_vol_grid(i) .or. \sigma_{r,t} using the model's notation).
       ! call tauchen(p_num,rho_p, mean_p, variance_p_innovation3, m, p_grid_3(:, i), trans_matrix_p_3(:,:,3))
@@ -1048,7 +1270,7 @@ do i=1,p_vol_num
 
 !vol_grid=4
 do i=1,p_vol_num
-      variance_p_innovation4 = (std_u_p * exp(p_vol_grid(4)))**(2)
+      variance_p_innovation4 = (std_u_p * exp(p_vol_grid(4)/2d+0))**(2)
       ! This is ok, because it's the conditional variance of the innovations to epsilon_r in period t, conditional on observing a realization
       ! of the volatility in that period (r_vol_grid(i) .or. \sigma_{r,t} using the model's notation).
        !call tauchen(p_num,rho_p, mean_p, variance_p_innovation4, m, p_grid_4(:, i), trans_matrix_p_4(:,:,4))
@@ -1057,7 +1279,7 @@ do i=1,p_vol_num
 
  !vol_grid=5
  do i=1,p_vol_num
-      variance_p_innovation5 = (std_u_p * exp(p_vol_grid(5)))**(2)
+      variance_p_innovation5 = (std_u_p * exp(p_vol_grid(5)/2d+0))**(2)
       ! This is ok, because it's the conditional variance of the innovations to epsilon_r in period t, conditional on observing a realization
       ! of the volatility in that period (r_vol_grid(i) .or. \sigma_{r,t} using the model's notation).
       ! call tauchen(p_num,rho_p, mean_p, variance_p_innovation5, m, p_grid_5(:, i), trans_matrix_p_5(:,:,5))
@@ -1397,7 +1619,7 @@ DOUBLE PRECISION function objective_function(b)
 USE param
 DOUBLE PRECISION, INTENT(IN) :: b
 INTEGER :: d
-DOUBLE PRECISION ::exp_v_next, exp_v_excl, q, output, consumption, oil_spending,TFP
+DOUBLE PRECISION ::exp_v_next, exp_v_excl, q, output, consumption, oil_spending,TFP, p_eff
 DOUBLE PRECISION, EXTERNAL:: u_fun, q_fun
 
 exp_v_next = exp_v_vector(i_b_next)      !0d+0
@@ -1411,11 +1633,13 @@ q = q_vector(i_b_next)
           default_grid(i_excl_global) * scale_y*(EXP(y_initial)  - max(zero, d0*EXP(y_initial) + d1*EXP(y_initial)**2))
          ! print*,'TFP_objective', TFP
 !oil_spending= TFP*(alpha/exp(p_initial))**(1/(1-alpha))
-oil_spending=func_m(y_initial,p_initial)
+! oil is disrupted exactly when the endowment loss applies, i.e. in default
+p_eff = p_initial + default_grid(i_excl_global)*log(1d+0 + oil_disruption)
+oil_spending=func_m(y_initial,p_eff)
 !print*, 'oil_spending', oil_spending
 output=((1-alpha)*TFP**theta+alpha*oil_spending**theta)**(1./theta)
 
-consumption=output-oil_spending*exp(p_initial)-(b_initial *coupon - q * (b-(1d+0 - delta)*b_initial) )*(1-default_grid(i_excl_global))
+consumption=output-oil_spending*exp(p_eff)-(b_initial *coupon - q * (b-(1d+0 - delta)*b_initial) )*(1-default_grid(i_excl_global))
 
 
 objective_function = u_fun(consumption) + beta * &
@@ -1505,10 +1729,10 @@ do i_p_vol = 1,p_vol_num
             v1_matrix_new(i_y, i_p, i_p_vol) = objective_function(b_next)
 
             TFP1_matrix(i_y, i_p, i_p_vol)= scale_y*(EXP(y_initial)  - max(zero, d0*EXP(y_initial) + d1*EXP(y_initial)**2))
-            oil1_matrix(i_y, i_p, i_p_vol)=func_m(y_initial,p_initial)
+            oil1_matrix(i_y, i_p, i_p_vol)=func_m(y_initial,p_initial+log(1d+0+oil_disruption))
             output1_matrix(i_y, i_p, i_p_vol)=(((1.-alpha)*TFP1_matrix(i_y, i_p, i_p_vol)**theta)+(alpha*oil1_matrix(i_y, i_p, i_p_vol)**theta))**(1./theta)
 
-            c1_matrix(i_y, i_p, i_p_vol) = output1_matrix(i_y, i_p, i_p_vol)-EXP(p_initial)*oil1_matrix(i_y, i_p, i_p_vol)
+            c1_matrix(i_y, i_p, i_p_vol) = output1_matrix(i_y, i_p, i_p_vol)-EXP(p_initial+log(1d+0+oil_disruption))*oil1_matrix(i_y, i_p, i_p_vol)
 
          q_def_free_paid_matrix_new(i_y, i_p, i_p_vol) = q_def_free_fun(i_y,i_p,i_p_vol)
 
@@ -1810,12 +2034,12 @@ do i_p_vol = 1,p_vol_num
             print*,'i_y', i_y
         TFP1(i_y,i_p,i_p_vol)=scale_y*(EXP(y_initial)  - max(zero, d0*EXP(y_initial) + d1*EXP(y_initial)**2))
         !print*, 'TFP1(i_y,i_p,i_p_vol)', TFP1(i_y,i_p,i_p_vol)
-        m1(i_y,i_p,i_p_vol)=func_m(y_initial,p_initial)
+        m1(i_y,i_p,i_p_vol)=func_m(y_initial,p_initial+log(1d+0+oil_disruption))
        !m1(i_y,i_p,i_p_vol)=0d+0
         !print*, 'm1(i_y,i_p,i_p_vol)',m1(i_y,i_p,i_p_vol)
        !v1_matrix(i_y,i_p,i_p_vol) = u_fun((alpha**(alpha-(1/(1-alpha))))*(alpha*TFP1(i_y,i_p,i_p_vol)/(exp(p_initial)**alpha))**(1./(1-alpha)))
        v1_matrix(i_y,i_p,i_p_vol)=u_fun(((1-alpha)*TFP1(i_y,i_p,i_p_vol)**theta+alpha*m1(i_y,i_p,i_p_vol)**theta)**(1./theta)-&
-       m1(i_y,i_p,i_p_vol)*exp(p_initial))
+       m1(i_y,i_p,i_p_vol)*exp(p_initial+log(1d+0+oil_disruption)))
             q_def_free_paid_matrix(i_y,i_p,i_p_vol) = 0d+0
 
             do i_b = 1,b_num

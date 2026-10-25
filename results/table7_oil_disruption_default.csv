@@ -1,0 +1,7 @@
+# R2 major comment 3: oil access disrupted during default (25% import premium).
+# Plain Tauchen, same kernel as the reported decomposition. Debt is the mean over
+# all simulated periods with no burn-in, the convention used in Tables 1 and 3.
+economy,mean_spread_bp,se_bp,default_rate_pct,mean_debt
+benchmark (oil unaffected by default),410.9,0.84,0.864,6.3808
+oil disrupted in default (25% premium),394.8,0.84,0.826,7.4505
+difference,-16.1,0.44,-0.038,+1.0697

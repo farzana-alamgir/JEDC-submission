@@ -1,0 +1,16 @@
+# R2 minor comment 2: oil-related moments of the simulated full-SV economy.
+# Good standing only, burn-in 500 of each 1500-period sample, n = 444558.
+moment,value
+corr(spread; oil price),-0.0129
+corr(spread; oil volatility),-0.0039
+corr(oil price; oil volatility),0.0013
+corr(d spread; d log oil price),0.0044
+corr(d spread; oil volatility),-0.0004
+OLS d_spread on d_log_oil_price (bp),36.41
+OLS d_spread on oil volatility (bp),-5.70
+standardised effect of oil price change (bp per sd),0.678
+standardised effect of volatility (bp per sd),-0.055
+effect of volatility across its full range (bp),-0.219
+sd(d spread) bp,155.014
+sd(oil price),0.1077
+mean oil volatility exp(h),0.01576
