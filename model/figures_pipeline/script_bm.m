@@ -312,12 +312,84 @@ dy1 =0.25*b_grid/mean(scale_y*exp(y_grid));
 y1=scale_y*exp(y_grid);
 spread1=spread_matrix;
 %fprintf('DEBUG: After assignment, spread1 size = ['); fprintf('%d ', size(spread1)); fprintf(']\n');
-mean_output1=mean(output_matrix(:));   % dimension-agnostic; identical to the nested means
+% ---- CES feasibility mask (per-state grid) ---------------------------------
+% The highest-volatility per-state grid is built from that state's volatility
+% treated as PERMANENT: half-width sqrt(p_num-1)*sd_k/sqrt(1-rho_p^2), which
+% for state 5 reaches down to p = 0.0892. That is below the CES feasibility
+% floor alpha^(1/theta) = 0.3^2 = 0.09 documented in oil_prod_CES.f90, so the
+% oil optimum there is not interior and output diverges: 7.7e10 at
+% (i_p=1,i_vol=5) against a maximum of 29.2 over every other node.
+%
+% The solved VALUE function is unaffected -- CRRA at sigma=2 gives u(c) = -1/c,
+% bounded above by zero, so unbounded consumption adds nothing and max|V| moves
+% only 5.409 -> 5.431 across volatility states. But any MEAN of output is
+% destroyed: including that node puts mean output at 2.9e8 and collapses the
+% Debt/GDP axis of FIGURE2 onto zero, which is why the Full Model line
+% disappeared. Mask the infeasible nodes before averaging.
+feas_node = squeeze(max(max(output_matrix,[],1),[],2)) < 1d3;   % p_num x p_vol_num
+if ~all(feas_node(:))
+    [bi,bj] = find(~feas_node);
+    fprintf('feasibility mask: dropping %d of %d price nodes:', ...
+            numel(bi), numel(feas_node));
+    for q = 1:numel(bi)
+        fprintf(' (i_p=%d,i_vol=%d,p=%.4f)', bi(q), bj(q), exp(p_grid_matrix(bi(q),bj(q))));
+    end
+    fprintf('\n');
+end
+O__ = reshape(output_matrix, size(output_matrix,1), size(output_matrix,2), []);
+O__(:,:,~feas_node(:)) = NaN;
+mean_output1 = mean(O__(:),'omitnan');
+fprintf('mean output: %.4f (masked)  vs %.4e (unmasked)\n', ...
+        mean_output1, mean(output_matrix(:)));
 debt_output1=0.25*b_grid./mean_output1;
 consumption1=cons_matrix;
 value1=v_matrix;
 output1=output_matrix;
 dprice_matrix_3=exp(p_grid_3_matrix(i_p_high,:))-exp(p_grid_3_matrix(i_p_low,:));
+
+% ---- matched-price contrast (per-state grid fix) --------------------------
+% With use_common_p_grid=.false. the model solves on a SEPARATE Rouwenhorst
+% grid per volatility state: p_grid_matrix(:,k) is symmetric in logs about
+% mean_p with half-width sqrt(p_num-1)*sd_k, so its width scales with the
+% state's volatility. Every state shares only the central node exp(mean_p).
+%
+% A FIXED price INDEX therefore denotes a different price in each state. The
+% submitted Figures 3 and 5 differenced spreads at indices i_p_low/i_p_high
+% and divided by state 3's price interval for every state, so a state whose
+% grid is wider contributed a larger numerator over an unchanged denominator.
+% Here the node2->node6 interval runs 1.237 (state 1) to 5.911 (state 5); the
+% state4/state2 ratio alone is 2.13, which accounts for most of the reported
+% 3x state dependence. The slope was a grid artifact, not a model property.
+%
+% Fix: choose ONE physical price pair and interpolate each state's spread
+% schedule onto it, so numerator and denominator refer to the same price
+% change in every state. The pair must lie in the common support of all
+% states, i.e. inside the NARROWEST (lowest-volatility) grid.
+p_lo_common = max(exp(p_grid_matrix(1,       :)));   % highest per-state floor
+p_hi_common = min(exp(p_grid_matrix(p_num,   :)));   % lowest  per-state ceiling
+if strcmp(CONTRAST_MODE,'price')
+    p_lo_tgt = 1.0120;  p_hi_tgt = 1.2562;           % the submitted contrast
+else
+    % Rouwenhorst is symmetric in logs about the process mean, so for odd
+    % p_num the central node equals exp(mean_p) in EVERY state -- the one
+    % price all five grids share. Read it off the grid rather than
+    % re-deriving mean_p, which this script never loads.
+    p_mid    = exp(p_grid_matrix(ceil(p_num/2), 3));
+    p_lo_tgt = 0.90*p_mid;  p_hi_tgt = 1.10*p_mid;    % local +/-10% contrast
+end
+p_lo_tgt = max(p_lo_tgt, p_lo_common);
+p_hi_tgt = min(p_hi_tgt, p_hi_common);
+dprice_matched = p_hi_tgt - p_lo_tgt;
+fprintf(['matched-price contrast: %.4f -> %.4f (dp=%.4f); ' ...
+         'common support [%.4f, %.4f]\n'], ...
+        p_lo_tgt, p_hi_tgt, dprice_matched, p_lo_common, p_hi_common);
+
+% slope_at_matched_prices(S4, i_b, i_vol) returns a 1 x y_num row of
+% d(spread)/d(price) at the matched pair, interpolated on state i_vol's grid.
+slope_at_matched_prices = @(S4, i_b, i_vol) ( ...
+      interp1(exp(p_grid_matrix(:,i_vol)), squeeze(S4(i_b,:,:,i_vol)).', p_hi_tgt, 'linear') ...
+    - interp1(exp(p_grid_matrix(:,i_vol)), squeeze(S4(i_b,:,:,i_vol)).', p_lo_tgt, 'linear') ...
+    ) ./ dprice_matched;
 dvol_matrix=exp(p_vol_grid(4)/2)-exp(p_vol_grid(3)/2);
 pdf_p_matrix1 = zeros(p_vol_num,p_num); %will have r across the columns, and r_vol as the different rows
 
@@ -386,7 +458,10 @@ i_b3 = 44;
 
 % Extract output values
 y_num = size(output_matrix, 2);
-output_y_values = squeeze(output_matrix(i_b3, :, pidx(2), 3));
+% x-axis output is evaluated at the price the slope is measured AROUND (the
+% shared central node), not at pidx(2). Same issue as FIGURE2/FIGURE5: with
+% the old index the abscissa was output at a price the slope never used.
+output_y_values = squeeze(output_matrix(i_b3, :, ceil(p_num/2), 3));
 
 % Compute slopes for vol states 2, 3, 4
 vol_states = [2, 3, 4];
@@ -394,13 +469,13 @@ slopes_all = zeros(y_num, 3);
 
 for vol_idx = 1:3
     i_vol = vol_states(vol_idx);
-    
-    % Spreads at low price (p=2) and high price (p=6)
-    spread_p2 = squeeze(spread_matrix(i_b3, :, i_p_low, i_vol));
-    spread_p6 = squeeze(spread_matrix(i_b3, :, i_p_high, i_vol));
-    
-    % Simple slope: ∆Spread / ∆Price
-    slopes_all(:, vol_idx) = (spread_p6 - spread_p2) ./ dprice;
+
+    % Matched-price slope. The old code took spread_matrix at the FIXED
+    % indices i_p_low/i_p_high and divided by `dprice`, state 3's interval,
+    % for all three states -- see the note at dprice_matched above. Each
+    % state's grid has a different width, so that compared unequal price
+    % changes and manufactured state dependence from the grid.
+    slopes_all(:, vol_idx) = slope_at_matched_prices(spread_matrix, i_b3, i_vol).';
 end
 
 figure('Position', [100, 100, 800, 600]);
@@ -475,10 +550,11 @@ output_vals = cell(1, 3);
 for d_idx = 1:3
     i_b = debt_indices(d_idx);
     
-    spread_p2 = squeeze(spread_matrix(i_b, :, i_p_low, i_vol));
-    spread_p6 = squeeze(spread_matrix(i_b, :, i_p_high, i_vol));
-    
-    slopes_debt(:, d_idx) = (spread_p6 - spread_p2) ./ dprice;
+    % Matched-price slope, same fix as FIGURE3. Here the volatility state is
+    % held at 3 and debt varies, so the old fixed-index version was internally
+    % consistent -- but it still measured a chord over state 3's full
+    % node2->node6 span (2.45 in price) rather than a local derivative.
+    slopes_debt(:, d_idx) = slope_at_matched_prices(spread_matrix, i_b, i_vol).';
     % pidx(4): index 4 was a mid-grid price on the submitted 7-node grid; on
     % 549 nodes it is p ~ 0.645, near the floor, so the x-axis was output at
     % a price the slope was never measured at. Same bug as FIGURE2.

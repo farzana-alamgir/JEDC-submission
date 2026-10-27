@@ -2,3 +2,16 @@
 *.kate-swp
 # Per-run simulation dumps (~160MB each, regenerable; exceed GitHub's 100MB limit)
 graphs_data_sim_dss.txt
+
+# Solved run directories (regenerable; 1.2GB at p_num=7, far more at 549).
+# Rebuild with model/figures_pipeline/run_all_optionA.sh after re-solving.
+model/runs_optionA/
+
+# Staging copies the figures pipeline makes from a run directory, plus the
+# MATLAB workspaces and logs it writes there. All regenerable.
+model/figures_pipeline/graphs_*.txt
+model/figures_pipeline/p_grid.txt
+model/figures_pipeline/p_vol_grid.txt
+model/figures_pipeline/*.mat
+model/figures_pipeline/ml_*.log
+model/figures_pipeline/FIGURE*.jpg

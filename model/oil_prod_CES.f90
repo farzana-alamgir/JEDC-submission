@@ -103,7 +103,7 @@ parameter (oil_disruption = 0d+0)
 !---------------------------------------------------------------------
 DOUBLE PRECISION :: kappa_risk
 parameter (kappa_risk = 0d+0)
-parameter (use_common_p_grid = .true., mean_preserving = .false., p_width_sd = 3.5d+0, p_vol_width_sd = 2d+0)
+parameter (use_common_p_grid = .false., mean_preserving = .false., p_width_sd = 3.5d+0, p_vol_width_sd = 2d+0)
 
 ! Memo cache for func_m (see the comment in that function).
 DOUBLE PRECISION :: m_cache_y, m_cache_p, m_cache_val
@@ -122,7 +122,7 @@ INTEGER :: b_num, y_num, quad_num, nout, i_y_global, i_excl_global, p_num, p_vol
      i_b_global, i_default_global, indicator_2, i_b_next, i_b_zero, b_num_interm, counter
 
 
-parameter (b_num= 100, y_num = 21, p_num=549, p_vol_num=5)
+parameter (b_num= 100, y_num = 21, p_num=7, p_vol_num=5)
 ! parameter (b_num= 200, y_num = 50)
 
 DOUBLE PRECISION :: b_grid(1:b_num), y_grid(1:y_num), default_grid(1:2), &
@@ -1051,6 +1051,26 @@ if(p_vol_num < 2) then
     call tauchen(p_vol_num,rho_p_vol, mean_p_vol, variance_p_vol,m, p_vol_grid, trans_matrix_p_vol)
 
    call discretize_AR(rho_p_vol, mean_p_vol , variance_p_vol, p_vol_grid, trans_matrix_p_vol_AR, prob_vector_p_vol)
+
+   !------------------------------------------------------------------
+   ! constant_vol on the PER-STATE grid path.
+   !
+   ! The constant_vol override above sits inside the use_common_p_grid
+   ! branch, so with use_common_p_grid = .false. it never executed and the
+   ! intermediate economy silently solved with FULL stochastic volatility --
+   ! identical to the benchmark on every moment. Same level as the common-grid
+   ! branch: h pinned at mu_h + var_h/2, which reproduces the UNCONDITIONAL
+   ! variance of the price innovation, E[exp(h)] = exp(mu_h + var_h/2), so
+   ! "full vs intermediate" isolates TIME-VARIATION in volatility rather
+   ! than its level.
+   !------------------------------------------------------------------
+   if (constant_vol) then
+      sd_log_vol         = sqrt(variance_p_vol/(1d+0 - rho_p_vol**(2d+0)))
+      p_vol_grid         = mean_p_vol + 0.5d+0*sd_log_vol**(2d+0)
+      trans_matrix_p_vol = 1d+0/dble(p_vol_num)
+      prob_vector_p_vol  = 1d+0/dble(p_vol_num)
+      write(*,'(a,f12.6)') ' constant_vol (per-state grid): h held at ', p_vol_grid(1)
+   end if
   end if
 
    do i=1,p_vol_num
@@ -2440,8 +2460,8 @@ do j=1,sample_num   !SOLVE FOR SAMPLE j
       end if
 
       !                  1         2         3         4         5        6       7          8        9                                 10     11         12       13
-        WRITE(23, '(F12.8, X, F12.8, X, F12.8, X, F12.8, X, F12.8, X, F12.8, X,  I3, X, &
-    I3, X, F12.8, X,  I3, X, F12.8, X, F12.8, X, F12.8, X, F12.8, X, F12.8, X, F12.8, X, I3, X, I3, F12.8, X, F12.8 )') &
+        WRITE(23, '(F20.8, X, F20.8, X, F20.8, X, F20.8, X, F20.8, X, F20.8, X,  I3, X, &
+    I3, X, F20.8, X,  I3, X, F20.8, X, F20.8, X, F20.8, X, F20.8, X, F20.8, X, F20.8, X, I3, X, I3, F20.8, X, F20.8 )') &
  !        1      2       3       4       5     6                             8
       y(i,j), c(i,j), b(i,j), q(i,j), qdef, oil(i,j), &
       !  7       8      9                     10          11                        12            13                14        15

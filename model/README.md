@@ -15,6 +15,40 @@ switches, not separate forks, so they cannot drift apart.
 | `kappa_risk` | `0d+0` | price of risk on the oil price innovation (R1 major 5). `0` reproduces risk-neutral pricing exactly. |
 | `use_moment_matching` | `.false.` | tilts the Tauchen rows to match the conditional mean and variance exactly. **Not used in any reported result.** |
 | `p_width_sd` | `3.5d+0` | half-width of the common price grid in unconditional sd of log p. |
+| `use_common_p_grid` | `.false.` | `.false.` = the submitted construction: one Rouwenhorst grid **per volatility state**, usable at `p_num = 7`. `.true.` = one physical grid shared by all states, which needs `p_num` in the hundreds. See "Which grid" below. |
+
+### Which grid
+
+`discretize_AR` is **Rouwenhorst**, exact in mean, variance and autocorrelation
+for any `n >= 2` — including at `rho_p = 0.98`, where Tauchen loses variance.
+Seven nodes per state were never too few to represent each state's process.
+
+| | per-state, `p_num=7` | common, `p_num=549` |
+|---|---|---|
+| solve time per economy | **26 s** | ~45 min |
+| sd(Δlog p) simulated (data 14.47%) | **14.63%** | 12.61% |
+| mean spread (target 4.1) | **4.21** | 4.02 |
+| debt/GDP (target 34.0) | 42.7 | **33.5** |
+| Figure 3 slope ratio | not identified | **1.03** |
+
+Use the per-state grid for the price process and the moments; it cannot
+identify the Figure 3 slope ratio (see `analysis/fig3_resolution_test.m`).
+Full comparison in `results/SUMMARY_OPTION_A.md`.
+
+**Two traps on the per-state path**, both fixed but worth knowing:
+
+1. `constant_vol` used to sit inside the `use_common_p_grid` branch, so on the
+   per-state path it silently did nothing and the intermediate economy solved
+   with full stochastic volatility — identical to the benchmark on every
+   moment. The override is now applied in both branches.
+2. State 5's grid is built from that state's volatility treated as *permanent*
+   (`sd_k/sqrt(1-rho_p^2)`), which stretches its lowest node to `p = 0.0892` —
+   **below** the CES feasibility floor `alpha**(1/theta) = 0.09`. Output there
+   is 7.7e10 against 29.2 everywhere else. The *solution* is unharmed (CRRA
+   `sigma=2` has `u(c) = -1/c`, bounded above, so `max|V|` moves 5.409→5.431),
+   but every **mean of output** must mask that node or the Debt/GDP axis
+   collapses onto zero. `script_bm.m` and `check_claims_optionA.m` mask it;
+   31 of 750,000 simulated rows are NaN-ed.
 
 The **constant-price** (basic) economy is `constant_vol = .true.` with
 `p_num = 1, p_vol_num = 1`; the single node is placed at the ergodic mean
@@ -26,7 +60,8 @@ The **constant-price** (basic) economy is `constant_vol = .true.` with
 `delta = 0.03`, `rstar = 0.01`, `rho = 0.9`, `scale_y = 10`,
 `d0 = -0.246`, **`d1 = 0.3847`**, `rho_p = 0.98`, `mean_p = 0.12`,
 `rho_p_vol = 0.66`, `mean_p_vol = -4.33`, `eta = 0.44`,
-`b_num = 100`, `y_num = 21`, `p_num = 549`, `p_vol_num = 5`.
+`b_num = 100`, `y_num = 21`, **`p_num = 7`**, `p_vol_num = 5`,
+`use_common_p_grid = .false.`.
 
 `d1` is the only parameter changed from the submitted version (0.37 → 0.3847,
 a 4% rise in the quadratic default cost). It improves all four targeted moments;
@@ -47,8 +82,14 @@ see `results/SUMMARY.md` §4 for the sensitivity this introduces.
    `alpha = 0.30000001192`, `beta = 0.95999997854`, `mean_p_vol = -4.32999992`.
 4. **Legacy grid blocks** no longer overwrite the common price grid.
 
+5. **Simulation output format** widened from `F12.8` to `F20.8`: at the wide
+   per-state grids the oil bill overflowed the field and wrote `************`,
+   which MATLAB's `load` cannot parse.
+
 Build: `gfortran -O3 -march=native -o solver oil_prod_CES.f90`. One economy
-takes roughly 45 minutes at `p_num = 549`.
+takes **26 seconds** at `p_num = 7`, roughly 45 minutes at `p_num = 549`.
+`model/runs_optionA/` holds the five solved runs and `run_all_optionA.sh`
+drives the figures from them.
 
 ---
 
@@ -97,6 +138,13 @@ Scripts behind `results/SUMMARY.md`. Run from a directory holding
 | `welfare.m` | consumption-equivalent welfare |
 | `draw_claims_figure.m` | `results/FIGURE_claims_check.jpg` |
 | `draw_debt_sweep.m` | `results/FIGURE_debt_sweep.jpg` |
+| `check_claims_optionA.m` | the four claims on the **per-state** grid: matched prices + feasibility mask |
+| `fig3_matched_vs_index.m` | Figure 3 slope, fixed-index vs matched-price side by side |
+| `fig3_resolution_test.m` | shows the slope ratio is *not identified* at `p_num = 7` |
+
+On the per-state grid, use `check_claims_optionA.m`: `check_claims.m` indexes
+`spread_matrix(:,:,iHi,k)` with the same `iHi` in every volatility state, which
+is a different physical price in each, and its `gdpm` is unmasked.
 
 **Measure slopes over a local price contrast.** `check_claims.m` uses ±10%
 around the ergodic median. Using a wide contrast — grid fractions, or ergodic
