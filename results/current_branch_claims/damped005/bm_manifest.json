@@ -1,0 +1,19 @@
+{
+  "economy": "bm",
+  "source_sha256": "4c6ffdd79d2b7a7cda32670b0e6641fefff1a824cd75d36e228c927dd476f9ff",
+  "commit": "0f27ce0482f3bb14a31cdd9de86cc528af761a29",
+  "tolerance": 1e-06,
+  "max_iterations": 300,
+  "warm_start": "/Users/farzanaalamgir/code/JEDC_submission/results/current_branch_claims/raw/bm",
+  "price_update_relaxation": 0.05,
+  "changed_equations": false,
+  "mean_preserving": false,
+  "algebraic_blas_acceleration": true,
+  "compiler_flags": [
+    "-O3",
+    "-march=native",
+    "-ffree-line-length-none",
+    "-framework",
+    "Accelerate"
+  ]
+}

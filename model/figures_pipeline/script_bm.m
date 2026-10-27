@@ -318,7 +318,7 @@ consumption1=cons_matrix;
 value1=v_matrix;
 output1=output_matrix;
 dprice_matrix_3=exp(p_grid_3_matrix(i_p_high,:))-exp(p_grid_3_matrix(i_p_low,:));
-dvol_matrix=exp(p_vol_grid(4))-exp(p_vol_grid(3));
+dvol_matrix=exp(p_vol_grid(4)/2)-exp(p_vol_grid(3)/2);
 pdf_p_matrix1 = zeros(p_vol_num,p_num); %will have r across the columns, and r_vol as the different rows
 
 for i_p_vol = 1:p_vol_num
@@ -427,7 +427,8 @@ legend boxoff;
 
 % Axis settings
 set(gca, 'FontSize', 14, 'LineWidth', 1.2, 'Box', 'on');
-xlim([5.5, 8]);
+% output range depends on the price grid; autoscale instead of [5.5,8]
+xo = output_y_values(isfinite(output_y_values)); xlim([min(xo) max(xo)]);
 % ylim 0..0.09 is the submitted figure's scale, set when the slopes ran
 % 0.002-0.092. Under the narrow ('price') contrast the slopes are an order of
 % magnitude smaller away from the default boundary -- 0.0007 to 0.004 -- so
@@ -509,7 +510,9 @@ legend boxoff;
 
 % Axis settings
 set(gca, 'FontSize', 14, 'LineWidth', 1.2, 'Box', 'on');
-xlim([5.5, 8]);
+% FIGURE5: output range moves with the price grid; autoscale
+xo5 = cell2mat(cellfun(@(v) v(isfinite(v)), output_vals, 'UniformOutput', false));
+xlim([min(xo5) max(xo5)]);
 ylim([-0.02, 0.35]);
 
 % Tight layout
@@ -814,10 +817,25 @@ exp_prices = zeros(7, p_vol_num);
 %      on p_grid_matrices{i_vol} (today's volatility state's grid). Under the
 %      common grid the two coincide, so this changes nothing here, but it is
 %      the correct expectation and it matters on a per-state grid.
-for i_p = [5 6 7]
+% Price nodes anchored to the ERGODIC distribution, not to relative grid
+% position. pidx() preserves position on the grid, which was fine when the
+% grid spanned p in [0.64, 1.97] but picks p = 2.3 / 4.8 / 10.2 on the wider
+% grid the corrected volatility requires -- absurd as "low/mean/high price"
+% when the mean price is about 1.37.
+pdf_p_erg = zeros(p_num,1);
+for i_pv = 1:p_vol_num
+    pdf_p_erg = pdf_p_erg + pdf_p((i_pv-1)*p_num + (1:p_num))';
+end
+pdf_p_erg = pdf_p_erg / sum(pdf_p_erg);
+cdf_p_erg = cumsum(pdf_p_erg);
+node_at = @(tgt) find(cdf_p_erg >= tgt, 1, 'first');
+sel = [node_at(0.10) node_at(0.50) node_at(0.90)];   % low / mean / high price
+fprintf('FIGURE4d price nodes (ergodic p10/p50/p90): %.4f %.4f %.4f\n', ...
+        exp(p_grid_matrix(sel(1),3)), exp(p_grid_matrix(sel(2),3)), exp(p_grid_matrix(sel(3),3)));
+for kk = 1:3
     for i_vol = 1:p_vol_num
-        expectation = transition_matrix_joint(:, :, pidx(i_p), i_vol) .* exp(p_grid_matrix);
-        exp_prices(i_p, i_vol) = sum(expectation, 'all');
+        expectation = transition_matrix_joint(:, :, sel(kk), i_vol) .* exp(p_grid_matrix);
+        exp_prices(4+kk, i_vol) = sum(expectation, 'all');
     end
 end
 
@@ -835,7 +853,9 @@ color_mean = [0.2, 0.4, 0.8];    % Blue
 color_high = [0.2, 0.7, 0.3];    % Green
 
 % Volatility values for x-axis
-volatility = exp(p_vol_grid);
+% exp(h/2): h is the log VARIANCE (stochvol convention), so the conditional
+% standard deviation is exp(h/2). See REVISION_NOTES Part 21.
+volatility = exp(p_vol_grid/2);
 
 % Plot
 h1 = plot(volatility, exp_5, '-', 'LineWidth', 3, 'Color', color_low);
@@ -854,7 +874,9 @@ legend boxoff;
 
 % Axis settings
 set(gca, 'FontSize', 14, 'LineWidth', 1.2, 'Box', 'on');
-axis([volatility(1), volatility(5), 1, 2]);
+% y limits were hardcoded to [1,2], which fits only the old price scale.
+yy = [exp_5(:); exp_6(:); exp_7(:)]; pad = 0.05*(max(yy)-min(yy)) + 1e-6;
+axis([volatility(1), volatility(5), min(yy)-pad, max(yy)+pad]);
 
 % Tight layout
 set(gca, 'LooseInset', get(gca, 'TightInset'));
@@ -1020,9 +1042,12 @@ color_basic = [0.8, 0.2, 0.2];    % Red
 % pidx(4): index 4 was the MEAN price on the submitted 7-node grid; on a
 % 549-node grid it is p ~ 0.645, near the floor, so Full and Intermediate
 % were being drawn at cheap oil while Basic sat at its single mean price.
-h1 = plot(debt_output1, 100*spread1(:,11,pidx(4),3)', '-', 'LineWidth', 3, 'Color', color_full);
+% Full and Intermediate differ by ~0.0002 pp on a 4 pp axis, so a solid line
+% drawn first is completely painted over by Intermediate. Draw Full LAST and
+% dashed so both are visible; the coincidence is the result, not a defect.
 hold on;
 h2 = plot(debt_output2, 100*squeeze(spread2(:,11,pidx(4),1))', '-', 'LineWidth', 3, 'Color', color_inter);
+h1 = plot(debt_output1, 100*spread1(:,11,pidx(4),3)', '--', 'LineWidth', 3.5, 'Color', color_full);
 h3 = plot(debt_output3, 100*spread3(:,11)', '-', 'LineWidth', 3, 'Color', color_basic);
 
 % Axis labels

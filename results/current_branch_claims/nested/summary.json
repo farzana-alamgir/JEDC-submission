@@ -1,0 +1,42 @@
+[
+  {
+    "economy": "bm",
+    "status": "NOT_CONVERGED_ITERATION_LIMIT",
+    "iteration": 600,
+    "outer": 5,
+    "inner": 92,
+    "price_update": false,
+    "value_change": 1.6129595437064381e-09,
+    "pricing_residual": 0.042227674046415864,
+    "switching_examples": {
+      "sampled_switches": 142,
+      "unique_states": 78,
+      "absolute_value_gap_median": 1.2097284596279678e-07,
+      "absolute_value_gap_max": 1.0810346713796548e-05,
+      "price_range": [
+        0.22831043945216506,
+        10.165014655902745
+      ]
+    }
+  },
+  {
+    "economy": "mp",
+    "status": "NOT_CONVERGED_ITERATION_LIMIT",
+    "iteration": 600,
+    "outer": 5,
+    "inner": 89,
+    "price_update": false,
+    "value_change": 1.1803500399309996e-09,
+    "pricing_residual": 0.038519533719225785,
+    "switching_examples": {
+      "sampled_switches": 126,
+      "unique_states": 73,
+      "absolute_value_gap_median": 5.5351756067523183e-08,
+      "absolute_value_gap_max": 4.459065535478146e-06,
+      "price_range": [
+        0.2768055305812899,
+        10.165014655902745
+      ]
+    }
+  }
+]

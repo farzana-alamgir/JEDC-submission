@@ -1,0 +1,70 @@
+[
+  {
+    "economy": "bm",
+    "equilibrium_solved": false,
+    "original": {
+      "price_nodes": 549,
+      "lower_price": 0.1250612215874377,
+      "upper_price": 10.165014655902745,
+      "relative_mean_error_at_original_upper_by_future_vol": [
+        -0.010009193725809884,
+        -0.018057611024694165,
+        -0.0023563622396507444,
+        -0.005542843609216197,
+        -0.011527723312446336
+      ],
+      "max_absolute_relative_mean_error_at_original_upper": 0.018057611024694165,
+      "mean_range_at_original_upper_across_current_vol_relative": 0.016034814918781927,
+      "max_absolute_relative_mean_error_at_original_lower": 0.1049718697626092
+    },
+    "extended": {
+      "price_nodes": 613,
+      "lower_price": 0.1250612215874377,
+      "upper_price": 16.98916329807595,
+      "relative_mean_error_at_original_upper_by_future_vol": [
+        -9.090506125630782e-13,
+        -1.9378387783319795e-11,
+        -2.475409877078505e-09,
+        -1.0636901094374096e-06,
+        -4.483386836184877e-05
+      ],
+      "max_absolute_relative_mean_error_at_original_upper": 4.483386836184877e-05,
+      "mean_range_at_original_upper_across_current_vol_relative": 0.012151387836748684,
+      "max_absolute_relative_mean_error_at_original_lower": 0.14894664784451628
+    }
+  },
+  {
+    "economy": "mp",
+    "equilibrium_solved": false,
+    "original": {
+      "price_nodes": 549,
+      "lower_price": 0.1250612215874377,
+      "upper_price": 10.165014655902745,
+      "relative_mean_error_at_original_upper_by_future_vol": [
+        -0.011570410772719697,
+        -0.019403990620943667,
+        -0.00243641199775968,
+        -0.005230078432156615,
+        -0.010268674596629834
+      ],
+      "max_absolute_relative_mean_error_at_original_upper": 0.019403990620943667,
+      "mean_range_at_original_upper_across_current_vol_relative": 0.007858290160348693,
+      "max_absolute_relative_mean_error_at_original_lower": 0.12085097644019438
+    },
+    "extended": {
+      "price_nodes": 613,
+      "lower_price": 0.1250612215874377,
+      "upper_price": 16.98916329807595,
+      "relative_mean_error_at_original_upper_by_future_vol": [
+        -1.4335199693960021e-12,
+        -1.553868145265369e-12,
+        -2.60586374700722e-09,
+        -9.701852331511773e-07,
+        -3.775826056939824e-05
+      ],
+      "max_absolute_relative_mean_error_at_original_upper": 3.775826056939824e-05,
+      "mean_range_at_original_upper_across_current_vol_relative": 1.8358913904911762e-05,
+      "max_absolute_relative_mean_error_at_original_lower": 0.17133146821528022
+    }
+  }
+]

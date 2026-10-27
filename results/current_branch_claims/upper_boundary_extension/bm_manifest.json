@@ -1,0 +1,10 @@
+{
+  "source_sha256": "4c6ffdd79d2b7a7cda32670b0e6641fefff1a824cd75d36e228c927dd476f9ff",
+  "instrumented_source_sha256": "8f87c2602eb664386b036b2acfc839a051ddca9f47515fd15abe1398caeaaaa4",
+  "kernel_only": true,
+  "equilibrium_solved": false,
+  "added_upper_nodes": 64,
+  "old_node_max_difference": 0.0,
+  "original_lower_price": 0.1250612215874377,
+  "extended_upper_price": 16.98916329807595
+}

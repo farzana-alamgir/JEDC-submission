@@ -1,0 +1,37 @@
+{
+  "economy": "mp",
+  "source_sha256": "4c6ffdd79d2b7a7cda32670b0e6641fefff1a824cd75d36e228c927dd476f9ff",
+  "commit": "0f27ce0482f3bb14a31cdd9de86cc528af761a29",
+  "tolerance": 1e-07,
+  "max_iterations": 600,
+  "warm_start": "/Users/farzanaalamgir/code/JEDC_submission/results/current_branch_claims/level_corrected_continuous/raw/mp",
+  "price_update_relaxation": 0.3,
+  "changed_equations": false,
+  "mean_preserving": true,
+  "algebraic_blas_acceleration": true,
+  "compiler_flags": [
+    "-O3",
+    "-march=native",
+    "-ffree-line-length-none",
+    "-framework",
+    "Accelerate",
+    "-fopenmp"
+  ],
+  "instrumented_source_sha256": "0a9f2bf3bb9e14fd89cadcc8af3f443e42cfac0d8eed21f10c692f20daac3221",
+  "method": "adaptive_nested_fixed_price_bellman",
+  "inner_tolerance": "max(1e-10,min(1e-6,0.001*last_outer_pricing_residual))",
+  "inner_cap": 200,
+  "uniform_value_correction": true,
+  "fixed_price_validation": false,
+  "continuous_interpolated_debt": true,
+  "pricing_residual_timing": "fresh at outer updates; retained on frozen sweeps",
+  "post_shift_bellman_residual_bound_checked": true,
+  "continuous_policy_change_checked": true,
+  "fixed_policy_lender_system_solved": true,
+  "alternative_transition_discretization": {
+    "path": "/Users/farzanaalamgir/code/JEDC_submission/results/current_branch_claims/level_mean_kernel_audit/mp_alternative_kernel.npz",
+    "sha256": "c826da7a8c13a38398305d7d5ad50e97c602e06699af61bc45efcfe10e16f7b1",
+    "discretization": "Finite-support exponential tilt matching conditional level means; log moments change near boundaries"
+  },
+  "parallel_independent_controls": true
+}

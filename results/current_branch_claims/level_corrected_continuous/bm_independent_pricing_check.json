@@ -1,0 +1,99 @@
+{
+  "status": "NOT_CONVERGED_ITERATION_LIMIT",
+  "maximum": 0.1229390321076903,
+  "median": 4.702599140482544e-05,
+  "percentile_99": 0.0020694237439893527,
+  "fraction_above_1e_6": 0.7336357012750455,
+  "worst_locations": [
+    {
+      "volatility_index": 1,
+      "price": 10.003161021210879,
+      "log_endowment": -0.11011955,
+      "proposed_debt": 8.19355632,
+      "stored_price": 0.44591620118,
+      "equation_price": 0.3229771690723097,
+      "absolute_residual": 0.1229390321076903
+    },
+    {
+      "volatility_index": 1,
+      "price": 10.083763106398507,
+      "log_endowment": -0.11011955,
+      "proposed_debt": 8.19355632,
+      "stored_price": 0.44115393611,
+      "equation_price": 0.31859282039663556,
+      "absolute_residual": 0.12256111571336442
+    },
+    {
+      "volatility_index": 1,
+      "price": 9.923203209006278,
+      "log_endowment": -0.11011955,
+      "proposed_debt": 8.19355632,
+      "stored_price": 0.45025014878,
+      "equation_price": 0.3277860528487738,
+      "absolute_residual": 0.1224640959312262
+    },
+    {
+      "volatility_index": 1,
+      "price": 10.165014655902745,
+      "log_endowment": -0.11011955,
+      "proposed_debt": 8.19355632,
+      "stored_price": 0.43592420875,
+      "equation_price": 0.3146452720174711,
+      "absolute_residual": 0.12127893673252887
+    },
+    {
+      "volatility_index": 1,
+      "price": 9.843884519946732,
+      "log_endowment": -0.11011955,
+      "proposed_debt": 8.19355632,
+      "stored_price": 0.45429124778,
+      "equation_price": 0.3330620832239281,
+      "absolute_residual": 0.12122916455607191
+    },
+    {
+      "volatility_index": 2,
+      "price": 10.083763106398507,
+      "log_endowment": -0.11011955,
+      "proposed_debt": 8.19355632,
+      "stored_price": 0.43771296008,
+      "equation_price": 0.3192794232556237,
+      "absolute_residual": 0.1184335368243763
+    },
+    {
+      "volatility_index": 2,
+      "price": 10.003161021210879,
+      "log_endowment": -0.11011955,
+      "proposed_debt": 8.19355632,
+      "stored_price": 0.44179003863,
+      "equation_price": 0.32363485127583813,
+      "absolute_residual": 0.11815518735416186
+    },
+    {
+      "volatility_index": 2,
+      "price": 10.165014655902745,
+      "log_endowment": -0.11011955,
+      "proposed_debt": 8.19355632,
+      "stored_price": 0.43321828917,
+      "equation_price": 0.31518636530548055,
+      "absolute_residual": 0.11803192386451944
+    },
+    {
+      "volatility_index": 2,
+      "price": 9.923203209006278,
+      "log_endowment": -0.11011955,
+      "proposed_debt": 8.19355632,
+      "stored_price": 0.44551920046,
+      "equation_price": 0.32823209478507925,
+      "absolute_residual": 0.11728710567492073
+    },
+    {
+      "volatility_index": 1,
+      "price": 9.765199845358298,
+      "log_endowment": -0.11011955,
+      "proposed_debt": 8.19355632,
+      "stored_price": 0.45668414854,
+      "equation_price": 0.3404593386988816,
+      "absolute_residual": 0.11622480984111838
+    }
+  ]
+}

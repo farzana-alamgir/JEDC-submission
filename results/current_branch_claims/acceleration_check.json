@@ -1,0 +1,24 @@
+[
+  {
+    "economy": "bm",
+    "compared_iterations": 7,
+    "current_iteration": 49,
+    "max_differences": {
+      "value_change": 0.0,
+      "paid_price_change": 3.3306690738754696e-16,
+      "default_changes": 0.0,
+      "debt_choice_changes": 0.0
+    }
+  },
+  {
+    "economy": "mp",
+    "compared_iterations": 7,
+    "current_iteration": 47,
+    "max_differences": {
+      "value_change": 4.440892098500626e-16,
+      "paid_price_change": 3.3306690738754696e-16,
+      "default_changes": 0.0,
+      "debt_choice_changes": 0.0
+    }
+  }
+]

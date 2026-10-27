@@ -1,0 +1,6 @@
+{
+  "max_kernel_loading_error": 0.0,
+  "passed": true,
+  "actual_kernel_sha256": "ab2401f3b9fc03d825590444fa47f2e574d6b509cb97ddaf64e79493dee03ff1",
+  "source_sha256": "441761b2c56dcc9a579a622011405e486585d77cab1ac3eff198886c7e4c7103"
+}

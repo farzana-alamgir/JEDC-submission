@@ -1,0 +1,1 @@
+Stopped during numerical experiments to use validated parallel control calculations. Policy files are starting seeds, not terminal results. Complete first-10-sweep comparisons are in continuous_parallel/parallel_validation.json.

@@ -1,0 +1,1 @@
+These two runs were stopped deliberately during their first fixed-price step to replace bisection-only debt optimization with a validated safeguarded Newton method. No terminal policies were saved. Existing policy files are initial seeds, not results. See continuous_newton for replacement runs.

@@ -1,0 +1,12 @@
+{
+  "compiler": "GNU Fortran (Homebrew GCC 14.2.0_1) 14.2.0",
+  "commit": "0f27ce0482f3bb14a31cdd9de86cc528af761a29",
+  "source_sha256": "4c6ffdd79d2b7a7cda32670b0e6641fefff1a824cd75d36e228c927dd476f9ff",
+  "all_solver_processes_completed": true,
+  "full_and_mp_economies": true,
+  "calibration_changed": false,
+  "converged_equilibria_obtained": false,
+  "completed_attempts": 6,
+  "comparison_table_checks": "passed",
+  "original_model_unchanged": true
+}

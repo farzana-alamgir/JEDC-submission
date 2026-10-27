@@ -1,0 +1,124 @@
+{
+  "economy": "bm",
+  "stationary_iterations": 577,
+  "stationary_error": 9.793381383627064e-15,
+  "row_sum_error": 2.4424906541753444e-15,
+  "max_log_mean_error": 0.01656640792259001,
+  "max_log_variance_error": 0.003225488702613826,
+  "max_level_mean_relative_error": 0.1049718697626092,
+  "max_interior_level_mean_relative_error": 5.617151188630487e-11,
+  "stationary_probability_at_endpoints": 0.0007096762469207747,
+  "stationary_probability_outer_5_percent_nodes": 0.002239471886197009,
+  "stationary_weighted_outside_support_probability": 0.0004681879337118602,
+  "mp_interior_conditional_level_mean_range": null,
+  "endpoint_examples": [
+    {
+      "price": 0.1250612215874377,
+      "log_price": -2.0789518888798355,
+      "stationary_probability": 0.0003548381234603937,
+      "level_mean_relative_errors_by_future_vol": [
+        0.008603593752974925,
+        0.01511078037762914,
+        0.02022724070095583,
+        0.04955891481474528,
+        0.1049718697626092
+      ],
+      "outside_support_probability_by_future_vol": [
+        0.24559582531912158,
+        0.303746529127504,
+        0.35076356878522785,
+        0.3874519708697076,
+        0.4155186063966966
+      ],
+      "conditional_level_mean_range_across_current_vol_relative": 0.06909743894776907
+    },
+    {
+      "price": 0.12606892257462415,
+      "log_price": -2.0709265170226097,
+      "stationary_probability": 2.4794388957868765e-05,
+      "level_mean_relative_errors_by_future_vol": [
+        0.006908027167267683,
+        0.012960469959683474,
+        0.01393246579109908,
+        0.041511934749478785,
+        0.09460899313727023
+      ],
+      "outside_support_probability_by_future_vol": [
+        0.20853200818887413,
+        0.27241900116924345,
+        0.3257069060918146,
+        0.3680184048864218,
+        0.40070250615569913
+      ],
+      "conditional_level_mean_range_across_current_vol_relative": 0.06328483269863198
+    },
+    {
+      "price": 1.1274968515793757,
+      "log_price": 0.1200000000000001,
+      "stationary_probability": 0.005160899818769246,
+      "level_mean_relative_errors_by_future_vol": [
+        -9.07940389538453e-13,
+        -1.9292456521213808e-11,
+        -1.4376277945871152e-12,
+        5.6170845752490095e-11,
+        -6.898037696601023e-12
+      ],
+      "outside_support_probability_by_future_vol": [
+        1.234537047979839e-259,
+        1.821386256905761e-145,
+        7.541348971243671e-82,
+        2.2417362338055153e-46,
+        1.4279995423967024e-26
+      ],
+      "conditional_level_mean_range_across_current_vol_relative": 0.012173362314057861
+    },
+    {
+      "price": 10.083763106398507,
+      "log_price": 2.31092651702261,
+      "stationary_probability": 2.4794388957867813e-05,
+      "level_mean_relative_errors_by_future_vol": [
+        -0.008143097372151797,
+        -0.01569104247554287,
+        -0.0018245988444671735,
+        -0.0049182954407596124,
+        -0.010810321786378196
+      ],
+      "outside_support_probability_by_future_vol": [
+        0.20853200818887616,
+        0.2724190011692451,
+        0.325706906091816,
+        0.3680184048864229,
+        0.4007025061557
+      ],
+      "conditional_level_mean_range_across_current_vol_relative": 0.014836205782878774
+    },
+    {
+      "price": 10.165014655902745,
+      "log_price": 2.3189518888798357,
+      "stationary_probability": 0.0003548381234603809,
+      "level_mean_relative_errors_by_future_vol": [
+        -0.010009193725809884,
+        -0.018057611024694165,
+        -0.0023563622396507444,
+        -0.005542843609216197,
+        -0.011527723312446336
+      ],
+      "outside_support_probability_by_future_vol": [
+        0.24559582531912383,
+        0.30374652912750577,
+        0.3507635687852293,
+        0.38745197086970873,
+        0.4155186063966974
+      ],
+      "conditional_level_mean_range_across_current_vol_relative": 0.016034814918781927
+    }
+  ],
+  "moment_comparison_tolerance": 1e-08,
+  "rows_missing_log_moment_targets": 22,
+  "total_rows": 2745,
+  "worst_level_error_location": {
+    "future_volatility_index": 5,
+    "price": 0.1250612215874377
+  },
+  "stationary_weighted_absolute_level_mean_relative_error": 2.0735704614344977e-05
+}

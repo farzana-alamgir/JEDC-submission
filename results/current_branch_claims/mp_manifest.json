@@ -1,0 +1,18 @@
+{
+  "economy": "mp",
+  "source_sha256": "4c6ffdd79d2b7a7cda32670b0e6641fefff1a824cd75d36e228c927dd476f9ff",
+  "commit": "0f27ce0482f3bb14a31cdd9de86cc528af761a29",
+  "tolerance": 1e-06,
+  "max_iterations": 160,
+  "warm_start": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_mp",
+  "changed_equations": false,
+  "mean_preserving": true,
+  "algebraic_blas_acceleration": true,
+  "compiler_flags": [
+    "-O3",
+    "-march=native",
+    "-ffree-line-length-none",
+    "-framework",
+    "Accelerate"
+  ]
+}

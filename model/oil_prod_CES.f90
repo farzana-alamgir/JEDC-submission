@@ -56,7 +56,7 @@ parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width 
 !---------------------------------------------------------------------
 LOGICAL :: use_common_p_grid, mean_preserving, use_moment_matching, constant_vol
 DOUBLE PRECISION :: p_width_sd, p_vol_width_sd
-parameter (use_moment_matching = .true.)
+parameter (use_moment_matching = .false.)
 parameter (constant_vol = .false.)
 !---------------------------------------------------------------------
 ! R2 major comment 3. In the submitted model a country in default keeps

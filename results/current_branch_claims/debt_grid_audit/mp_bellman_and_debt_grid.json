@@ -1,0 +1,17 @@
+{
+  "economy": "mp",
+  "source_runs": "/Users/farzanaalamgir/code/JEDC_submission/results/current_branch_claims/nested/raw",
+  "status": "NOT_CONVERGED_ITERATION_LIMIT",
+  "bellman_residual_max": 2.3447732644399366e-09,
+  "bellman_residual_median": 6.241049899102791e-10,
+  "repayment_residual_max": 2.5390880509235103e-09,
+  "autarky_residual_max": 1.756294665256064e-09,
+  "default_disagreements": 0,
+  "repayment_choice_value_loss_max": 0.0,
+  "debt_grid_spacing": 0.204838907979798,
+  "off_grid_selected_states": 162,
+  "off_grid_max_repayment_value_gain": 5.7536681733694195e-05,
+  "off_grid_fraction_different_next_debt": 0.845679012345679,
+  "off_grid_default_changes": 0,
+  "off_grid_is_equilibrium_solution": false
+}
