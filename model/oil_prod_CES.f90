@@ -21,8 +21,8 @@ DOUBLE PRECISION :: beta, sigma, b_inf, b_sup, y_inf, y_sup, std_eps,mmax_global
      p_vol_inf, p_vol_sup, std_u_p, std_u_vol, rho_p, rho_p_vol, mean_p, mean_p_vol, std_p_vol,eta
 
 parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width = 1.5d+0,  rstar = 0.01d+0,  &
-     prob_excl_end =0.0833d+0, std_eps = 0.03d+0, rho = 0.9d+0, beta=0.96, alpha=0.3, theta=0.5,&          !A-m has been changed in order to capture the new specification of stealing function
-     mean_y = -0.5d+0*std_eps**2,delta = 0.03d+0,  m=4d+0, scale_y=10d+0, d0= -0.246, d1=0.37, mmax_global=100d+0,&
+     prob_excl_end =0.0833d+0, std_eps = 0.03d+0, rho = 0.9d+0, beta=0.96d+0, alpha=0.3d+0, theta=0.5d+0,&          !A-m has been changed in order to capture the new specification of stealing function
+     mean_y = -0.5d+0*std_eps**2,delta = 0.03d+0,  m=4d+0, scale_y=10d+0, d0 = -0.246d+0, d1 = 0.3847d+0, mmax_global=100d+0,&
      std_u_p = 1d+0, std_u_vol= 1d+0, rho_p = 0.98d+0, rho_p_vol = 0.66d+0 ,pprime=3.97d+0,mean_p = 0.12d+0, mean_p_vol = -4.33d+0, eta = 0.44d+0)
 
 !---------------------------------------------------------------------
@@ -47,7 +47,7 @@ parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width 
 !     y_t = exp(h_t/2) * eps_t,
 ! so h is the log VARIANCE and the conditional STANDARD DEVIATION is
 ! exp(h/2). The submitted code used exp(h) as the standard deviation,
-! which at mean_p_vol = -4.33 gives 1.32% per quarter against 11.47% under
+! which at mean_p_vol = -4.33d+0 gives 1.32% per quarter against 11.47% under
 ! exp(h/2). The real oil price in empirical/oil_qtrly.xlsx has a quarterly
 ! log-change standard deviation of 14.47% over 1995-2019, so exp(h) makes
 ! the model's oil price about 8x too smooth and its most volatile state
@@ -75,6 +75,34 @@ parameter (constant_vol = .false.)
 !---------------------------------------------------------------------
 DOUBLE PRECISION :: oil_disruption
 parameter (oil_disruption = 0d+0)
+!---------------------------------------------------------------------
+! R1 major comment 5: risk-averse lenders.
+!
+! The submitted model prices with a constant SDF, m = exp(-rstar), so the
+! spread is pure expected loss and carries no risk premium. Here the kernel
+! loads on the innovation to the log oil price, which is the global state in
+! this model and the one default is tied to:
+!
+!   log m' = -rstar - kappa_risk * eps' - 0.5 * kappa_risk^2 * Var(eps')
+!   eps'   = log p' - [(1-rho_p)*mean_p + rho_p*log p]
+!
+! kappa_risk > 0 makes the SDF HIGH when oil is expensive. Default happens
+! when oil is expensive, so losing the payoff in those states is costly in
+! present-value terms and lenders demand a premium. (An earlier version had
+! this sign backwards: an SDF that is LOW in default states makes EXCLUDING
+! them raise the bond price, which drove the spread negative.)
+!
+!   log m' = -rstar + kappa_risk*(log p' - mean_p) - 0.5*kappa_risk^2*V
+!   V      = Var(log p) unconditionally, so E[m'] = exp(-rstar)
+!
+! The price of risk is on the oil price LEVEL, not the innovation. A level
+! kernel depends only on p', so it folds into the payoff before the
+! contraction over (y', p', sigma') and the factorisation is preserved. An
+! innovation kernel depends on the current price too and would not factorise.
+! kappa_risk = 0 reproduces the submitted model exactly.
+!---------------------------------------------------------------------
+DOUBLE PRECISION :: kappa_risk
+parameter (kappa_risk = 0d+0)
 parameter (use_common_p_grid = .true., mean_preserving = .false., p_width_sd = 3.5d+0, p_vol_width_sd = 2d+0)
 
 ! Memo cache for func_m (see the comment in that function).
@@ -84,9 +112,9 @@ LOGICAL :: m_cache_valid = .false.
 
 CHARACTER(LEN = 10) :: outFormat
 
-! parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width = 1.5d+0,  rstar = 0.01d+0, kappa=0, epsilon=5.2, &
-!      prob_excl_end =0.0385d+0, std_eps = 0.03d+0, rho = 0.9d+0, beta=0.97, tax_rate=1d+0, gamma=1.06, monitoring=2.64, A_m=0,theta=0.01,&             !A-m has been changed in order to capture the new specification of stealing function
-!      mean_y = -0.5d+0*std_eps**2,delta = 0.07d+0, cost=0.92d+0, m=4d+0, monitoring_in_bc=0, scale_y=10d+0, d0= -0.15, d1=0.25,&
+! parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width = 1.5d+0,  rstar = 0.01d+0, kappa=0, epsilon = 5.2d+0, &
+!      prob_excl_end =0.0385d+0, std_eps = 0.03d+0, rho = 0.9d+0, beta = 0.97d+0, tax_rate=1d+0, gamma = 1.06d+0, monitoring = 2.64d+0, A_m=0,theta = 0.01d+0,&             !A-m has been changed in order to capture the new specification of stealing function
+!      mean_y = -0.5d+0*std_eps**2,delta = 0.07d+0, cost=0.92d+0, m=4d+0, monitoring_in_bc=0, scale_y=10d+0, d0 = -0.15d+0, d1 = 0.25d+0,&
 !      std_u_p = 1d+0, std_u_vol= 1d+0, rho_p = 0.98d+0, rho_p_vol = 0.66d+0, mean_p = 0.12d+0, mean_p_vol = -4.33d+0, eta = 0.49d+0)
 
 
@@ -647,7 +675,7 @@ END SUBROUTINE tauchen_fixed
 SUBROUTINE precompute_expectations
 IMPLICIT NONE
 INTEGER :: iy, iyn, ip, ipn, iv, ivn, ib
-DOUBLE PRECISION :: w, m_const, coup_const
+DOUBLE PRECISION :: w, m_const, coup_const, sdc_sdf, eps_sdf, m_sdf_s
 DOUBLE PRECISION :: acc_by(b_num, y_num), acc_y(y_num)
 
 ! --- Step 1: contract over next-period endowment ---
@@ -722,13 +750,14 @@ end do
 ! same; the path to it is not, so iterates differ and the sweep count can change.
 m_const = EXP(-rstar)
 coup_const = (rstar + delta)/(1d+0 + rstar)
+
 do ivn = 1, p_vol_num
    do ipn = 1, p_num
       do iyn = 1, y_num
          do ib = 1, b_num
             q_src(ib, iyn, ipn, ivn) = &
                  (1d+0 - default_grid(default_decision(ib, iyn, ipn, ivn))) &
-                 * m_const * (coup_const + (1d+0-delta)*q_paid_matrix(ib, iyn, ipn, ivn))
+                 * (coup_const + (1d+0-delta)*q_paid_matrix(ib, iyn, ipn, ivn))
          end do
       end do
    end do
@@ -746,11 +775,29 @@ do ivn = 1, p_vol_num
    end do
 end do
 
+! Risk-averse lenders (R1 major 5). The kernel must be applied HERE, in the
+! p'-contraction, because it depends on the current price as well as the next:
+!
+!   log m' = -rstar + kappa_risk*eps' - 0.5*kappa_risk^2*Var(eps'|sigma')
+!   eps'   = log p' - [(1-rho_p)*mean_p + rho_p*log p]
+!
+! Normalising by the CONDITIONAL variance makes E[m'|p,sigma] = exp(-rstar) in
+! EVERY state, which the perpetuity q = E[m(coupon + (1-delta)q')] requires:
+! it converges only if (1-delta)*E[m|state] < 1 everywhere. A kernel on the
+! price LEVEL normalised by the unconditional variance fails this -- it gives
+! E[m|p] = 7.1 at the top of the grid, so (1-delta)E[m] = 6.9 and q_def_free
+! diverged to 1e92.
 do ivn = 1, p_vol_num
+   sdc_sdf = std_u_p*exp(p_vol_grid(ivn)/2d+0)
    do ip = 1, p_num
       acc_by = 0d+0
       do ipn = 1, p_num
-         acc_by = acc_by + trans_matrix_p(ip, ipn, ivn) * exp_aux_a(:, :, ipn, ivn)
+         eps_sdf = p_grid(ipn, ivn) &
+                   - ((1d+0-rho_p)*mean_p + rho_p*p_grid(ip, ivn))
+         m_sdf_s = EXP(-rstar + kappa_risk*eps_sdf &
+                       - 0.5d+0*(kappa_risk**2)*(sdc_sdf**2))
+         acc_by = acc_by + trans_matrix_p(ip, ipn, ivn) * m_sdf_s &
+                  * exp_aux_a(:, :, ipn, ivn)
       end do
       exp_aux_b(:, :, ip, ivn) = acc_by
    end do
@@ -1562,7 +1609,12 @@ do i_p_vol_next = 1,p_vol_num
 
          y_next = y_grid(i)
 
-         argument = rstar
+         ! risk-averse lenders; identical kernel to precompute_expectations
+         argument = rstar &
+              - kappa_risk*( p_grid(i_p_next, i_p_vol_next) &
+                   - ((1d+0-rho_p)*mean_p + rho_p*p_grid(i_p, i_p_vol_next)) ) &
+              + 0.5d+0*(kappa_risk**2) &
+                * ((std_u_p*exp(p_vol_grid(i_p_vol_next)/2d+0))**2)
 
          m_next = EXP(- argument)
          coupon_next = (rstar + delta )/ (1d+0 + rstar)
@@ -1596,7 +1648,12 @@ do i_p_vol_next = 1,p_vol_num
       do i=1,y_num
          y_next = y_grid(i)
 
-         argument = rstar
+         ! risk-averse lenders; identical kernel to precompute_expectations
+         argument = rstar &
+              - kappa_risk*( p_grid(i_p_next, i_p_vol_next) &
+                   - ((1d+0-rho_p)*mean_p + rho_p*p_grid(i_p, i_p_vol_next)) ) &
+              + 0.5d+0*(kappa_risk**2) &
+                * ((std_u_p*exp(p_vol_grid(i_p_vol_next)/2d+0))**2)
 
          m_next = EXP(- argument)
          coupon_next = (rstar + delta )/ (1d+0 + rstar)

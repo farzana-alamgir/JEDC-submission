@@ -2053,3 +2053,156 @@ The natural fix -- recalibrate to sigma < 1, where oil is a complement -- is
 **closed**: with oil essential (alpha = 0.02, 26% share) the model does not
 converge (Part 25), and with oil non-essential (alpha = 0.00056) every channel
 is zero because output is just the endowment (Part 22).
+
+## Part 27 — R2 major 3 on the clean runs, and R1 major 5 implemented
+
+### Oil access disrupted in default (25% import premium)
+
+sigma = 2, corrected volatility, relative 1d-10 bisection:
+
+| | spread | default %/yr | mean debt | GDP |
+|---|---|---|---|---|
+| benchmark (oil unaffected by default) | 431.9 | 3.403 | 6.3613 | 6.2670 |
+| **oil disrupted in default** | **461.8** | 3.666 | **7.4174** | 6.2859 |
+| difference | **+29.9** (t = 41.2) | +0.263 pp | **+1.056 (+16.6%)** | +0.019 |
+
+Making default costlier deters it, so the sovereign can borrow more: debt rises
+**16.6%**. It then sits at higher debt, so the equilibrium default rate and
+spread **rise** rather than fall. That is the standard commitment-versus-debt
+trade-off and it is a clean answer to the referee: the submitted model, by
+letting a defaulting country import oil frictionlessly, understates the cost of
+default and therefore understates both sustainable debt and the spread.
+
+**This result flipped sign with the bisection fix** — the loose-tolerance runs
+gave −17.8 bp and a *falling* default rate. Another +/-20 bp effect that the
+1e-2 oil-demand error had mis-signed, and further reason to treat anything of
+that magnitude computed before Part 24 as unreliable.
+
+### R1 major 5 — risk-averse lenders, implemented
+
+The submitted model prices with a constant SDF, `m = exp(-rstar)`, so the
+spread is pure expected loss with no risk premium. The kernel now loads on the
+innovation to the log oil price, the global state default is tied to:
+
+    log m' = -rstar - kappa_risk*eps' - 0.5*kappa_risk^2*Var(eps')
+    eps'   = log p' - [(1-rho_p)*mean_p + rho_p*log p]
+
+`kappa_risk > 0` makes the SDF low when oil is expensive, which is exactly when
+an oil importer defaults, so lenders are compensated for holding a claim that
+fails in bad global states. The `-0.5*kappa^2*Var` term keeps
+`E[m'] = exp(-rstar)`, so the risk-free rate and the default-free bond are
+unchanged and the spread remains interpretable.
+
+Applied at both pricing sites (`q_fun` and `q_def_free_fun`). `kappa_risk = 0`
+reduces `argument` to `rstar` exactly, so it reproduces the submitted model by
+construction. A verification run at `kappa_risk = 0` against `model-final-v1`
+is in progress.
+
+## Part 28 — single-precision literals, and the model's noise floor
+
+`kappa_risk = 0` did **not** reproduce `model-final-v1`, and the cause was not
+the new SDF. Four parameters are declared `DOUBLE PRECISION` but given
+**default-REAL (single precision) literals**:
+
+| parameter | as written | value actually used | intended |
+|---|---|---|---|
+| `alpha` | `0.3` | 0.30000001192092895508 | 0.29999999999999998890 |
+| `beta` | `0.96` | 0.95999997854232788086 | 0.95999999999999996447 |
+| `d1` | `0.37` | single-rounded | — |
+| `theta` | `0.5` | 0.5 | 0.5 (exact in binary) |
+
+So the submitted model does not run at the calibration the paper states — it
+runs at `alpha = 0.30000001`, `beta = 0.95999998`. The errors are about 1e-8
+relative, and `theta = 0.5` is exact because 0.5 is representable.
+
+My `t2` builds happened to substitute `alpha=0.3d+0, theta=0.5d+0` while the
+repo source kept `0.3`, which is the entire discrepancy. Now promoted to
+`d+0` throughout.
+
+### The useful part: this measures the model's noise floor
+
+Changing `alpha` by **1.19e-8** moves the mean spread by **+1.34 bp**
+(se 0.272, t = 4.9), with everything else identical.
+
+That bounds how precisely any channel in this model can be identified, and it
+is consistent with what the revision has already found:
+
+| quantity | size | versus the 1.3 bp floor |
+|---|---|---|
+| oil price risk | +154.6 bp | **100x the floor** -- solid |
+| decomposition sub-channels | +/-4 bp | ~3x the floor, and they flipped sign with the bisection fix |
+| time-varying volatility | −0.3 bp | **below the floor** -- zero |
+
+The discrete default decision is what does it: a 1e-8 parameter change flips a
+handful of marginal states, which moves the bond price schedule, which
+propagates. It is not a defect so much as a property of this class of model,
+but it means **no channel below a couple of basis points should be reported
+with a sign**.
+
+The kappa > 0 runs were launched from the repo source, so their correct
+baseline is `run_verify` (433.27 bp), not `t2/run_bm` (431.92 bp). Comparing
+them against `t2` would mix the risk premium with this 1.3 bp literal effect.
+
+---
+
+## Part 29 — the four economies on a fully clean build, and a failed R1 major 5
+
+All literals double precision, `exp(h/2)` volatility, relative 1d-10 oil-demand
+bisection, plain Tauchen, `p_width_sd = 3.5`. All six economies from one source.
+
+| economy | spread | se | sd | default %/yr | debt | GDP |
+|---|---|---|---|---|---|---|
+| constant price | 277.6 | 0.72 | 156.7 | 2.197 | 6.4860 | 5.6559 |
+| constant volatility | 432.5 | 1.15 | 245.2 | 3.342 | 6.3849 | 6.2549 |
+| mean-preserving | 429.7 | 1.19 | 250.2 | 3.388 | 6.3628 | 6.2865 |
+| full SV | 434.4 | 1.20 | 254.9 | 3.420 | 6.3645 | 6.2672 |
+
+| channel | bp | se | t |
+|---|---|---|---|
+| **oil price risk** (cv − basic) | **+154.9** | 0.91 | 170.0 |
+| TOTAL time-varying volatility (bm − cv) | +1.9 | 0.51 | 3.7 |
+| of which dispersion (mp − cv) | −2.8 | 0.52 | −5.5 |
+| of which mean / Jensen (bm − mp) | +4.7 | 0.32 | 14.6 |
+
+Against the paper's predictions (`results/PAPER_PREDICTIONS.md`):
+
+- **spread ordering basic < cv < bm: HOLDS.** basic 277.6 < cv 432.5 < bm 434.4.
+- **spread sd ordering: HOLDS.** 156.7 < 245.2 < 254.9.
+- **default rate ordering: HOLDS.** 2.197 < 3.342 < 3.420.
+- but the cv-to-bm gaps are **+1.9 bp**, **+9.7 sd**, **+0.078 pp** — the sign
+  is right and the magnitude is negligible. The entire distance from `basic` to
+  `bm` is covered by oil price risk, not by volatility.
+- **mp sits BELOW cv** (429.7 < 432.5), so the dispersion channel is negative.
+  It was +3.2 before the bisection fix and −2.8 now. At +/-3 bp against a
+  1.3 bp noise floor this is still not reliably signed.
+
+### R1 major 5 was implemented in the wrong place -- results invalid
+
+The kappa runs are **void**. `graphs_q_dss.txt` is byte-identical across
+kappa = 0, 2, 5, and so are the default decisions and debt. Only the
+default-free bond moved, and at kappa = 5 the spread came out at **−43.8 bp**,
+which is impossible.
+
+Cause: the model does **not** price the risky bond with `q_fun`. The solution
+uses the factorized contraction in `precompute_expectations`
+(`q_fun_matrix(:,:,ip,iv) = acc_by`, line 785), which applies a **constant**
+`m_const = EXP(-rstar)`. `q_fun` is only called in the simulation loop
+(lines 2315-2392) to report q. So the modified kernel never entered the
+solution -- it only rescaled the reported bond price, which is why spreads
+moved while nothing else did.
+
+Two things must change for a correct implementation:
+
+1. **Location.** The SDF has to go into `precompute_expectations`, where
+   `pay = (1-default)*m_const*(coup_const + (1-delta)*q_paid)` is formed before
+   the contraction over (y', p', sigma').
+2. **Sign.** The kernel must be **high** in default states, not low. Default
+   happens when oil is expensive, so losing the payoff there should be costly:
+   `log m' = -rstar + lambda*(log p' - mean_p) - ...` with lambda > 0. The
+   implementation had `exp(-rstar - kappa*eps)`, which makes the SDF low
+   exactly where the bond defaults -- so excluding those states *raised* the
+   risky bond price and drove the spread negative.
+
+A level-based price of risk (depending on `log p'` rather than the innovation)
+factorises cleanly through the p'-contraction; an innovation-based one does
+not, because it depends on the current price as well.
