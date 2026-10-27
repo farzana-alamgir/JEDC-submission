@@ -15,3 +15,4 @@ model/figures_pipeline/p_vol_grid.txt
 model/figures_pipeline/*.mat
 model/figures_pipeline/ml_*.log
 model/figures_pipeline/FIGURE*.jpg
+model/runs_elasticity/
