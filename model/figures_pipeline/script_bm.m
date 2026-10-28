@@ -311,6 +311,7 @@ scale_y=10;
 dy1 =0.25*b_grid/mean(scale_y*exp(y_grid));
 y1=scale_y*exp(y_grid);
 spread1=spread_matrix;
+p_grid_matrix1 = p_grid_matrix;   % snapshot: later loads overwrite p_grid_matrix
 %fprintf('DEBUG: After assignment, spread1 size = ['); fprintf('%d ', size(spread1)); fprintf(']\n');
 % ---- CES feasibility mask (per-state grid) ---------------------------------
 % The highest-volatility per-state grid is built from that state's volatility
@@ -996,6 +997,7 @@ load oil_intermediate.mat %(=intermediate=vol constant at mean, but level changi
 dy2 =0.25*b_grid/mean(scale_y*exp(y_grid));
 y2=scale_y*exp(y_grid);
 spread2=spread_matrix;
+p_grid_matrix2 = reshape(p_grid, p_num, p_vol_num);   % intermediate's own grid
 mean_output2=mean(output_matrix(:));   % was 3 nested means, which leaves a 4-D array
                                        % whenever p_vol_num > 1 in the comparison economy
 debt_output2=0.25*b_grid./mean_output2;
@@ -1070,6 +1072,7 @@ load oil_basic %(=oil price level and vol both are constant)
 dy3 =0.25*b_grid/mean(scale_y*exp(y_grid));
 y3=scale_y*exp(y_grid);
 spread3=spread_matrix;
+p_grid_basic   = exp(p_grid(1));                      % basic's single price node
 mean_output3=mean(output_matrix(:));   % dimension-agnostic
 debt_output3=0.25*b_grid./mean_output3;
 consumption3=cons_matrix;
@@ -1149,9 +1152,29 @@ color_basic = [0.8, 0.2, 0.2];    % Red
 % drawn first is completely painted over by Intermediate. Draw Full LAST and
 % dashed so both are visible; the coincidence is the result, not a defect.
 hold on;
-h2 = plot(debt_output2, 100*squeeze(spread2(:,11,pidx(4),1))', '-', 'LineWidth', 3, 'Color', color_inter);
-h1 = plot(debt_output1, 100*spread1(:,11,pidx(4),3)', '--', 'LineWidth', 3.5, 'Color', color_full);
-h3 = plot(debt_output3, 100*spread3(:,11)', '-', 'LineWidth', 3, 'Color', color_basic);
+% ---- evaluate all three economies at ONE physical price ------------------
+% Each economy centres its own grid differently: the benchmark's central node
+% is exp(mean_p) = 1.1275, the LEVEL-MATCHED intermediate has mean_p shifted
+% so its simulated E[p] matches, putting its central node at 1.1090, and the
+% basic economy is pinned at the ergodic MEAN price 1.3339 -- 18% above the
+% benchmark's node, because Rouwenhorst centres on the median of log p while
+% the basic pin targets the mean of p. Plotting each at its own node compared
+% three different oil prices and made the Basic schedule look high by
+% construction. Interpolate all three onto the benchmark's central node.
+% The common price has to be the BASIC economy's, since it has a single price
+% node and cannot be interpolated anywhere else. Full and intermediate are
+% brought to it.
+p_fig2 = p_grid_basic;
+pm1 = exp(p_grid_matrix1(:,3));  pm2 = exp(p_grid_matrix2(:,1));
+s_full_f2 = 100*interp1(pm1, squeeze(spread1(:,11,:,3)).', p_fig2, 'linear').';
+s_int_f2  = 100*interp1(pm2, squeeze(spread2(:,11,:,1)).', p_fig2, 'linear').';
+s_bas_f2  = 100*spread3(:,11);          % single price node, already at p_fig2
+fprintf(['FIGURE2 evaluated at p = %.4f  (own central nodes: full %.4f, ' ...
+         'intermediate %.4f, basic %.4f)\n'], p_fig2, ...
+        pm1(ceil(numel(pm1)/2)), pm2(ceil(numel(pm2)/2)), p_grid_basic);
+h2 = plot(debt_output2, s_int_f2',  '-',  'LineWidth', 3,   'Color', color_inter);
+h1 = plot(debt_output1, s_full_f2', '--', 'LineWidth', 3.5, 'Color', color_full);
+h3 = plot(debt_output3, s_bas_f2',  '-',  'LineWidth', 3,   'Color', color_basic);
 
 % Axis labels
 xlabel('Debt/GDP', 'FontSize', 16, 'FontWeight', 'bold', 'Interpreter', 'latex');
