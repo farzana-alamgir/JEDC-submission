@@ -509,11 +509,17 @@ xo = output_y_values(isfinite(output_y_values)); xlim([min(xo) max(xo)]);
 % magnitude smaller away from the default boundary -- 0.0007 to 0.004 -- so
 % that scale crushes all three curves onto one line and hides a state
 % dependence that peaks at 4.4x. Autoscale to the non-exploding part instead.
-if strcmp(CONTRAST_MODE,'price')
-    finite_sl = slopes_all(isfinite(slopes_all) & slopes_all > 0);
-    ylim([0, min(0.09, 3*median(finite_sl))]);
-else
+% Autoscale in BOTH contrast modes. The fixed 0..0.09 was fine at the
+% submitted calibration but the slope level moves with the oil elasticity:
+% at sigma_oil = 0.3 (theta = -2.333) the slopes run 0.001-0.005, so the
+% submitted scale crushes all three curves onto the axis and hides whatever
+% ordering there is. Cap at the submitted 0.09 so the figure never zooms
+% further OUT than the published one.
+finite_sl = slopes_all(isfinite(slopes_all) & slopes_all > 0);
+if isempty(finite_sl)
     ylim([0, 0.09]);
+else
+    ylim([0, min(0.09, max(3*median(finite_sl), 1.15*prctile(finite_sl,90)))]);
 end
 
 % Remove grid for cleaner look (optional - uncomment if you want grid)

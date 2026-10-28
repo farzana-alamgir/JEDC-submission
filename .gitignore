@@ -16,3 +16,5 @@ model/figures_pipeline/*.mat
 model/figures_pipeline/ml_*.log
 model/figures_pipeline/FIGURE*.jpg
 model/runs_elasticity/
+model/runs_sigma03/
+model/runs_sigma03_d1/
