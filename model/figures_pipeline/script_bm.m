@@ -845,9 +845,21 @@ sg_n = numel(spread_values);
 spread_smooth = spread_values;
 for sg_i = 1:sg_n
     sg_lo = max(1, sg_i-sg_h); sg_hi = min(sg_n, sg_i+sg_h);
-    sg_tt = (sg_lo:sg_hi)' - sg_i;
+    % Drop non-finite nodes from the window. The spread is NaN wherever the
+    % country defaults with certainty, so q = 0 and the yield is undefined --
+    % which happens at the top price nodes once the default cost depends on
+    % the oil price. Without this the NaN propagates through the regression
+    % and blanks the entire smoothed curve, not just the undefined nodes.
+    sg_idx = sg_lo:sg_hi;
+    sg_ok  = isfinite(spread_values(sg_idx));
+    sg_idx = sg_idx(sg_ok);
+    if numel(sg_idx) < sg_ord+1 || ~isfinite(spread_values(sg_i))
+        spread_smooth(sg_i) = spread_values(sg_i);   % leave as-is (incl. NaN)
+        continue
+    end
+    sg_tt = sg_idx' - sg_i;
     sg_AA = sg_tt.^(0:sg_ord);
-    sg_bb = (sg_AA'*sg_AA)\(sg_AA'*spread_values(sg_lo:sg_hi)');
+    sg_bb = (sg_AA'*sg_AA)\(sg_AA'*spread_values(sg_idx)');
     spread_smooth(sg_i) = sg_bb(1);          % fitted value at t = 0
 end
 plot(price_values, spread_values, '-', 'LineWidth', 1, 'Color', [0.78 0.78 0.78]);

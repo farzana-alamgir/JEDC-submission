@@ -33,3 +33,7 @@ model/figures_pipeline/oil_va*.mat
 model/va_search*.sh
 model/va_search*.log
 model/va_final.*
+model/runs_va_final/
+model/solve_va_final.log
+model/param.mod
+model/shared_types.mod

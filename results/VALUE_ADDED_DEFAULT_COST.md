@@ -96,6 +96,73 @@ in this model class, not a calibration or measurement problem. Three separate
 interventions — lower persistence, an oil-price-dependent default cost, and a
 value-added default cost — all move it further the wrong way.
 
+---
+
+# Full solve: all six economies and the ten figures
+
+Runs in `model/runs_va_final/`, figures in `results/figures_valueadded/`,
+sources in `model/sigma03_calibrated_valueadded/`.
+
+## Decomposition — the oil price risk channel is now dominant
+
+Comparison economies level-matched at the benchmark's simulated
+`E[p] = 1.3339` (verified for both).
+
+| channel | value added | endowment |
+|---|---|---|
+| **oil price risk** (full − basic, matched) | **+206.5 bp** | +7.1 bp |
+| time-varying volatility (full − intermediate, matched) | +1.7 bp | +5.6 bp |
+| mean-preserving | −13.6 bp | +26.6 bp |
+
+Oil price risk goes from a rounding error to **206 bp**, and is now by far the
+largest channel. This is the paper's headline mechanism finally carrying real
+quantitative weight.
+
+## Welfare — in the paper's range, correctly nested
+
+| comparison | CEV |
+|---|---|
+| full → basic, matched (remove all oil price risk) | **+0.732%** |
+| full → intermediate, matched (remove time-varying vol) | **+0.175%** |
+
+Both positive, properly nested, and +0.73% sits inside the paper's claimed
++0.2% to +1.1%. FIGURE7 shows +0.81% and +0.16%.
+
+## Claims
+
+| claim | paper | value added | endowment |
+|---|---|---|---|
+| [1] slope state dependence | 3.0 | **0.65** | 0.90 |
+| [2] debt amplification | larger when indebted | **112 → 286 bp** | 15 → 44 bp |
+| [3] debt slope by vol state | 0.16/0.25/0.70 | not measurable | not measurable |
+| [4] welfare | +0.2% to +1.1% | **+0.73%** | +0.52% |
+
+Debt amplification is now an order of magnitude larger in absolute terms
+(112 bp at low debt rising to 286 bp at high debt) while keeping the same
+monotone shape. Claim [1] still fails, now at 0.65.
+
+## Figures (`results/figures_valueadded/`)
+
+All ten drawn, no blank or sparse panels.
+
+**FIGURE2 now matches the paper.** The Basic schedule sits clearly below Full
+and Intermediate across the whole debt range, a gap of roughly 0.5–1 pp,
+consistent with the +206 bp channel. Under the endowment cost the three
+schedules coincided to within ±8 bp and the figure carried no message.
+
+**FIGURE7 matches the paper** — both curves positive and well separated.
+
+**FIGURE3 still contradicts the paper**, and now does so more visibly: the
+slopes are an order of magnitude larger (0.01–0.06 against 0.001–0.005), so
+the three curves separate cleanly — in the wrong order, low volatility
+steepest.
+
+**FIGURE4c needed a fix.** With the default cost tied to the oil price, the
+country defaults with certainty at the top two price nodes, so `q = 0` and the
+spread is NaN there. The local-cubic smoother propagated that NaN across the
+entire curve and blanked the panel. The smoother now drops non-finite nodes
+from each window and leaves NaN only where the spread is genuinely undefined.
+
 ## Recommendation
 
 Adopt the value-added default cost. It is a defensible modelling choice, it
