@@ -41,3 +41,10 @@ echo "=== moments (sim_prod_oil_dec29 convention) ==="
 python3 analysis/moments_fast.py $OUT/bm $OUT/mp $OUT/intermediate $OUT/basic $OUT/basic_matched
 echo "=== welfare ==="
 ( cd $OUT && python3 ../analysis/welfare_raw.py bm 7 5 intermediate basic basic_matched )
+
+# Level-matched intermediate: pins mean_p so the SIMULATED E[p] equals the
+# benchmark's. Without this the intermediate economy faces oil ~1.7% dearer
+# than the benchmark (and basic ~3.0% dearer), because the basic pin targets
+# the THEORETICAL ergodic mean while Rouwenhorst matches log-moments, not
+# level moments. At sigma_oil < 1 that gap is costly enough to invert the
+# welfare ranking -- see results/FINAL_CALIBRATION.md.

@@ -45,15 +45,43 @@ which is enough to miss the target.
 
 ## Welfare — the paper's claim holds
 
-| comparison | CEV | paper |
-|---|---|---|
-| full → basic (remove all oil price risk) | **+0.202%** | +0.2% to +1.1% |
-| full → basic, matched E[p] | **+0.516%** | |
-| full → intermediate (remove time-varying vol) | **+0.245%** | |
+**Report the level-matched column.** The comparison economies must be pinned
+at the benchmark's *simulated* mean price, not at the theoretical one.
 
-All positive and all inside the claimed range. FIGURE7 shows both curves at
-+0.21% to +0.26%, rising in output. At `sigma_oil = 2` these were −2.78% /
-−3.03% / +0.15%.
+| comparison | as-built | **level-matched** | paper |
+|---|---|---|---|
+| full → intermediate (remove time-varying vol) | +0.245% | **+0.302%** | |
+| full → basic (remove all oil price risk) | +0.202% | **+0.516%** | +0.2% to +1.1% |
+
+All positive and inside the claimed range. At `sigma_oil = 2` these were
++0.15% and −2.78%.
+
+### Why the as-built column is misleading
+
+As built, `full → intermediate` (+0.245%) exceeds `full → basic` (+0.202%),
+i.e. removing *part* of the risk appears to beat removing *all* of it. That is
+an artifact, not a result.
+
+`basic` pins log p at the **theoretical** ergodic mean,
+`exp(mean_p + 0.5*Var(log p)/(1-rho_p^2)) = 1.3735`. But Rouwenhorst matches
+log-moments, not level moments, so the benchmark's **simulated** mean price is
+1.3339. The comparison economies therefore face dearer oil than the benchmark:
+
+| economy | E[p] | vs bm | welfare cost of the gap |
+|---|---|---|---|
+| bm | 1.3339 | — | — |
+| intermediate | 1.3562 | +1.67% | 0.058pp |
+| basic | 1.3735 | +2.97% | 0.314pp |
+
+At `sigma_oil = 0.30` oil is complementary, so the country cannot substitute
+away from a higher price level and the gap is costly. `basic` has the larger
+gap and so loses more, which inverted the ranking. Re-pinning both at 1.3339
+(`basic_matched`, `intermediate_matched`) restores the correct, nested
+ordering: +0.516% for all risk, of which +0.302% is the time-varying part and
++0.214% the residual constant-volatility dispersion.
+
+The same correction matters for the spread decomposition (§ below), where it
+moved the oil-price-risk channel from +23.3 to +7.1 bp at `sigma_oil = 2`.
 
 ## Spread decomposition — small, and the Jensen channel dominates
 
@@ -86,7 +114,7 @@ but the paper should not claim both run through the same channel.
 | [1] spread-slope state dependence | 3.0 | **0.79** | 0.64 |
 | [2] debt amplification | larger when indebted | **confirmed**, 14.6→43.7 bp | confirmed, 19→198 bp |
 | [3] debt slope by vol state | 0.16/0.25/0.70 | not measurable | not measurable |
-| [4] welfare | +0.2% to +1.1% | **+0.20% to +0.52%** | −2.78% |
+| [4] welfare | +0.2% to +1.1% | **+0.30% / +0.52%** (level-matched) | −2.78% |
 
 **[1] still does not hold.** The ratio is 0.79 — below 1 at all 19 output
 points, so low volatility has the *steeper* slope. And on this grid the ratio
