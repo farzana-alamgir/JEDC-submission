@@ -168,6 +168,7 @@ c_matrix, TFP_matrix, output_matrix, oil_matrix, TFP0, m0
 DOUBLE PRECISION, DIMENSION(p_vol_num, p_vol_num) :: trans_matrix_p_vol, cdf_matrix_p_vol, trans_matrix_p_vol_AR
 DOUBLE PRECISION, DIMENSION(y_num, y_num) :: trans_matrix, cdf_matrix
 DOUBLE PRECISION, DIMENSION(p_num, p_num, p_vol_num) :: trans_matrix_p_AR,trans_matrix_p, cdf_matrix_p, trans_matrix_p_1, trans_matrix_p_2, trans_matrix_p_3, trans_matrix_p_4, trans_matrix_p_5
+DOUBLE PRECISION, DIMENSION(p_num, p_vol_num) :: sdf_norm
 
 DOUBLE PRECISION, DIMENSION (y_num, p_num, p_vol_num) :: q_def_free_paid_matrix
 
@@ -822,8 +823,8 @@ do ivn = 1, p_vol_num
       do ipn = 1, p_num
          eps_sdf = p_grid(ipn, ivn) &
                    - ((1d+0-rho_p)*mean_p + rho_p*p_grid(ip, ivn))
-         m_sdf_s = EXP(-rstar + kappa_risk*eps_sdf &
-                       - 0.5d+0*(kappa_risk**2)*(sdc_sdf**2))
+         ! numerically normalised kernel; see the SDF NORMALISER note
+         m_sdf_s = EXP(-rstar)*EXP(kappa_risk*eps_sdf)/sdf_norm(ip, ivn)
          acc_by = acc_by + trans_matrix_p(ip, ipn, ivn) * m_sdf_s &
                   * exp_aux_a(:, :, ipn, ivn)
       end do
@@ -1540,6 +1541,44 @@ do k=1,p_vol_num
    end do
 end do
 
+!---------------------------------------------------------------------
+! SDF NORMALISER.
+!
+! The risk kernel is  m' = exp(-rstar) * exp(kappa*eps') / Z(p, sigma'),
+! with  Z = E[ exp(kappa*eps') | p, sigma' ]  computed on the ACTUAL grid.
+! That makes E[m'] = exp(-rstar) exactly, which is what makes kappa_risk a
+! price of RISK rather than a shift in the risk-free rate.
+!
+! The previous code used the analytic lognormal Jensen term,
+! -0.5*kappa^2*sigma^2. That is correct only for a continuous normal
+! innovation. On the 7-node Rouwenhorst grid exp(kappa*eps) spans orders of
+! magnitude at kappa = 3, and the discrete expectation missed badly:
+! E[m]/exp(-rstar) ran from 0.0000 to 2559 across (p, sigma) cells instead of
+! 1. Worse, in the constant-price economy (p_num = 1) eps is identically zero
+! while the correction still applied, so E[m] = exp(-rstar - 0.5*kappa^2*
+! sigma^2): a pure discount-rate shift. That economy then showed a 22% spread
+! with ZERO defaults in 500,000 periods.
+!
+! kappa_risk = 0 gives Z = 1 and m' = exp(-rstar), reproducing the
+! risk-neutral model exactly, including when p_num = 1.
+!---------------------------------------------------------------------
+do k = 1, p_vol_num
+   do i = 1, p_num
+      sdf_norm(i,k) = 0d+0
+      do j = 1, p_num
+         sdf_norm(i,k) = sdf_norm(i,k) + trans_matrix_p(i,j,k) &
+              * EXP(kappa_risk*( p_grid(j,k) &
+                    - ((1d+0-rho_p)*mean_p + rho_p*p_grid(i,k)) ))
+      end do
+      if (sdf_norm(i,k) <= 0d+0) then
+         print *, 'SDF normaliser non-positive at i_p, i_p_vol =', i, k
+         call exit
+      end if
+   end do
+end do
+write(*,'(a,2f14.6)') ' SDF normaliser Z: min, max = ', &
+     minval(sdf_norm), maxval(sdf_norm)
+
 open (302, FILE='graphs_cdf_matrix_p.txt',STATUS='replace')
 do k=1,p_vol_num
    do i=1,p_num
@@ -1742,11 +1781,11 @@ do i_p_vol_next = 1,p_vol_num
          y_next = y_grid(i)
 
          ! risk-averse lenders; identical kernel to precompute_expectations
+         ! numerically normalised kernel; see the SDF NORMALISER note
          argument = rstar &
               - kappa_risk*( p_grid(i_p_next, i_p_vol_next) &
                    - ((1d+0-rho_p)*mean_p + rho_p*p_grid(i_p, i_p_vol_next)) ) &
-              + 0.5d+0*(kappa_risk**2) &
-                * ((std_u_p*exp(p_vol_grid(i_p_vol_next)/2d+0))**2)
+              + LOG(sdf_norm(i_p, i_p_vol_next))
 
          m_next = EXP(- argument)
          coupon_next = (rstar + delta )/ (1d+0 + rstar)
@@ -1781,11 +1820,11 @@ do i_p_vol_next = 1,p_vol_num
          y_next = y_grid(i)
 
          ! risk-averse lenders; identical kernel to precompute_expectations
+         ! numerically normalised kernel; see the SDF NORMALISER note
          argument = rstar &
               - kappa_risk*( p_grid(i_p_next, i_p_vol_next) &
                    - ((1d+0-rho_p)*mean_p + rho_p*p_grid(i_p, i_p_vol_next)) ) &
-              + 0.5d+0*(kappa_risk**2) &
-                * ((std_u_p*exp(p_vol_grid(i_p_vol_next)/2d+0))**2)
+              + LOG(sdf_norm(i_p, i_p_vol_next))
 
          m_next = EXP(- argument)
          coupon_next = (rstar + delta )/ (1d+0 + rstar)
