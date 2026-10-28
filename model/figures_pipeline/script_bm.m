@@ -312,6 +312,7 @@ dy1 =0.25*b_grid/mean(scale_y*exp(y_grid));
 y1=scale_y*exp(y_grid);
 spread1=spread_matrix;
 p_grid_matrix1 = p_grid_matrix;   % snapshot: later loads overwrite p_grid_matrix
+p_vol_grid1    = p_vol_grid;      % snapshot of the benchmark's volatility grid
 %fprintf('DEBUG: After assignment, spread1 size = ['); fprintf('%d ', size(spread1)); fprintf(']\n');
 % ---- CES feasibility mask (per-state grid) ---------------------------------
 % The highest-volatility per-state grid is built from that state's volatility
@@ -998,6 +999,7 @@ dy2 =0.25*b_grid/mean(scale_y*exp(y_grid));
 y2=scale_y*exp(y_grid);
 spread2=spread_matrix;
 p_grid_matrix2 = reshape(p_grid, p_num, p_vol_num);   % intermediate's own grid
+p_vol_grid2    = p_vol_grid;                          % its (constant) volatility level
 mean_output2=mean(output_matrix(:));   % was 3 nested means, which leaves a 4-D array
                                        % whenever p_vol_num > 1 in the comparison economy
 debt_output2=0.25*b_grid./mean_output2;
@@ -1166,8 +1168,24 @@ hold on;
 % brought to it.
 p_fig2 = p_grid_basic;
 pm1 = exp(p_grid_matrix1(:,3));  pm2 = exp(p_grid_matrix2(:,1));
-s_full_f2 = 100*interp1(pm1, squeeze(spread1(:,11,:,3)).', p_fig2, 'linear').';
+% ---- match the VOLATILITY too -------------------------------------------
+% The intermediate economy pins h at mu_h + var_h/2, a conditional sd of
+% 0.1250. The benchmark's five states are 0.0639 / 0.0856 / 0.1147 / 0.1538 /
+% 0.2061, so plotting it at state 3 compared sd 0.1147 against 0.1250. The
+% spread falls monotonically in volatility here (3.65 -> 2.99 across states),
+% so that mismatch flattered the benchmark. Interpolate the benchmark over h
+% to the intermediate's level -- h is the log variance and the grid is evenly
+% spaced in h, so interpolate there rather than in sd.
+h_target = p_vol_grid2(1);
+s_full_by_vol = zeros(size(spread1,1), numel(p_vol_grid1));
+for kk = 1:numel(p_vol_grid1)
+    s_full_by_vol(:,kk) = interp1(exp(p_grid_matrix1(:,kk)), ...
+                                  squeeze(spread1(:,11,:,kk)).', p_fig2, 'linear').';
+end
+s_full_f2 = 100*interp1(p_vol_grid1(:), s_full_by_vol.', h_target, 'linear').';
 s_int_f2  = 100*interp1(pm2, squeeze(spread2(:,11,:,1)).', p_fig2, 'linear').';
+fprintf('FIGURE2 volatility: benchmark interpolated to h = %.5f (sd %.4f), intermediate sd %.4f\n', ...
+        h_target, exp(h_target/2), exp(p_vol_grid2(1)/2));
 s_bas_f2  = 100*spread3(:,11);          % single price node, already at p_fig2
 fprintf(['FIGURE2 evaluated at p = %.4f  (own central nodes: full %.4f, ' ...
          'intermediate %.4f, basic %.4f)\n'], p_fig2, ...
