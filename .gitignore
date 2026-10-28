@@ -26,3 +26,5 @@ model/calib_stage2.log
 __pycache__/
 model/runs_diag/
 model/figures_pipeline/oil_rho090.mat
+model/runs_oildisrupt/
+model/figures_pipeline/oil_k*.mat
