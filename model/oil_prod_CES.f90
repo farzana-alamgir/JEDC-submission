@@ -109,6 +109,34 @@ parameter (use_common_p_grid = .false., mean_preserving = .false., p_width_sd = 
 DOUBLE PRECISION :: m_cache_y, m_cache_p, m_cache_val
 INTEGER :: m_cache_excl
 LOGICAL :: m_cache_valid = .false.
+!---------------------------------------------------------------------
+! VALUE-ADDED DEFAULT COST.
+!
+! The submitted penalty, max(0, d0*yt + d1*yt**2) with yt = EXP(y), is a
+! function of the ENDOWMENT alone, so the oil price never enters the default
+! decision except through the consumption level common to both branches. With
+! rho_p = 0.98 an oil price shock is very nearly permanent and shifts the
+! value of repaying and of defaulting by almost the same amount, so the
+! default margin barely moves. That is the quantitative reason every oil
+! channel comes out small -- see results/WHY_OPPOSITE.md.
+!
+! With va_default_cost = .true. the penalty is instead a function of VALUE
+! ADDED, output net of the oil bill, which shrinks when oil is expensive. A
+! higher oil price then LOWERS the absolute cost of defaulting, making default
+! relatively more attractive exactly when the importer is squeezed, so the
+! spread should respond more strongly rather than less.
+!
+! Value added is evaluated at the NO-DEFAULT TFP, which does not depend on the
+! penalty. That is what makes this a two-pass calculation rather than a fixed
+! point, and it matches how default costs are normally described: a share of
+! the output the country would otherwise have produced. It is normalised by
+! scale_y so it is O(1) like EXP(y), and va_default_cost = .false. reproduces
+! the submitted model exactly.
+!---------------------------------------------------------------------
+LOGICAL :: va_default_cost
+parameter (va_default_cost = .false.)
+DOUBLE PRECISION :: va_cache_y, va_cache_p, va_cache_val
+LOGICAL :: va_cache_valid = .false.
 
 CHARACTER(LEN = 10) :: outFormat
 
@@ -867,7 +895,7 @@ iter_bi =0
 ! p_initial=x1
 ! y_initial=x2
  A=(1d+0 - default_grid(i_excl_global)) * scale_y*EXP(y_initial) + &
-           default_grid(i_excl_global) * scale_y*(EXP(y_initial)  - max(zero, d0*EXP(y_initial) + d1*EXP(y_initial)**2))
+           default_grid(i_excl_global) * scale_y*(EXP(y_initial)  - defloss(y_initial, p_initial))
 ! x=mmin-((alpha/exp(p_initial))**(1/(1-theta)))*(alpha*mmin**theta+(1-alpha)*(exp(y_initial)**theta))**(1/theta)
 ! if (x .le. zero) then
 !A=scale_y*EXP(y_initial)
@@ -935,6 +963,90 @@ m_cache_valid = .true.
 
 
 end function func_m
+
+
+!---------------------------------------------------------------------
+! Normalised value added at the NO-DEFAULT TFP: (Y - p*m)/scale_y.
+!
+! Solves the same CES oil first-order condition as func_m but with the
+! undamaged TFP, so the result is independent of the default penalty and no
+! fixed point arises. Same relative bisection tolerance and bracket expansion
+! as func_m; the duplication is deliberate, so that the hot path in func_m is
+! untouched by this feature.
+!---------------------------------------------------------------------
+function va_norm(y_initial, p_initial)
+implicit none
+double precision, intent(in) :: y_initial, p_initial
+double precision :: va_norm, A, Y, d_bi, m_opt, mmin, mmax
+integer :: iter_bi
+integer, parameter :: itmax_bi = 5000
+double precision, parameter :: tol_bi = 1d-10
+
+if (va_cache_valid .and. y_initial == va_cache_y .and. p_initial == va_cache_p) then
+   va_norm = va_cache_val
+   return
+end if
+
+A = scale_y*EXP(y_initial)                       ! undamaged TFP
+mmin = 1d-16
+mmax = mmax_global
+do while (mmax < 1d+12 .and. &
+          mmax - ((alpha/exp(p_initial))**(1./(1.-theta))) &
+                 *(alpha*mmax**theta+(1-alpha)*(A**theta))**(1./theta) < zero)
+   mmax = mmax*2d+0
+end do
+
+d_bi = 1d+0
+iter_bi = 0
+m_opt = (mmin+mmax)/2d+0
+do while (iter_bi .le. itmax_bi .and. d_bi .ge. tol_bi*max(1d+0, abs(m_opt)))
+   m_opt = (mmin+mmax)/2d+0
+   d_bi = m_opt - ((alpha/exp(p_initial))**(1./(1.-theta))) &
+                  *(alpha*m_opt**theta+(1-alpha)*(A**theta))**(1./theta)
+   if (d_bi .le. zero) then
+      mmin = m_opt
+   else
+      mmax = m_opt
+   end if
+   d_bi = max(abs(d_bi), abs(mmin-mmax))
+   iter_bi = iter_bi + 1
+end do
+
+if (d_bi .ge. tol_bi*max(1d+0, abs(m_opt))) then
+   print *, 'iterations exceeded in va_norm'
+   print *, 'y_initial', y_initial, ' p_initial', exp(p_initial)
+   call exit
+end if
+
+Y = ((1-alpha)*A**theta + alpha*m_opt**theta)**(1./theta)
+va_norm = (Y - exp(p_initial)*m_opt)/scale_y
+
+va_cache_y     = y_initial
+va_cache_p     = p_initial
+va_cache_val   = va_norm
+va_cache_valid = .true.
+
+end function va_norm
+
+
+!---------------------------------------------------------------------
+! The default output penalty, in endowment units. Identical to the submitted
+! max(0, d0*EXP(y) + d1*EXP(y)**2) when va_default_cost = .false.; the only
+! change is which base the quadratic is evaluated at.
+!---------------------------------------------------------------------
+function defloss(y_initial, p_initial)
+implicit none
+double precision, intent(in) :: y_initial, p_initial
+double precision :: defloss, base
+
+if (va_default_cost) then
+   base = va_norm(y_initial, p_initial)
+else
+   base = EXP(y_initial)
+end if
+defloss = max(zero, d0*base + d1*base**2)
+
+end function defloss
 
 
 end module param
@@ -1707,7 +1819,7 @@ q = q_vector(i_b_next)
 
 
  TFP = (1d+0 - default_grid(i_excl_global)) * scale_y*EXP(y_initial) + &
-          default_grid(i_excl_global) * scale_y*(EXP(y_initial)  - max(zero, d0*EXP(y_initial) + d1*EXP(y_initial)**2))
+          default_grid(i_excl_global) * scale_y*(EXP(y_initial)  - defloss(y_initial, p_initial))
          ! print*,'TFP_objective', TFP
 !oil_spending= TFP*(alpha/exp(p_initial))**(1/(1-alpha))
 ! oil is disrupted exactly when the endowment loss applies, i.e. in default
@@ -1805,7 +1917,7 @@ do i_p_vol = 1,p_vol_num
             b_next   = b_grid(i_b_next)
             v1_matrix_new(i_y, i_p, i_p_vol) = objective_function(b_next)
 
-            TFP1_matrix(i_y, i_p, i_p_vol)= scale_y*(EXP(y_initial)  - max(zero, d0*EXP(y_initial) + d1*EXP(y_initial)**2))
+            TFP1_matrix(i_y, i_p, i_p_vol)= scale_y*(EXP(y_initial)  - defloss(y_initial, p_initial))
             oil1_matrix(i_y, i_p, i_p_vol)=func_m(y_initial,p_initial+log(1d+0+oil_disruption))
             output1_matrix(i_y, i_p, i_p_vol)=(((1.-alpha)*TFP1_matrix(i_y, i_p, i_p_vol)**theta)+(alpha*oil1_matrix(i_y, i_p, i_p_vol)**theta))**(1./theta)
 
@@ -2109,7 +2221,7 @@ do i_p_vol = 1,p_vol_num
 
             y_initial = y_grid(i_y)
             print*,'i_y', i_y
-        TFP1(i_y,i_p,i_p_vol)=scale_y*(EXP(y_initial)  - max(zero, d0*EXP(y_initial) + d1*EXP(y_initial)**2))
+        TFP1(i_y,i_p,i_p_vol)=scale_y*(EXP(y_initial)  - defloss(y_initial, p_initial))
         !print*, 'TFP1(i_y,i_p,i_p_vol)', TFP1(i_y,i_p,i_p_vol)
         m1(i_y,i_p,i_p_vol)=func_m(y_initial,p_initial+log(1d+0+oil_disruption))
        !m1(i_y,i_p,i_p_vol)=0d+0
@@ -2382,7 +2494,7 @@ do j=1,sample_num   !SOLVE FOR SAMPLE j
             i_b_next = i_b_zero
             b(i+1,j) = b_grid(i_b_next)
             q(i,j) = q_fun(i_b_next, i_y_current,i_p_current, i_p_vol_current)
-            y(i,j) = scale_y*(EXP(z_shock(i,j))  - max(zero, d0*EXP(z_shock(i,j)) + d1*EXP(z_shock(i,j))**2))
+            y(i,j) = scale_y*(EXP(z_shock(i,j))  - defloss(z_shock(i,j), p_grid(i_p_current, i_p_vol_current)))
             ! Country is in autarky this period, so its allocation is the default-state
             ! one, which depends on (y,p,sigma) only. c_matrix/oil_matrix/output_matrix
             ! at a zero-debt index would return the REPAY allocation (incl. new bond
@@ -2410,7 +2522,7 @@ do j=1,sample_num   !SOLVE FOR SAMPLE j
             i_b_next = i_b_zero
             b(i+1,j) = b_grid(i_b_next)
             q(i,j) = q_fun(i_b_next, i_y_current,i_p_current, i_p_vol_current)  !q_paid
-            y(i,j) = scale_y*(EXP(z_shock(i,j))  - max(zero, d0*EXP(z_shock(i,j)) + d1*EXP(z_shock(i,j))**2))
+            y(i,j) = scale_y*(EXP(z_shock(i,j))  - defloss(z_shock(i,j), p_grid(i_p_current, i_p_vol_current)))
             ! Default is chosen at (i_b_current,...), so c_matrix/oil_matrix/output_matrix
             ! there already hold the autarky (c1/oil1/output1) values. Indexing by
             ! i_b_next (= zero debt) would instead return the repay allocation.
