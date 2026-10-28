@@ -315,6 +315,30 @@ consumption1=cons_matrix;
 value1=v_matrix;
 output1=output_matrix;
 dprice_matrix_3=exp(p_grid_3_matrix(i_p_high,:))-exp(p_grid_3_matrix(i_p_low,:));
+
+% ---- matched-price contrast (per-state grid fix) --------------------------
+% This script loads oil_bm.mat above, so the FIGURE3 block below draws the
+% BENCHMARK's spread slope. It used to do so with the fixed-index method,
+% differencing spread_matrix at i_p_low/i_p_high and dividing every volatility
+% state by state 3's price interval. On per-state grids those intervals run
+% 1.2371 (state 1) to 5.9112 (state 5), so a wider-grid state gets a larger
+% numerator over an unchanged denominator and the ordering inverts: the
+% fixed-index version puts HIGH volatility on top (ratio 1.142) while the
+% matched-price version puts LOW volatility on top (0.621).
+%
+% run_all*.sh deletes FIGURE*.jpg before the bm stage, so this figure never
+% reached the published set -- but it did flash on screen during a run and
+% read as confirming the paper's claim. Same fix as script_bm.m.
+p_lo_common = max(exp(p_grid_matrix(1,     :)));
+p_hi_common = min(exp(p_grid_matrix(p_num, :)));
+p_mid_c  = exp(p_grid_matrix(ceil(p_num/2), 3));
+p_lo_tgt = max(0.90*p_mid_c, p_lo_common);
+p_hi_tgt = min(1.10*p_mid_c, p_hi_common);
+dprice_matched = p_hi_tgt - p_lo_tgt;
+slope_at_matched_prices = @(S4, i_b, i_vol) ( ...
+      interp1(exp(p_grid_matrix(:,i_vol)), squeeze(S4(i_b,:,:,i_vol)).', p_hi_tgt, 'linear') ...
+    - interp1(exp(p_grid_matrix(:,i_vol)), squeeze(S4(i_b,:,:,i_vol)).', p_lo_tgt, 'linear') ...
+    ) ./ dprice_matched;
 dvol_matrix=exp(p_vol_grid(4)/2)-exp(p_vol_grid(3)/2);
 pdf_p_matrix1 = zeros(p_vol_num,p_num); %will have r across the columns, and r_vol as the different rows
 
@@ -392,12 +416,8 @@ slopes_all = zeros(y_num, 3);
 for vol_idx = 1:3
     i_vol = vol_states(vol_idx);
     
-    % Spreads at low price (p=2) and high price (p=6)
-    spread_p2 = squeeze(spread_matrix(i_b3, :, i_p_low, i_vol));
-    spread_p6 = squeeze(spread_matrix(i_b3, :, i_p_high, i_vol));
-    
-    % Simple slope: ∆Spread / ∆Price
-    slopes_all(:, vol_idx) = (spread_p6 - spread_p2) ./ dprice;
+    % Matched-price slope -- see the note at dprice_matched above.
+    slopes_all(:, vol_idx) = slope_at_matched_prices(spread_matrix, i_b3, i_vol).';
 end
 
 figure('Position', [100, 100, 800, 600]);
