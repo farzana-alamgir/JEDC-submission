@@ -37,3 +37,8 @@ model/runs_va_final/
 model/solve_va_final.log
 model/param.mod
 model/shared_types.mod
+model/runs_kappa/
+model/kappa_sweep.sh
+model/kappa_sweep.log
+model/figures_pipeline/oil_kap*.mat
+model/figures_pipeline/FIGURE3_kappa3.jpg
