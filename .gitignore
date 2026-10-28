@@ -28,3 +28,8 @@ model/runs_diag/
 model/figures_pipeline/oil_rho090.mat
 model/runs_oildisrupt/
 model/figures_pipeline/oil_k*.mat
+model/runs_va/
+model/figures_pipeline/oil_va*.mat
+model/va_search*.sh
+model/va_search*.log
+model/va_final.*
