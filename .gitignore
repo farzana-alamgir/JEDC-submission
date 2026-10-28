@@ -18,3 +18,9 @@ model/figures_pipeline/FIGURE*.jpg
 model/runs_elasticity/
 model/runs_sigma03/
 model/runs_sigma03_d1/
+model/runs_final/
+model/runs_calib/
+model/calib_*.csv
+model/grid*.txt
+model/calib_stage2.log
+__pycache__/
