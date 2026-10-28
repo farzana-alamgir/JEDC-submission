@@ -126,17 +126,62 @@ is not identified in either direction (see §6 of `SUMMARY_OPTION_A.md`), so
 **[3] remains unmeasurable** at `p_num = 7`: the ±10% price contrast falls
 inside a single grid cell in every volatility state.
 
-## Figures
+## Figures — audit
 
-All ten drawn, no blank or sparse panels (`results/figures_final/`).
+Use **`results/figures_final_matched/`**: the level-matched set, drawn with
+`intermediate_matched` and `basic_matched`. `results/figures_final/` is the
+same calibration with the unmatched comparison economies and carries the
+inverted welfare ranking described above.
 
-- **FIGURE7 matches the paper** — both curves positive.
-- **FIGURE2 does not separate.** Full, Intermediate and Basic lie on top of
-  one another, which is exactly what a +2.1 bp (±4.5) channel should look
-  like. At `sigma_oil = 2` Basic sat visibly below. This figure no longer
-  carries a message and should either be dropped or re-cast around the
-  mean-preserving comparison, which *is* significant at +26.6 bp.
-- **FIGURE3** keeps the low-volatility-steepest ordering.
+All ten drawn, no blank or sparse panels.
+
+### Usable
+
+| figure | what it shows |
+|---|---|
+| **5** | debt amplification: High > Mean > Low Debt slope. The paper's strongest claim. |
+| **7** | welfare: Basic +0.53%, Intermediate +0.31%, both positive and correctly nested. |
+| **4a, 4b, 4c** | spread rising in the oil price, monotone and smooth. |
+| **6a, 6b** | debt policy functions; low oil price borrows more, clean default thresholds. |
+
+### Problematic
+
+**FIGURE2 — contradicts the paper.** The Basic schedule now sits *above* Full
+and Intermediate, i.e. removing oil price risk *raises* the spread schedule.
+That is consistent with the measured channel (−8.4 ± 4.6 bp) but is the
+opposite of the paper's claim. Drop it, or re-cast it around the
+mean-preserving comparison, which is significant and correctly signed at
++26.6 ± 5.2 bp.
+
+**FIGURE3 — not identified, and ordered against the claim.** Low volatility is
+steepest (ratio 0.79 against a claimed 3.0). See §6 of
+`SUMMARY_OPTION_A.md`: on per-state grids the slope is a chord whose span is
+set by that state's node spacing, so the ratio is not identified in either
+direction.
+
+**FIGURE4d — a grid artifact.** It conditions on fixed node indices 2/4/6, and
+on per-state grids those are different physical prices in each volatility
+state:
+
+| curve | state 1 | state 5 | ratio |
+|---|---|---|---|
+| "low price" (node 2) | 0.6675 | 0.2078 | 3.21x |
+| "mean price" (node 4) | 1.1275 | 1.1275 | **1.00x** |
+| "high price" (node 6) | 1.9045 | 6.1190 | 3.21x |
+
+The flat middle curve is the control: node 4 is the only node identical across
+states, and it is the only curve that does not move. The outer curves diverge
+because the conditioning price moves with volatility, not because `E[p']`
+responds to it. Fixing this needs the same matched-price interpolation applied
+to FIGURE3/FIGURE5, on `transition_matrix_joint`.
+
+### Presentational fixes applied
+
+FIGURE3 and FIGURE5 had hardcoded y-limits (0.09 and 0.35) set at the
+submitted calibration. At `sigma_oil = 0.30` the slopes run an order of
+magnitude smaller and both panels were crushed onto the axis. Both now
+autoscale, capped at the submitted limit so they never zoom out past the
+published scale. FIGURE7's legend moved off the upper curve.
 
 ## Honest summary
 

@@ -595,7 +595,16 @@ set(gca, 'FontSize', 14, 'LineWidth', 1.2, 'Box', 'on');
 % FIGURE5: output range moves with the price grid; autoscale
 xo5 = cell2mat(cellfun(@(v) v(isfinite(v)), output_vals, 'UniformOutput', false));
 xlim([min(xo5) max(xo5)]);
-ylim([-0.02, 0.35]);
+% Autoscale, same reason as FIGURE3: the slope LEVEL moves with the oil
+% elasticity, and at sigma_oil = 0.3 these run 0-0.05, so the submitted
+% [-0.02, 0.35] crushes the debt ordering into the bottom 15% of the panel.
+% Cap at the submitted 0.35 so it never zooms out past the published scale.
+fs5 = slopes_debt(isfinite(slopes_debt) & slopes_debt > 0);
+if isempty(fs5)
+    ylim([-0.02, 0.35]);
+else
+    ylim([-0.02, min(0.35, 1.15*max(fs5))]);
+end
 
 % Tight layout
 set(gca, 'LooseInset', get(gca, 'TightInset'));
@@ -1198,8 +1207,11 @@ ylabel('Welfare Gain (\% of Consumption)', 'FontSize', 16, 'FontWeight', 'bold',
 % Labels were swapped: h1 plots welfare_gain_full_to_BASE and h2 plots
 % welfare_gain_full_to_INT, but the legend named them the other way round.
 % Present in the submitted script too, so the published Figure 7 is mislabelled.
+% 'northwest' sat on top of the upper curve once the comparison economies were
+% level-matched and both gains turned positive. Place it on whichever side has
+% room, from the data rather than by hand.
 leg = legend([h1, h2], {'Full to Basic', 'Full to Intermediate'}, ...
-    'Location', 'northwest', 'FontSize', 14, 'Interpreter', 'latex');
+    'Location', 'east', 'FontSize', 14, 'Interpreter', 'latex');
 legend boxoff;
 
 % Axis settings
