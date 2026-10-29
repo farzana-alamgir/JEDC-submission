@@ -17,17 +17,22 @@
 % ---------------------------------------------------------------------------
 
 %% ---- configuration: point these at your solved runs ----------------------
-RUN_INTERMEDIATE = fullfile('..','runs_va_final','intermediate_matched');
+% The MIDDLE economy of FIGURE2. Two sensible choices:
+%   runs_va_final/intermediate_matched  - constant volatility
+%   runs_va_final/mp                    - mean-preserving (dispersion only)
+RUN_MIDDLE       = fullfile('..','runs_va_final','mp');
+FIG2_LABEL       = 'Mean-Preserving';     % legend text for that line
 RUN_BASIC        = fullfile('..','runs_va_final','basic_matched');
 RUN_BENCHMARK    = fullfile('..','runs_va_final','bm');
 
 % 'fraction' = the submitted relative price contrast (nodes 2 and 6 at p_num=7)
 setenv('CONTRAST_MODE','fraction');
+setenv('FIG2_MIDDLE_LABEL', FIG2_LABEL);
 
 fprintf('\n=== ALL_FIGURES ===\n');
-build_economy(RUN_INTERMEDIATE, 'oil_intermediate');
-build_economy(RUN_BASIC,        'oil_basic');
-build_economy(RUN_BENCHMARK,    'oil_bm');
+build_economy(RUN_MIDDLE,    'oil_intermediate');
+build_economy(RUN_BASIC,     'oil_basic');
+build_economy(RUN_BENCHMARK, 'oil_bm');
 fprintf('drawing...\n\n');
 
 %% ---- drawing (verbatim from script_bm.m) ---------------------------------
@@ -935,7 +940,14 @@ hold on;
 % node and cannot be interpolated anywhere else. Full and intermediate are
 % brought to it.
 p_fig2 = p_grid_basic;
-pm1 = exp(p_grid_matrix1(:,3));  pm2 = exp(p_grid_matrix2(:,1));
+% Which volatility state to read the comparison economy at. The INTERMEDIATE
+% economy has constant volatility, so all five slices are identical and the
+% index is immaterial. The MEAN-PRESERVING economy does NOT -- it keeps the
+% full volatility process and only removes the Jensen drift -- so taking slice
+% 1 would compare the benchmark against its LOWEST volatility state. Use the
+% middle slice, which is the shared one, for either.
+i_vol_cmp = ceil(size(spread2,4)/2);
+pm1 = exp(p_grid_matrix1(:,3));  pm2 = exp(p_grid_matrix2(:,i_vol_cmp));
 % ---- match the VOLATILITY too -------------------------------------------
 % The intermediate economy pins h at mu_h + var_h/2, a conditional sd of
 % 0.1250. The benchmark's five states are 0.0639 / 0.0856 / 0.1147 / 0.1538 /
@@ -944,16 +956,16 @@ pm1 = exp(p_grid_matrix1(:,3));  pm2 = exp(p_grid_matrix2(:,1));
 % so that mismatch flattered the benchmark. Interpolate the benchmark over h
 % to the intermediate's level -- h is the log variance and the grid is evenly
 % spaced in h, so interpolate there rather than in sd.
-h_target = p_vol_grid2(1);
+h_target = p_vol_grid2(i_vol_cmp);
 s_full_by_vol = zeros(size(spread1,1), numel(p_vol_grid1));
 for kk = 1:numel(p_vol_grid1)
     s_full_by_vol(:,kk) = interp1(exp(p_grid_matrix1(:,kk)), ...
                                   squeeze(spread1(:,11,:,kk)).', p_fig2, 'linear').';
 end
 s_full_f2 = 100*interp1(p_vol_grid1(:), s_full_by_vol.', h_target, 'linear').';
-s_int_f2  = 100*interp1(pm2, squeeze(spread2(:,11,:,1)).', p_fig2, 'linear').';
+s_int_f2  = 100*interp1(pm2, squeeze(spread2(:,11,:,i_vol_cmp)).', p_fig2, 'linear').';
 fprintf('FIGURE2 volatility: benchmark interpolated to h = %.5f (sd %.4f), intermediate sd %.4f\n', ...
-        h_target, exp(h_target/2), exp(p_vol_grid2(1)/2));
+        h_target, exp(h_target/2), exp(p_vol_grid2(i_vol_cmp)/2));
 s_bas_f2  = 100*spread3(:,11);          % single price node, already at p_fig2
 fprintf(['FIGURE2 evaluated at p = %.4f  (own central nodes: full %.4f, ' ...
          'intermediate %.4f, basic %.4f)\n'], p_fig2, ...
@@ -967,7 +979,11 @@ xlabel('Debt/GDP', 'FontSize', 16, 'FontWeight', 'bold', 'Interpreter', 'latex')
 ylabel('Annual Spread (\%)', 'FontSize', 16, 'FontWeight', 'bold', 'Interpreter', 'latex');
 
 % Legend
-leg = legend([h1, h2, h3], {'Full Model', 'Intermediate Model', 'Basic Model'}, ...
+% Label the middle economy from the environment, so the same code can draw
+% either the intermediate or the mean-preserving comparison.
+lbl_cmp = getenv('FIG2_MIDDLE_LABEL');
+if isempty(lbl_cmp), lbl_cmp = 'Intermediate Model'; end
+leg = legend([h1, h2, h3], {'Full Model', lbl_cmp, 'Basic Model'}, ...
     'Location', 'northwest', 'FontSize', 14);
 legend boxoff;
 
