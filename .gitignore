@@ -42,3 +42,16 @@ model/kappa_sweep.sh
 model/kappa_sweep.log
 model/figures_pipeline/oil_kap*.mat
 model/figures_pipeline/FIGURE3_kappa3.jpg
+model/runs_sdf/
+model/runs_k3cal/
+model/runs_k3_final/
+model/runs_calib_k3/
+model/sdf_k.*
+model/solve_k3_final.*
+model/calib_k3.log
+model/grid_k3.txt
+model/figures_pipeline/oil_sdf*.mat
+model/figures_pipeline/oil_k3cal.mat
+model/runs_common_v6/
+model/figures_pipeline/oil_common549.mat
+model/figures_pipeline/ml_common549.log
