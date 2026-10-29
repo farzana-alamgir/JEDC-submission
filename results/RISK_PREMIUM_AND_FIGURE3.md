@@ -1,95 +1,109 @@
-# A risk premium on oil price risk recovers FIGURE3's ordering
+# A risk premium on oil price risk: what it can and cannot do for FIGURE3
 
-Tested `kappa_risk`, the price of oil price risk in the lenders' stochastic
-discount factor, on top of the value-added default cost calibration. Runs in
-`model/runs_kappa/`, figure at `results/FIGURE3_kappa3.jpg`.
+**This file replaces an earlier version whose numbers were wrong.** The
+original reported that `kappa_risk = 3` flipped the FIGURE3 ordering (ratio
+1.235). That result came from a defective stochastic discount factor and does
+not survive the fix. The corrected finding is below.
 
-    log m' = -rstar + kappa*eps_p' - 0.5*kappa^2*Var(eps_p' | sigma')
+---
 
-`kappa > 0` makes the SDF high when oil is unexpectedly expensive. For an
-importer that is exactly when default is likely and the bond pays least, so
-the bond is a poor hedge and carries a premium. Crucially the normalisation
-uses the **state-specific** conditional variance, so the premium scales with
-each volatility state's own sd — which is the state dependence FIGURE3 claims.
+## The bug
 
-## Result: the ordering flips at kappa ~ 2.7
+The risk kernel was
 
-Spread slope at the matched-price contrast, i_b = 44:
+    log m' = -rstar + kappa*eps' - 0.5*kappa^2*sigma^2
 
-| kappa | vol 1 | vol 2 | vol 3 | vol 4 | vol 5 | ratio 4/2 |
-|---|---|---|---|---|---|---|
-| 0 | 0.03046 | 0.02379 | 0.01894 | 0.01478 | 0.01132 | 0.621 |
-| 0.5 | 0.03352 | 0.02693 | 0.02071 | 0.01714 | 0.01318 | 0.637 |
-| 1.0 | 0.03153 | 0.02607 | 0.02037 | 0.01819 | 0.01481 | 0.698 |
-| 2.0 | 0.02871 | 0.02490 | 0.02005 | 0.01927 | 0.01720 | 0.774 |
-| 2.5 | 0.02151 | 0.01985 | 0.01702 | 0.01812 | 0.01801 | 0.913 |
-| **3.0** | 0.01169 | 0.01291 | 0.01246 | 0.01595 | **0.01826** | **1.235** |
+where `-0.5*kappa^2*sigma^2` is the **lognormal** Jensen correction, which
+makes `E[m'] = exp(-rstar)` only for a *continuous normal* innovation. On the
+7-node Rouwenhorst grid `exp(kappa*eps)` spans orders of magnitude at
+`kappa = 3`, and the discrete expectation misses badly. Measured on the
+benchmark grid:
 
-Monotone in `kappa`, crossing 1 at about **2.7**. The mechanism is visible in
-the columns: the high-volatility slope rises steadily (0.0113 -> 0.0183, +61%)
-while the low-volatility slope falls. At `kappa = 3` the slope *increases*
-with volatility, and `FIGURE3_kappa3.jpg` shows High above Mean above Low for
-output above about 9.2 (it still reverses below that).
+    E[m]/exp(-rstar) across (p, sigma) cells:  0.0000 to 2559      (should be 1)
 
-## Correction to an earlier conclusion
+So `kappa_risk` was not pricing risk; it was applying an arbitrary,
+state-varying distortion to the discount factor.
 
-Earlier notes in this revision concluded that the FIGURE3 claim was
-"structurally unavailable in this model class", on the evidence that four
-separate interventions — lower `rho_p`, the oil-disruption premium, the
-value-added default cost, and matched-price measurement — all pushed the ratio
-further below 1.
+The clearest symptom was the constant-price economy. With `p_num = 1` the
+innovation is identically zero while the correction still applied, leaving
+`E[m] = exp(-rstar - 0.5*kappa^2*sigma^2)` — a pure shift in the discount
+rate with no risk in it at all. That economy reported a **22% spread with
+ZERO defaults in 500,000 periods**.
 
-**That was wrong, and the reason is identifiable.** All four were tested under
-**risk-neutral** pricing (`kappa_risk = 0`). Under risk neutrality the spread
-is a pure default probability, and as a function of today's price that is a
-step convolved with the conditional distribution of `p'` — widening the kernel
-can only flatten it. The convolution argument is correct, but it governs only
-the *default-probability* component of the spread. A risk premium is a second
-component the argument does not cover, and it scales with volatility in the
-opposite direction. Adding it reverses the sign.
+## The fix
 
-## What it costs
+The kernel is now normalised numerically on the actual grid:
 
-| | target | kappa = 0 | kappa = 2.5 | kappa = 3.0 |
-|---|---|---|---|---|
-| mean spread | 4.1 | 4.41 | 5.26 | 4.81 |
-| sd(spread) | 2.0 | 2.91 | 3.10 | 3.24 |
-| debt/GDP | 34.0 | **33.69** | 25.05 | **25.02** |
-| oil/GDP | 9.0 | 8.73 | 10.25 | 9.91 |
+    m' = exp(-rstar) * exp(kappa*eps') / Z(p, sigma'),
+    Z  = sum_j  pi(p -> p_j | sigma') * exp(kappa*eps_j)
 
-Two caveats, both real:
+so `E[m'] = exp(-rstar)` holds exactly by construction, for any grid including
+the degenerate `p_num = 1` case. `Z` is computed once in `compute_grid` and
+shared by all three use sites (`precompute_expectations`, `q_fun`,
+`q_def_free_fun`), so they cannot drift apart.
 
-1. **The calibration breaks.** debt/GDP falls to 25 against a 34 target. A
-   joint re-fit of `beta`, `d0`, `d1` at the chosen `kappa` is required before
-   any of these numbers can be reported. `kappa = 4` fails outright — only 284
-   default episodes and the spread collapses to 2.57.
+Verified: at `kappa_risk = 0`, `Z = 1.000000` exactly and the solver
+reproduces the previous baseline to **2.7e-15** (the residual is
+`EXP(a)*EXP(b)/1` rounding differently from `EXP(a+b)`).
 
-2. **The required price of risk is high.** `kappa = 3` implies a maximum
-   quarterly Sharpe ratio of `kappa * sd(eps_p) = 3 * 0.125 = 0.375`, roughly
-   0.75 annualised. That is above the equity Sharpe (~0.4) though within the
-   range used in the sovereign-debt asset-pricing literature. It needs
-   justifying, not asserting.
+## Corrected result
 
-## Magnitude
+Slope ratio (high/low volatility) at i_b = 44, value-added default cost,
+`sigma_oil = 0.30`:
 
-The ratio at `kappa = 3` is **1.235**, not the paper's 3.0. The *sign* and
-*ordering* are recovered; the *magnitude* is about a quarter of the claim.
-Pushing further requires `kappa` beyond 3, where the model degrades.
+| kappa | buggy kernel | **corrected kernel** |
+|---|---|---|
+| 0 | 0.621 | 0.621 |
+| 1 | 0.698 | 0.682 |
+| 2 | 0.774 | 0.722 |
+| 3 | **1.235** | **0.830** |
+| 5 | — | **1.199** |
 
-Note also that the published 3.0 was itself inflated by the per-state grid
-artifact (`SUMMARY_OPTION_A.md` §6), so 3.0 was never a clean target.
+The mechanism is real and points the right way — a risk premium loads more
+heavily on high-volatility states, and the ratio rises monotonically in
+`kappa`. But it rises about three times more slowly than the buggy version
+suggested, and at `kappa = 3` the ratio is **0.68 to 0.86 across the entire
+debt grid**, never above 1.
 
-## Recommendation
+## Where it crosses, and what that costs
 
-This is the right mechanism to put in the paper. Risk premia in sovereign
-spreads are standard and well documented, the model already implements it, and
-it answers R1 major 5 at the same time. The honest framing is:
+The ordering does flip, at roughly `kappa = 4`:
 
-- oil price risk raises spreads (+206 bp) and is welfare-costly (+0.73%) under
-  risk-neutral pricing already;
-- the *state dependence* of the spread response requires risk-averse lenders,
-  and is quantitatively modest (about 1.2x, not 3x);
-- under risk neutrality it has the opposite sign, which is itself a result
-  worth reporting since it isolates what the risk premium is doing.
+| | kappa = 0 | kappa = 3 | kappa = 5 |
+|---|---|---|---|
+| slope ratio (i_b = 44) | 0.621 | 0.830 | **1.199** |
+| mean spread (target 4.1) | 4.41 | 6.48 | 5.61 |
+| **debt/GDP (target 34.0)** | **33.69** | **18.06** | **8.11** |
+| oil/GDP (target 9.0) | 8.73 | 11.84 | 15.07 |
+| default episodes in 500k periods | 1423 | 395 | **95** |
+| implied max Sharpe, annualised | 0 | 0.75 | **1.25** |
 
-Next step if adopted: joint (beta, d0, d1) re-fit at `kappa = 3`, then redraw.
+At `kappa = 5` the country barely borrows — debt/GDP 8.1% against a 34%
+target — so the model no longer describes an indebted sovereign, which is the
+object the paper is about. The implied maximum Sharpe ratio of 1.25 a year is
+also well beyond any empirical benchmark (equities are about 0.4).
+
+**So the FIGURE3 ordering is attainable, but not at a calibration that also
+matches Table 3.** Raising `kappa` buys the ratio by destroying the debt
+moment. That is a different statement from "structurally impossible", and a
+weaker one than the earlier draft claimed — but it is not a result the paper
+can use.
+
+## What this does not change
+
+Everything in `VALUE_ADDED_DEFAULT_COST.md` stands, since it was computed at
+`kappa_risk = 0` where the bug is inert (`Z = 1`):
+
+- oil price risk raises spreads **+206.5 bp**
+- a 20% oil price move shifts the spread **43 bp**, ten times the endowment-cost model
+- debt amplification **112 -> 286 bp**
+- welfare of removing oil price risk **+0.73%**, inside the claimed +0.2% to +1.1%
+- FIGURE2, FIGURE5, FIGURE6a/6b and FIGURE7 all support the paper
+
+## Lesson for the code
+
+Any SDF added to this model must be checked for `E[m] = exp(-rstar)` **on the
+discrete grid** before its results are used. The analytic continuous-state
+correction is not a substitute, and the error is invisible at `kappa = 0`
+where everything is tested by default. `compute_grid` now prints the range of
+`Z` at startup so a broken kernel is visible immediately.
