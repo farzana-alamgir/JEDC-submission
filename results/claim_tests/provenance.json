@@ -1,0 +1,334 @@
+[
+  {
+    "group": "fin2",
+    "economy": "bm",
+    "directory": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_bm",
+    "parameters": {
+      "beta": 0.96,
+      "alpha": 0.3,
+      "theta": 0.5,
+      "d0": -0.246,
+      "d1": 0.3847,
+      "scale_y": 10.0,
+      "rho_p": 0.98,
+      "mean_p": 0.12
+    },
+    "iterations": 141,
+    "value_iteration_change": 0.0009568448353567405,
+    "bond_price_iteration_change": 0.6798829498424458,
+    "choice_price_identity_error": 0.0,
+    "max_expected_price_relative_range_across_volatility": 0.01148428658896826,
+    "bond_price_convergence_warning": true,
+    "inputs": [
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/src_bm.f90",
+        "sha256": "246ba4ea26c2e82c64292cf61b65b5f94fc69a50aa7c3ccf1e713f9990c62156"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_bm/graphs_b_grid_dss.txt",
+        "sha256": "10d0f5f6d8044f0c56408c4cd700fad02e754aab47b9190716e30f0140686ab6"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_bm/graphs_y_grid_dss.txt",
+        "sha256": "c39d3b2a36264f1fa114aa7b1e35a0186027b371fa5dc80eb8fef9dfac9df329"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_bm/graphs_p_grid_dss.txt",
+        "sha256": "beec6f3a66cf259fc38babd3b6c98c905d6ec2dc5cc86327d3650aefdbcbfd4c"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_bm/graphs_p_vol_grid_dss.txt",
+        "sha256": "f49c74ff4b8bf6b9e0f73464c35af7e79cf02b1ecf3eade041b00d510d67e7a9"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_bm/graphs_b_next_dss.txt",
+        "sha256": "6d584a33275faeeed6542de0e68fea78be13e774bdf1808d6ebcb045cad8ea72"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_bm/graphs_default_dss.txt",
+        "sha256": "d2105fabce23a28df4547810173d2d7dd43e5021533b926ff32359a731788931"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_bm/graphs_q_dss.txt",
+        "sha256": "ee47ee6b14f7a53d8776344cedd0cd0491cad5f200a16d71938607767fb46488"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_bm/graphs_q_paid_dss.txt",
+        "sha256": "51fd86d984c1416e1ddc63741282a8e66b6877f2b061bb82f2ae4b095d659d30"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_bm/graphs_dev_dss.txt",
+        "sha256": "bb24b8972253cc7e92f703a7f37ebb9a892495be2aba92e90701868249f7bae7"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_bm/graphs_trans_matrix_p.txt",
+        "sha256": "d0003636304ad83c5ac87a132c8987ee706e17334f8bea8140655464dbf5b683"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_bm/graphs_trans_matrix_p_vol.txt",
+        "sha256": "b047ad12e0abfb47777feaabb4900d675623b14915f867aa6a2c29907a029ed0"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_bm/graphs_trans_matrix_y.txt",
+        "sha256": "18e9c3f6f45dcae9681e34d26d8f26c2d00e0e20be1a65c210d7ed7e0091422f"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_bm/graphs_q_def_free.txt",
+        "sha256": "8eb500166eb6f3cff8c6075a92b4571d661437c86903016a0fecb03a0a33aee4"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_bm/param_calib.txt",
+        "sha256": "184af3556cf32090a265b3f5c8b2a2433e08ae1a235b5b9f8f4cf7f9e9aa13a0"
+      }
+    ]
+  },
+  {
+    "group": "fin2",
+    "economy": "mp",
+    "directory": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_mp",
+    "parameters": {
+      "beta": 0.96,
+      "alpha": 0.3,
+      "theta": 0.5,
+      "d0": -0.246,
+      "d1": 0.3847,
+      "scale_y": 10.0,
+      "rho_p": 0.98,
+      "mean_p": 0.12
+    },
+    "iterations": 143,
+    "value_iteration_change": 0.0008640336652376845,
+    "bond_price_iteration_change": 0.9260942331055818,
+    "choice_price_identity_error": 0.0,
+    "max_expected_price_relative_range_across_volatility": 8.589689435513418e-16,
+    "bond_price_convergence_warning": true,
+    "inputs": [
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/src_mp.f90",
+        "sha256": "fd70d3235df2898ca4db9d37d952302b0ad8223b14c8a767741b03ce368823e7"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_mp/graphs_b_grid_dss.txt",
+        "sha256": "10d0f5f6d8044f0c56408c4cd700fad02e754aab47b9190716e30f0140686ab6"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_mp/graphs_y_grid_dss.txt",
+        "sha256": "c39d3b2a36264f1fa114aa7b1e35a0186027b371fa5dc80eb8fef9dfac9df329"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_mp/graphs_p_grid_dss.txt",
+        "sha256": "beec6f3a66cf259fc38babd3b6c98c905d6ec2dc5cc86327d3650aefdbcbfd4c"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_mp/graphs_p_vol_grid_dss.txt",
+        "sha256": "f49c74ff4b8bf6b9e0f73464c35af7e79cf02b1ecf3eade041b00d510d67e7a9"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_mp/graphs_b_next_dss.txt",
+        "sha256": "61fefc2c7977cfe97108760352e4f4648e352e3d92163cc9e72550aa07ee21f2"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_mp/graphs_default_dss.txt",
+        "sha256": "2ee50753bbce8046497d7729659e8111525c169fab1312dbcb4952de5b7c52e3"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_mp/graphs_q_dss.txt",
+        "sha256": "d1a4b0e43e4eaab4a7051798c0a1bd3be241b7fc383b10fc3cf01100a8c3020a"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_mp/graphs_q_paid_dss.txt",
+        "sha256": "5abd69f193f670745b5feb0f9c082d5516b3859007961cdcd39119548af1ae4c"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_mp/graphs_dev_dss.txt",
+        "sha256": "ce9b21facd66edb500d92f721048b92d26dee1345b555b4f4e86f5eceeeb835f"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_mp/graphs_trans_matrix_p.txt",
+        "sha256": "6dd44ad4eb3ed14e03658a390010f00f53a29958d637f8865f821b6fe42f4a22"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_mp/graphs_trans_matrix_p_vol.txt",
+        "sha256": "b047ad12e0abfb47777feaabb4900d675623b14915f867aa6a2c29907a029ed0"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_mp/graphs_trans_matrix_y.txt",
+        "sha256": "18e9c3f6f45dcae9681e34d26d8f26c2d00e0e20be1a65c210d7ed7e0091422f"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_mp/graphs_q_def_free.txt",
+        "sha256": "8eb500166eb6f3cff8c6075a92b4571d661437c86903016a0fecb03a0a33aee4"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin2/run_mp/param_calib.txt",
+        "sha256": "184af3556cf32090a265b3f5c8b2a2433e08ae1a235b5b9f8f4cf7f9e9aa13a0"
+      }
+    ]
+  },
+  {
+    "group": "fin",
+    "economy": "bm",
+    "directory": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_bm",
+    "parameters": {
+      "beta": 0.96,
+      "alpha": 0.3,
+      "theta": 0.5,
+      "d0": -0.246,
+      "d1": 0.37,
+      "scale_y": 10.0,
+      "rho_p": 0.98,
+      "mean_p": 0.12
+    },
+    "iterations": 138,
+    "value_iteration_change": 0.0009542224700211932,
+    "bond_price_iteration_change": 0.8150167828244256,
+    "choice_price_identity_error": 0.0,
+    "max_expected_price_relative_range_across_volatility": 0.01148428658896826,
+    "bond_price_convergence_warning": true,
+    "inputs": [
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/src_bm.f90",
+        "sha256": "e26f54a5197c79550fbe63144424be44df274a53b1136e30ffc00a801e71f4da"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_bm/graphs_b_grid_dss.txt",
+        "sha256": "10d0f5f6d8044f0c56408c4cd700fad02e754aab47b9190716e30f0140686ab6"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_bm/graphs_y_grid_dss.txt",
+        "sha256": "c39d3b2a36264f1fa114aa7b1e35a0186027b371fa5dc80eb8fef9dfac9df329"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_bm/graphs_p_grid_dss.txt",
+        "sha256": "beec6f3a66cf259fc38babd3b6c98c905d6ec2dc5cc86327d3650aefdbcbfd4c"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_bm/graphs_p_vol_grid_dss.txt",
+        "sha256": "f49c74ff4b8bf6b9e0f73464c35af7e79cf02b1ecf3eade041b00d510d67e7a9"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_bm/graphs_b_next_dss.txt",
+        "sha256": "c909e1ca8dbdd92139e92df5560ffb08af6c63c084a51b01c8282e67f470d7cd"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_bm/graphs_default_dss.txt",
+        "sha256": "458c0e40cae08cd7762e760fba0e9304b062ff33854a425f4aa601363edb6d5b"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_bm/graphs_q_dss.txt",
+        "sha256": "8e11c6184a5e59135368a5d04294145aa41b8808b24c89d3f14f434a85eb3db7"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_bm/graphs_q_paid_dss.txt",
+        "sha256": "0a7305615b03e8c6cd92a17eac3c68a7941f899dc4f9fd52dcf872169f7f7011"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_bm/graphs_dev_dss.txt",
+        "sha256": "e69203422beef7d7ef15912c6f34f0c863fb14b51b425243895112233973fa53"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_bm/graphs_trans_matrix_p.txt",
+        "sha256": "d0003636304ad83c5ac87a132c8987ee706e17334f8bea8140655464dbf5b683"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_bm/graphs_trans_matrix_p_vol.txt",
+        "sha256": "b047ad12e0abfb47777feaabb4900d675623b14915f867aa6a2c29907a029ed0"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_bm/graphs_trans_matrix_y.txt",
+        "sha256": "18e9c3f6f45dcae9681e34d26d8f26c2d00e0e20be1a65c210d7ed7e0091422f"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_bm/graphs_q_def_free.txt",
+        "sha256": "8eb500166eb6f3cff8c6075a92b4571d661437c86903016a0fecb03a0a33aee4"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_bm/param_calib.txt",
+        "sha256": "37a6173eebc571f0467fffb57b4f1d99a3babb311697f65132ef98f72ccd0ef4"
+      }
+    ]
+  },
+  {
+    "group": "fin",
+    "economy": "mp",
+    "directory": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_mp",
+    "parameters": {
+      "beta": 0.96,
+      "alpha": 0.3,
+      "theta": 0.5,
+      "d0": -0.246,
+      "d1": 0.37,
+      "scale_y": 10.0,
+      "rho_p": 0.98,
+      "mean_p": 0.12
+    },
+    "iterations": 138,
+    "value_iteration_change": 0.000958492973296643,
+    "bond_price_iteration_change": 0.7369309196439111,
+    "choice_price_identity_error": 0.0,
+    "max_expected_price_relative_range_across_volatility": 8.589689435513418e-16,
+    "bond_price_convergence_warning": true,
+    "inputs": [
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/src_mp.f90",
+        "sha256": "555073e400782175725bc9e883c97e3bfca9de04f745059515a7ab2c53100b8b"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_mp/graphs_b_grid_dss.txt",
+        "sha256": "10d0f5f6d8044f0c56408c4cd700fad02e754aab47b9190716e30f0140686ab6"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_mp/graphs_y_grid_dss.txt",
+        "sha256": "c39d3b2a36264f1fa114aa7b1e35a0186027b371fa5dc80eb8fef9dfac9df329"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_mp/graphs_p_grid_dss.txt",
+        "sha256": "beec6f3a66cf259fc38babd3b6c98c905d6ec2dc5cc86327d3650aefdbcbfd4c"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_mp/graphs_p_vol_grid_dss.txt",
+        "sha256": "f49c74ff4b8bf6b9e0f73464c35af7e79cf02b1ecf3eade041b00d510d67e7a9"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_mp/graphs_b_next_dss.txt",
+        "sha256": "df1e0967246ee4039d637005c3b0a03b459146e22c7a633f95da74724a0077d7"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_mp/graphs_default_dss.txt",
+        "sha256": "b5ee61cc09aad3c3bc84d89524ee692882e6cca7fb8c096201315c8ab0606873"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_mp/graphs_q_dss.txt",
+        "sha256": "480eee7b57d7bed2c81657e608fc3b73d8145293d8860b188788c0a65e733874"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_mp/graphs_q_paid_dss.txt",
+        "sha256": "1dd3c8c3c17664f194e4a774171cb99b6aae621efd72541f36a4c929a817260a"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_mp/graphs_dev_dss.txt",
+        "sha256": "477049c3786d1423d70ba69b0582e0265358c7fed2c48afb2fd8746a2a803161"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_mp/graphs_trans_matrix_p.txt",
+        "sha256": "6dd44ad4eb3ed14e03658a390010f00f53a29958d637f8865f821b6fe42f4a22"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_mp/graphs_trans_matrix_p_vol.txt",
+        "sha256": "b047ad12e0abfb47777feaabb4900d675623b14915f867aa6a2c29907a029ed0"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_mp/graphs_trans_matrix_y.txt",
+        "sha256": "18e9c3f6f45dcae9681e34d26d8f26c2d00e0e20be1a65c210d7ed7e0091422f"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_mp/graphs_q_def_free.txt",
+        "sha256": "8eb500166eb6f3cff8c6075a92b4571d661437c86903016a0fecb03a0a33aee4"
+      },
+      {
+        "path": "/tmp/claude-501/-Users-farzanaalamgir-code-JEDC-submission/b6660bc3-6976-496e-b7a2-4e265f410095/scratchpad/fin/run_mp/param_calib.txt",
+        "sha256": "37a6173eebc571f0467fffb57b4f1d99a3babb311697f65132ef98f72ccd0ef4"
+      }
+    ]
+  }
+]

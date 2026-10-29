@@ -1,0 +1,11 @@
+economy,vol_state,conditional_sd_exp_h_over_2,E_price_next_at_ergodic_median
+full_SV,1,0.063885,1.12980302
+full_SV,2,0.085620,1.13164017
+full_SV,3,0.114750,1.13494757
+full_SV,4,0.153791,1.14091266
+full_SV,5,0.206115,1.15170604
+mean_preserving_SV,1,0.063885,1.13634645
+mean_preserving_SV,2,0.085620,1.13634645
+mean_preserving_SV,3,0.114750,1.13634645
+mean_preserving_SV,4,0.153791,1.13634645
+mean_preserving_SV,5,0.206115,1.13634645

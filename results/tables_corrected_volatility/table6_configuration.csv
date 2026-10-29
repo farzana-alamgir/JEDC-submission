@@ -1,0 +1,24 @@
+item,value,note
+volatility convention,exp(h/2),h is the log variance (stochvol y_t = exp(h_t/2)*eps_t)
+conditional sd by vol state,0.0639 / 0.0856 / 0.1147 / 0.1538 / 0.2061,quarterly sd of log oil price
+simulated sd(d log oil price),0.1261,data 0.1447 (empirical/oil_qtrly.xlsx real price 1995-2019)
+p_num,549,
+p_vol_num,5,
+b_num,100,
+y_num,21,
+p_width_sd,3.5,"narrowed from 6: sigma=2 floor is p > alpha^2 = 0.09"
+price grid,[0.1251 10.165],levels
+p_vol_width_sd,2.0,
+rho_p,0.98,
+mean_p,0.12,
+mean_p_vol,-4.33,
+rho_p_vol,0.66,
+eta,0.44,
+alpha,0.3,
+theta,0.5,sigma = 1/(1-theta) = 2
+beta,0.96,
+delta,0.03,long-term debt
+risk aversion sigma,2,CRRA
+discretisation,Tauchen,moment matching off
+burn-in,500 of each 1500-period sample,
+samples,500,

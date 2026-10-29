@@ -1,0 +1,8 @@
+moment,value
+sd(d log oil price) model,0.126102
+sd(d log oil price) data,0.1447
+OLS d_spread on d_log_oil_price (bp),132.608
+OLS d_spread on oil volatility (bp),-9.95697
+standardised oil price effect (bp per sd),16.7096
+standardised volatility effect (bp per sd),-0.36004
+sd(d spread) bp,175.199

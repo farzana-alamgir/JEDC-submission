@@ -1,0 +1,5 @@
+channel,spread_bp,se_bp,t_stat,default_pp_annual,mean_debt
+oil price variation at all (constant vol - constant price),+154.6,0.93,166.9,+1.1672,-0.1075
+total effect of time-varying volatility (full - constant vol),-0.3,0.51,-0.6,+0.0392,-0.0173
+  pure dispersion channel (mean-preserving - constant vol),-4.0,0.53,-7.6,+0.0272,-0.0197
+  expected-price (mean) channel (full - mean-preserving),+3.7,0.37,10.0,+0.0120,+0.0025

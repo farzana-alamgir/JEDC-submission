@@ -1,0 +1,170 @@
+[
+  {
+    "group": "current_branch",
+    "economy": "bm",
+    "directory": "results/current_branch_claims/damped005/raw/bm",
+    "parameters": {
+      "beta": 0.96,
+      "alpha": 0.3,
+      "theta": 0.5,
+      "d0": -0.246,
+      "d1": 0.3847,
+      "scale_y": 10.0,
+      "rho_p": 0.98,
+      "mean_p": 0.12
+    },
+    "solve_status": "NOT_CONVERGED_ITERATION_LIMIT",
+    "iterations": 300,
+    "value_iteration_change": 7.05875701001446e-06,
+    "bond_price_iteration_change": 0.49424531095908053,
+    "choice_price_identity_error": 0.0,
+    "max_expected_price_relative_range_across_volatility": 0.012186898862895413,
+    "bond_price_convergence_warning": true,
+    "inputs": [
+      {
+        "path": "results/current_branch_claims/damped005/raw/bm/source.f90",
+        "sha256": "d5fa496b1257b809e710eca1ec70ce2eb7dbf26d2267e38b0d699efd8f4ad2a0"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/bm/graphs_b_grid_dss.txt",
+        "sha256": "10d0f5f6d8044f0c56408c4cd700fad02e754aab47b9190716e30f0140686ab6"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/bm/graphs_y_grid_dss.txt",
+        "sha256": "c39d3b2a36264f1fa114aa7b1e35a0186027b371fa5dc80eb8fef9dfac9df329"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/bm/graphs_p_grid_dss.txt",
+        "sha256": "beec6f3a66cf259fc38babd3b6c98c905d6ec2dc5cc86327d3650aefdbcbfd4c"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/bm/graphs_p_vol_grid_dss.txt",
+        "sha256": "f49c74ff4b8bf6b9e0f73464c35af7e79cf02b1ecf3eade041b00d510d67e7a9"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/bm/graphs_b_next_dss.txt",
+        "sha256": "a42fc022410a218feab90ca1be29e9441b9986f59d557de63bd9e88ebd9bbe6c"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/bm/graphs_default_dss.txt",
+        "sha256": "815913f37b38e959c4e420f1b01b0e2b9c1c23ae0e9b8f93c5cb008a79620810"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/bm/graphs_q_dss.txt",
+        "sha256": "73285e754f4e386bdeb11e54495ab36f5e602dcf21ccf9ef16318944ccc8523c"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/bm/graphs_q_paid_dss.txt",
+        "sha256": "fa22f5af43a84c7c1b9b07665f139ca642abb1d301ee829d04606e4120e9408e"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/bm/graphs_dev_dss.txt",
+        "sha256": "27e2da7b0fcc8b70d5ae73861c667abafbf97a2fb1f028a4b50e60d94ac03598"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/bm/graphs_trans_matrix_p.txt",
+        "sha256": "a2cf868f1da578b5220cc5f7a565b057fd2ee0f7747f6b9608bf48b9c4c9d8db"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/bm/graphs_trans_matrix_p_vol.txt",
+        "sha256": "bd61f982dff2aea91f8ffb174b0161d09e16263cbb7901a391958be7ed31dca9"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/bm/graphs_trans_matrix_y.txt",
+        "sha256": "18e9c3f6f45dcae9681e34d26d8f26c2d00e0e20be1a65c210d7ed7e0091422f"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/bm/graphs_q_def_free.txt",
+        "sha256": "8eb500166eb6f3cff8c6075a92b4571d661437c86903016a0fecb03a0a33aee4"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/bm/param_calib.txt",
+        "sha256": "184af3556cf32090a265b3f5c8b2a2433e08ae1a235b5b9f8f4cf7f9e9aa13a0"
+      }
+    ]
+  },
+  {
+    "group": "current_branch",
+    "economy": "mp",
+    "directory": "results/current_branch_claims/damped005/raw/mp",
+    "parameters": {
+      "beta": 0.96,
+      "alpha": 0.3,
+      "theta": 0.5,
+      "d0": -0.246,
+      "d1": 0.3847,
+      "scale_y": 10.0,
+      "rho_p": 0.98,
+      "mean_p": 0.12
+    },
+    "solve_status": "NOT_CONVERGED_ITERATION_LIMIT",
+    "iterations": 300,
+    "value_iteration_change": 9.90029904635037e-06,
+    "bond_price_iteration_change": 0.31101265004909645,
+    "choice_price_identity_error": 0.0,
+    "max_expected_price_relative_range_across_volatility": 5.248858129991095e-15,
+    "bond_price_convergence_warning": true,
+    "inputs": [
+      {
+        "path": "results/current_branch_claims/damped005/raw/mp/source.f90",
+        "sha256": "36b18c5064685f722d1b6a9550d36d8b0cdada89563aca18f71d0324557ce165"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/mp/graphs_b_grid_dss.txt",
+        "sha256": "10d0f5f6d8044f0c56408c4cd700fad02e754aab47b9190716e30f0140686ab6"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/mp/graphs_y_grid_dss.txt",
+        "sha256": "c39d3b2a36264f1fa114aa7b1e35a0186027b371fa5dc80eb8fef9dfac9df329"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/mp/graphs_p_grid_dss.txt",
+        "sha256": "beec6f3a66cf259fc38babd3b6c98c905d6ec2dc5cc86327d3650aefdbcbfd4c"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/mp/graphs_p_vol_grid_dss.txt",
+        "sha256": "f49c74ff4b8bf6b9e0f73464c35af7e79cf02b1ecf3eade041b00d510d67e7a9"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/mp/graphs_b_next_dss.txt",
+        "sha256": "792af7eb7c49d57e906bfb1a8d53e704f9760ed051d160761472422a537ee3d2"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/mp/graphs_default_dss.txt",
+        "sha256": "3878c6996f096c2a43cbc2168b75062866b20439891136825fd6b0fc897daca4"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/mp/graphs_q_dss.txt",
+        "sha256": "08fa74826050adb9fbe0a3cf78806716fc5b0d14dd486de15f5bd529c0e56ef4"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/mp/graphs_q_paid_dss.txt",
+        "sha256": "33bd7a829c843a7ba16c71967232ffe3a35babed2e69e2764592b83d4ff480e4"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/mp/graphs_dev_dss.txt",
+        "sha256": "bc6ca62346f6d6bfbbbaac4e01521257aa3365118589f6ddaa5b85c5a41250de"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/mp/graphs_trans_matrix_p.txt",
+        "sha256": "84e086ba30312d523fdb16ee8401e782c7151ee598a8d51fba8b7ada4e5c2a06"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/mp/graphs_trans_matrix_p_vol.txt",
+        "sha256": "bd61f982dff2aea91f8ffb174b0161d09e16263cbb7901a391958be7ed31dca9"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/mp/graphs_trans_matrix_y.txt",
+        "sha256": "18e9c3f6f45dcae9681e34d26d8f26c2d00e0e20be1a65c210d7ed7e0091422f"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/mp/graphs_q_def_free.txt",
+        "sha256": "8eb500166eb6f3cff8c6075a92b4571d661437c86903016a0fecb03a0a33aee4"
+      },
+      {
+        "path": "results/current_branch_claims/damped005/raw/mp/param_calib.txt",
+        "sha256": "184af3556cf32090a265b3f5c8b2a2433e08ae1a235b5b9f8f4cf7f9e9aa13a0"
+      }
+    ]
+  }
+]

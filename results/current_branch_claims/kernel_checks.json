@@ -1,0 +1,12 @@
+[
+  {
+    "economy": "bm",
+    "max_transition_row_sum_error": 2.4424906541753444e-15,
+    "finite_nonnegative": true
+  },
+  {
+    "economy": "mp",
+    "max_transition_row_sum_error": 3.3306690738754696e-15,
+    "finite_nonnegative": true
+  }
+]

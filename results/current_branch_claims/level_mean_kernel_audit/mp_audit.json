@@ -1,0 +1,18 @@
+{
+  "economy": "mp",
+  "equilibrium_solved": false,
+  "alternative_discretization_only": true,
+  "mean_preserving": true,
+  "changed_rows": 2745,
+  "max_relative_level_mean_error": 2.020605904817785e-14,
+  "max_conditional_level_mean_range_across_current_vol_relative": 1.98274826401841e-14,
+  "max_interior_row_total_variation": 8.905326054087203e-12,
+  "max_row_total_variation": 0.147048350031158,
+  "old_stationary_weighted_row_total_variation": 2.3586907483313952e-05,
+  "max_absolute_log_mean_error": 0.015908724852402134,
+  "max_relative_log_variance_error": 0.7460931732609076,
+  "old_stationary_weighted_absolute_relative_log_variance_error": 0.0004327523323649169,
+  "variance_order_violations_across_future_vol": 0,
+  "minimum_price": 0.1250612215874377,
+  "oil_interior_price_threshold": 0.09
+}

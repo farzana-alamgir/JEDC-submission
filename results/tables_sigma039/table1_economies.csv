@@ -1,0 +1,5 @@
+economy,mean_spread_bp,se_bp,sd_spread_bp,default_rate_pct_annual,mean_debt,mean_price,mean_gdp,mean_oil_bill_over_gdp
+full_SV,470.9,0.93,252.7,3.6528,10.6342,1.37468,9.6982,0.0625
+mean_preserving_SV,479.8,1.08,263.3,3.9496,10.5437,1.36976,9.7035,0.0624
+constant_volatility,482.2,1.03,253.5,3.7160,10.6473,1.36949,9.7000,0.0624
+constant_price,485.6,1.16,326.1,4.4184,10.5111,1.37350,9.6901,0.0655

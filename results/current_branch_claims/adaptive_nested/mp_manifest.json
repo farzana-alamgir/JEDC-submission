@@ -1,0 +1,26 @@
+{
+  "economy": "mp",
+  "source_sha256": "4c6ffdd79d2b7a7cda32670b0e6641fefff1a824cd75d36e228c927dd476f9ff",
+  "commit": "0f27ce0482f3bb14a31cdd9de86cc528af761a29",
+  "tolerance": 1e-06,
+  "max_iterations": 1200,
+  "warm_start": "/Users/farzanaalamgir/code/JEDC_submission/results/current_branch_claims/nested/raw/mp",
+  "price_update_relaxation": 0.1,
+  "changed_equations": false,
+  "mean_preserving": true,
+  "algebraic_blas_acceleration": true,
+  "compiler_flags": [
+    "-O3",
+    "-march=native",
+    "-ffree-line-length-none",
+    "-framework",
+    "Accelerate"
+  ],
+  "instrumented_source_sha256": "50438c0ba66c57b8977ae6ac998912ed86c0b53dc6fae964d23b4ca091b232a4",
+  "method": "adaptive_nested_fixed_price_bellman",
+  "inner_tolerance": "max(1e-10,min(1e-6,0.001*last_outer_pricing_residual))",
+  "inner_cap": 200,
+  "uniform_value_correction": true,
+  "fixed_price_validation": false,
+  "pricing_residual_timing": "fresh at outer updates; retained on frozen sweeps"
+}

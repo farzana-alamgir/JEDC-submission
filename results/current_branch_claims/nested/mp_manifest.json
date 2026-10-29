@@ -1,0 +1,23 @@
+{
+  "economy": "mp",
+  "source_sha256": "4c6ffdd79d2b7a7cda32670b0e6641fefff1a824cd75d36e228c927dd476f9ff",
+  "commit": "0f27ce0482f3bb14a31cdd9de86cc528af761a29",
+  "tolerance": 1e-06,
+  "max_iterations": 600,
+  "warm_start": "/Users/farzanaalamgir/code/JEDC_submission/results/current_branch_claims/damped005/raw/mp",
+  "price_update_relaxation": 0.1,
+  "changed_equations": false,
+  "mean_preserving": true,
+  "algebraic_blas_acceleration": true,
+  "compiler_flags": [
+    "-O3",
+    "-march=native",
+    "-ffree-line-length-none",
+    "-framework",
+    "Accelerate"
+  ],
+  "method": "nested_fixed_price_bellman",
+  "inner_tolerance": 1e-09,
+  "inner_cap": 200,
+  "instrumented_source_sha256": "3bbb2a3835ebfc02890af644625b75f7692c0dfb274e901fcded3f5eb360a51e"
+}

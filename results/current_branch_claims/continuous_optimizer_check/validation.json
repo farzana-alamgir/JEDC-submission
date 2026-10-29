@@ -1,0 +1,9 @@
+{
+  "cases": 400,
+  "reference": "Independent NumPy polynomial roots of the quartic first-order equation, floor crossings and endpoints",
+  "seed": 48291,
+  "max_objective_discrepancy": 5.329070518200751e-15,
+  "max_reconstructed_objective_discrepancy": 5.329070518200751e-15,
+  "max_gain_over_coarse_choices": 1.7532293882521115,
+  "passed": true
+}

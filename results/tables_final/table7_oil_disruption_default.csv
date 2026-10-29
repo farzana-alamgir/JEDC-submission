@@ -1,0 +1,6 @@
+# R2 major comment 3: oil access disrupted during default (25% import premium).
+"# sigma=2, corrected exp(h/2) volatility, relative 1d-10 oil-demand bisection."
+economy,mean_spread_bp,se_bp,default_rate_pct_annual,mean_debt,mean_gdp
+benchmark (oil unaffected by default),431.9,1.17,3.4032,6.3613,6.2670
+oil disrupted in default (25% premium),461.8,1.19,3.6664,7.4174,6.2859
+difference,+29.9,0.73,+0.2632,+1.0561,+0.0189

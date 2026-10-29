@@ -1,0 +1,680 @@
+--- current_branch
++++ mp_nested
+@@ -1,3 +1,131 @@
++module fixed_policy_pricing
++use, intrinsic :: ieee_arithmetic, only:ieee_is_finite
++implicit none
++contains
++subroutine apply_policy_price(nb,ny,np,nh,ty,tp,th,decision,left,weight,q,coupon,discount,surviving,include_coupon,out,src,a,b)
++integer,intent(in)::nb,ny,np,nh,decision(nb,ny,np,nh),left(nb,ny,np,nh)
++double precision,intent(in)::ty(ny,ny),tp(np,np,nh),th(nh,nh),weight(nb,ny,np,nh),q(nb,ny,np,nh),coupon,discount,surviving
++logical,intent(in)::include_coupon
++double precision,intent(out)::out(nb,ny,np,nh)
++double precision,intent(inout)::src(nb,ny,np,nh),a(nb,ny,np,nh),b(nb,ny,np,nh)
++integer::ib,iy,ip,iv,iyn,ivn,j
++double precision::w,payoff,constant
++constant=0d0
++if(include_coupon)constant=coupon
++do iv=1,nh
++do ip=1,np
++do iy=1,ny
++do ib=1,nb
++ src(ib,iy,ip,iv)=0d0
++ if(decision(ib,iy,ip,iv)==1)then
++  j=left(ib,iy,ip,iv);w=weight(ib,iy,ip,iv)
++  payoff=(1d0-w)*q(j,iy,ip,iv)+w*q(j+1,iy,ip,iv)
++  src(ib,iy,ip,iv)=discount*(constant+surviving*payoff)
++ end if
++end do
++end do
++end do
++end do
++do iv=1,nh
++ do ip=1,np
++  do iy=1,ny
++   a(:,iy,ip,iv)=0d0
++   do iyn=1,ny
++    a(:,iy,ip,iv)=a(:,iy,ip,iv)+ty(iy,iyn)*src(:,iyn,ip,iv)
++   end do
++  end do
++ end do
++ call dgemm('N','T',nb*ny,np,np,1d0,a(1,1,1,iv),nb*ny,tp(1,1,iv),np,0d0,b(1,1,1,iv),nb*ny)
++end do
++out=0d0
++do iv=1,nh
++ do ivn=1,nh
++  out(:,:,:,iv)=out(:,:,:,iv)+th(iv,ivn)*b(:,:,:,ivn)
++ end do
++end do
++end subroutine apply_policy_price
++
++subroutine solve_fixed_policy_prices(nb,ny,np,nh,grid,policy,decision,ty,tp,th,qinitial,coupon,discount,surviving,tolerance, &
++ qsolution,initial_residual,final_residual,iterations,success)
++integer,intent(in)::nb,ny,np,nh,decision(nb,ny,np,nh)
++double precision,intent(in)::grid(nb),policy(nb,ny,np,nh),ty(ny,ny),tp(np,np,nh),th(nh,nh),qinitial(nb,ny,np,nh)
++double precision,intent(in)::coupon,discount,surviving,tolerance
++double precision,intent(out)::qsolution(nb,ny,np,nh),initial_residual,final_residual
++integer,intent(out)::iterations
++logical,intent(out)::success
++integer,allocatable::left(:,:,:,:)
++double precision,allocatable::weight(:,:,:,:),r(:,:,:,:),rhat(:,:,:,:),p(:,:,:,:),v(:,:,:,:),s(:,:,:,:),t(:,:,:,:)
++double precision,allocatable::src(:,:,:,:),a(:,:,:,:),b(:,:,:,:)
++double precision::rho,rho_old,alpha,omega,beta_k,denom,tt,db,qbound
++integer::ib,iy,ip,iv,j,it,fallback
++allocate(left(nb,ny,np,nh),weight(nb,ny,np,nh),r(nb,ny,np,nh),rhat(nb,ny,np,nh),p(nb,ny,np,nh),v(nb,ny,np,nh), &
++ s(nb,ny,np,nh),t(nb,ny,np,nh),src(nb,ny,np,nh),a(nb,ny,np,nh),b(nb,ny,np,nh))
++db=grid(2)-grid(1)
++do iv=1,nh
++do ip=1,np
++do iy=1,ny
++do ib=1,nb
++ j=max(1,min(nb-1,int((policy(ib,iy,ip,iv)-grid(1))/db)+1))
++ left(ib,iy,ip,iv)=j
++ weight(ib,iy,ip,iv)=max(0d0,min(1d0,(policy(ib,iy,ip,iv)-grid(j))/(grid(j+1)-grid(j))))
++end do
++end do
++end do
++end do
++qsolution=qinitial
++call apply_policy_price(nb,ny,np,nh,ty,tp,th,decision,left,weight,qsolution,coupon,discount,surviving,.true.,r,src,a,b)
++r=r-qsolution;initial_residual=maxval(abs(r));final_residual=initial_residual
++iterations=0;success=initial_residual<tolerance
++if(.not.success)then
++ rhat=r;p=0d0;v=0d0;rho_old=1d0;alpha=1d0;omega=1d0
++ do it=1,150
++  iterations=it
++  rho=sum(rhat*r)
++  if(.not.ieee_is_finite(rho).or.abs(rho)<1d-280)exit
++  if(it==1)then
++   p=r
++  else
++   if(abs(omega)<1d-280)exit
++   beta_k=(rho/rho_old)*(alpha/omega)
++   p=r+beta_k*(p-omega*v)
++  end if
++  call apply_policy_price(nb,ny,np,nh,ty,tp,th,decision,left,weight,p,coupon,discount,surviving,.false.,v,src,a,b)
++  v=p-v;denom=sum(rhat*v)
++  if(.not.ieee_is_finite(denom).or.abs(denom)<1d-280)exit
++  alpha=rho/denom;s=r-alpha*v
++  if(maxval(abs(s))<tolerance)then
++   qsolution=qsolution+alpha*p
++   exit
++  end if
++  call apply_policy_price(nb,ny,np,nh,ty,tp,th,decision,left,weight,s,coupon,discount,surviving,.false.,t,src,a,b)
++  t=s-t;tt=sum(t*t)
++  if(.not.ieee_is_finite(tt).or.tt<1d-280)exit
++  omega=sum(t*s)/tt
++  if(.not.ieee_is_finite(omega))exit
++  qsolution=qsolution+alpha*p+omega*s;r=s-omega*t
++  if(maxval(abs(r))<tolerance)exit
++  rho_old=rho
++ end do
++ ! Always test the actual pricing equation, not only the recursive Krylov residual.
++ call apply_policy_price(nb,ny,np,nh,ty,tp,th,decision,left,weight,qsolution,coupon,discount,surviving,.true.,r,src,a,b)
++ final_residual=maxval(abs(r-qsolution))
++ if(.not.ieee_is_finite(final_residual))then
++  qsolution=qinitial;final_residual=huge(1d0)
++ end if
++ ! Positive-contraction fallback if BiCGSTAB breaks down or its residual drifts.
++ do fallback=1,2000
++  if(final_residual<tolerance)exit
++  call apply_policy_price(nb,ny,np,nh,ty,tp,th,decision,left,weight,qsolution,coupon,discount,surviving,.true.,r,src,a,b)
++  final_residual=maxval(abs(r-qsolution));qsolution=r;iterations=iterations+1
++ end do
++ call apply_policy_price(nb,ny,np,nh,ty,tp,th,decision,left,weight,qsolution,coupon,discount,surviving,.true.,r,src,a,b)
++ final_residual=maxval(abs(r-qsolution))
++end if
++qbound=discount*coupon/(1d0-discount*surviving)
++success=ieee_is_finite(final_residual).and.final_residual<tolerance.and.minval(qsolution)>-1d-8.and.maxval(qsolution)<qbound+1d-8
++end subroutine solve_fixed_policy_prices
++end module fixed_policy_pricing
++
+ !**************************************************************************************************
+ 
+ !cd /Users/farzanaalamgir/code/JEDC_submission/model
+@@ -103,7 +231,7 @@
+ !---------------------------------------------------------------------
+ DOUBLE PRECISION :: kappa_risk
+ parameter (kappa_risk = 0d+0)
+-parameter (use_common_p_grid = .true., mean_preserving = .false., p_width_sd = 3.5d+0, p_vol_width_sd = 2d+0)
++parameter (use_common_p_grid = .true., mean_preserving = .true., p_width_sd = 3.5d+0, p_vol_width_sd = 2d+0)
+ 
+ ! Memo cache for func_m (see the comment in that function).
+ DOUBLE PRECISION :: m_cache_y, m_cache_p, m_cache_val
+@@ -155,6 +283,15 @@
+ DOUBLE PRECISION, DIMENSION(b_num, y_num, p_num, p_vol_num) :: q_fun_matrix, q_src
+ DOUBLE PRECISION, DIMENSION(y_num, p_num, p_vol_num) :: exp_v_excl_matrix, exc_aux_a, exc_aux_b
+ 
++DOUBLE PRECISION :: qdf_a(y_num,p_num,p_vol_num), qdf_b(y_num,p_num,p_vol_num), qdf_expect(y_num,p_num,p_vol_num)
++DOUBLE PRECISION :: continuous_b_choice,continuous_q_choice
++INTEGER :: continuous_ip,continuous_iv
++DOUBLE PRECISION :: control_b(b_num,y_num,p_num,p_vol_num),control_v(b_num,y_num,p_num,p_vol_num),control_q(b_num,y_num,p_num,p_vol_num)
++DOUBLE PRECISION :: policy_inner_residual
++INTEGER :: policy_price_iterations
++LOGICAL :: policy_price_success=.false.
++logical :: update_prices=.true.
++DOUBLE PRECISION :: q_schedule_old(b_num,y_num,p_num,p_vol_num), raw_schedule_residual
+ contains
+ 
+ 
+@@ -673,6 +810,7 @@
+ ! at the level of machine rounding. It is not bit-identical by construction.
+ !=====================================================================
+ SUBROUTINE precompute_expectations
++USE fixed_policy_pricing, only:solve_fixed_policy_prices
+ IMPLICIT NONE
+ INTEGER :: iy, iyn, ip, ipn, iv, ivn, ib
+ DOUBLE PRECISION :: w, m_const, coup_const, sdc_sdf, eps_sdf, m_sdf_s
+@@ -705,17 +843,10 @@
+ ! contiguous (b,y) slice instead keeps the accumulator in cache and streams
+ ! the source once per ipn.
+ do ivn = 1, p_vol_num
+-   do ip = 1, p_num
+-      acc_by = 0d+0
+-      acc_y  = 0d+0
+-      do ipn = 1, p_num
+-         w = trans_matrix_p(ip, ipn, ivn)
+-         acc_by = acc_by + w * exp_aux_a(:, :, ipn, ivn)
+-         acc_y  = acc_y  + w * exc_aux_a(:, ipn, ivn)
+-      end do
+-      exp_aux_b(:, :, ip, ivn) = acc_by
+-      exc_aux_b(:, ip, ivn)    = acc_y
+-   end do
++   call dgemm('N','T',b_num*y_num,p_num,p_num,1d0,exp_aux_a(1,1,1,ivn), &
++       b_num*y_num,trans_matrix_p(1,1,ivn),p_num,0d0,exp_aux_b(1,1,1,ivn),b_num*y_num)
++   call dgemm('N','T',y_num,p_num,p_num,1d0,exc_aux_a(1,1,ivn), &
++       y_num,trans_matrix_p(1,1,ivn),p_num,0d0,exc_aux_b(1,1,ivn),y_num)
+ end do
+ 
+ ! --- Step 3: contract over next-period volatility ---
+@@ -734,6 +865,7 @@
+ end do
+ 
+ 
++if (.false.) then
+ ! --- Bond price: the same contraction applied to the survival-weighted payoff ---
+ !
+ ! q(b',y,p,s) = sum_{s',p',y'} P_s P_p P_y * surv(b',y',p',s')
+@@ -788,19 +920,8 @@
+ ! E[m|p] = 7.1 at the top of the grid, so (1-delta)E[m] = 6.9 and q_def_free
+ ! diverged to 1e92.
+ do ivn = 1, p_vol_num
+-   sdc_sdf = std_u_p*exp(p_vol_grid(ivn)/2d+0)
+-   do ip = 1, p_num
+-      acc_by = 0d+0
+-      do ipn = 1, p_num
+-         eps_sdf = p_grid(ipn, ivn) &
+-                   - ((1d+0-rho_p)*mean_p + rho_p*p_grid(ip, ivn))
+-         m_sdf_s = EXP(-rstar + kappa_risk*eps_sdf &
+-                       - 0.5d+0*(kappa_risk**2)*(sdc_sdf**2))
+-         acc_by = acc_by + trans_matrix_p(ip, ipn, ivn) * m_sdf_s &
+-                  * exp_aux_a(:, :, ipn, ivn)
+-      end do
+-      exp_aux_b(:, :, ip, ivn) = acc_by
+-   end do
++   call dgemm('N','T',b_num*y_num,p_num,p_num,exp(-rstar),exp_aux_a(1,1,1,ivn), &
++       b_num*y_num,trans_matrix_p(1,1,ivn),p_num,0d0,exp_aux_b(1,1,1,ivn),b_num*y_num)
+ end do
+ 
+ do iv = 1, p_vol_num
+@@ -813,6 +934,43 @@
+    end do
+ end do
+ 
++end if
++coup_const=(rstar+delta)/(1d0+rstar)
++! Same default-free recursion, factored over y', p', h'.
++do ivn=1,p_vol_num
++   do ipn=1,p_num
++      do iy=1,y_num
++         qdf_a(iy,ipn,ivn)=0d0
++         do iyn=1,y_num
++            qdf_a(iy,ipn,ivn)=qdf_a(iy,ipn,ivn)+trans_matrix(iy,iyn) &
++                *(coup_const+(1d0-delta)*q_def_free_paid_matrix(iyn,ipn,ivn))
++         end do
++      end do
++   end do
++   call dgemm('N','T',y_num,p_num,p_num,exp(-rstar),qdf_a(1,1,ivn), &
++       y_num,trans_matrix_p(1,1,ivn),p_num,0d0,qdf_b(1,1,ivn),y_num)
++end do
++do iv=1,p_vol_num
++   qdf_expect(:,:,iv)=0d0
++   do ivn=1,p_vol_num
++      qdf_expect(:,:,iv)=qdf_expect(:,:,iv)+trans_matrix_p_vol(iv,ivn)*qdf_b(:,:,ivn)
++   end do
++end do
++! Relax the price schedule only; raw_schedule_residual tests the UNDAMPED pricing equation.
++if(update_prices)then
++ call solve_fixed_policy_prices(b_num,y_num,p_num,p_vol_num,b_grid,b0_next_matrix,default_decision, &
++ trans_matrix,trans_matrix_p,trans_matrix_p_vol,q_schedule_old,coup_const,exp(-rstar),1d0-delta,1d-10, &
++ q_fun_matrix,raw_schedule_residual,policy_inner_residual,policy_price_iterations,policy_price_success)
++ open(721,file='fixed_policy_pricing.csv',position='append')
++ write(721,*)counter,policy_price_iterations,raw_schedule_residual,policy_inner_residual,policy_price_success
++ close(721)
++end if
++if (update_prices) then
++q_fun_matrix=(1d0-3.000000000000d-01)*q_schedule_old+3.000000000000d-01*q_fun_matrix
++else
++q_fun_matrix=q_schedule_old
++end if
++q_schedule_old=q_fun_matrix
+ END SUBROUTINE precompute_expectations
+ 
+ !-----------------------------------------------------
+@@ -1173,6 +1331,13 @@
+          end if
+          call tauchen_fixed(p_num, p_grid_common, rho_p, mean_p, &
+                             std_u_p*exp(p_vol_grid(i)/2d+0), trans_matrix_p(:,:,i), mp_drift)
++         ! Audited finite-support level-moment correction, computed externally.
++         if(i==1)open(718,file='level_mean_kernel.txt',status='old')
++         do j=1,p_num
++            read(718,*)trans_matrix_p(j,:,i)
++         end do
++         if(i==p_vol_num)close(718)
++
+          ! Stationary distribution of the price chain conditional on this
+          ! volatility state, by power iteration on the kernel.
+          prob_vector_p(:, i) = 1d+0/dble(p_num)
+@@ -1600,6 +1765,8 @@
+ DOUBLE PRECISION :: exp_m, exp_q, y_next, m_next, coupon_next, argument
+ INTEGER :: i, i_p_vol_next, i_p_next
+ 
++q_def_free_fun = qdf_expect(i_y,i_p,i_p_vol)
++return
+ exp_m = 0d+0
+ exp_q = 0d+0
+ 
+@@ -1706,23 +1873,20 @@
+ 
+ end function objective_function
+ 
+-subroutine optimize(index_opt, v_value)
+-USE param
+-integer ::i, index_opt, index_vector(1)
+-DOUBLE PRECISION :: b_next, v_value,  vector(b_num)
+-DOUBLE PRECISION, EXTERNAL:: objective_function
+-
+-do i=1,b_num
+-   i_b_next = i
+-   b_next   = b_grid(i)
+-   vector(i)  = objective_function(b_next)
+-
+-end do
+-
+-index_vector = maxloc(vector)
+-v_value = vector(index_vector(1))
+-index_opt = index_vector(1)
+-
++subroutine optimize(index_opt,v_value)
++use param
++integer::index_opt,index_vector(1)
++double precision::v_value,resources_opt,tfp_opt,price_opt
++tfp_opt=scale_y*exp(y_initial)
++price_opt=exp(p_initial)
++if(theta/=0.5d0.or.sigma/=2d0)error stop 'Continuous optimizer requires theta=.5 and utility gamma=2'
++if(price_opt<=alpha**2)error stop 'No finite oil-input optimum'
++resources_opt=(1d0-alpha)**2*tfp_opt*price_opt/(price_opt-alpha**2)
++continuous_b_choice=control_b(i_b_global,i_y_global,continuous_ip,continuous_iv)
++v_value=control_v(i_b_global,i_y_global,continuous_ip,continuous_iv)
++continuous_q_choice=control_q(i_b_global,i_y_global,continuous_ip,continuous_iv)
++index_vector=minloc(abs(b_grid-continuous_b_choice));index_opt=index_vector(1)
++i_b_next=b_num
+ end subroutine optimize
+ 
+ subroutine iterate
+@@ -1736,10 +1900,15 @@
+ 
+ DOUBLE PRECISION, DIMENSION(b_num, y_num, p_num,p_vol_num) :: v_matrix_new, dev_matrix, dev_matrix_q
+ INTEGER i_b, i_y,i_p, i_p_vol, i_p_next, i_p_vol_next, i_b_optimal0, i_b_optimal1, i_y_next, i_b_prime
++INTEGER :: changes_d, changes_b, inner_steps=0, outer_steps=0
++DOUBLE PRECISION :: previous_bellman=1d0, inner_tolerance=1d-6, value_shift, continuous_change
++DOUBLE PRECISION :: old_continuous_b(b_num,y_num,p_num,p_vol_num), bellman_bound
++INTEGER :: old_d(b_num,y_num,p_num,p_vol_num), old_b(b_num,y_num,p_num,p_vol_num)
+ DOUBLE PRECISION, EXTERNAL:: q_fun, objective_function, q_def_free_fun
+-
+-
+-criteria = 1.0d-3   !CRITERIA FOR CONVERGENCE
++SAVE
++
++
++criteria = 1.000000000000d-07   !CRITERIA FOR CONVERGENCE
+ convergence = -1
+ 
+ 
+@@ -1747,6 +1916,15 @@
+    deviation = 0
+    deviation_q = 0
+    counter = counter + 1
++   update_prices = (counter == 1 .or. previous_bellman < inner_tolerance .or. inner_steps >= 200)
++   if (update_prices) then
++      outer_steps=outer_steps+1
++      inner_steps=0
++   end if
++   inner_steps=inner_steps+1
++   old_d = default_decision
++   old_b = b_next_matrix
++   old_continuous_b=b0_next_matrix
+ 
+ 
+ coupon = (rstar + delta )/ (1d+0 + rstar)
+@@ -1755,10 +1933,13 @@
+ ! by factorized contraction instead of a triple sum per (b',y,p,sigma). See
+ ! precompute_expectations for the algebra and the cost argument.
+ call precompute_expectations
++call build_continuous_controls
+ 
+ do i_p_vol = 1,p_vol_num
+       do i_p = 1,p_num
+       p_initial=p_grid(i_p,i_p_vol)
++      continuous_ip=i_p
++      continuous_iv=i_p_vol
+      ! print*, 'p_initial-ITERATE', p_initial
+          do i_y = 1,y_num
+             i_y_global = i_y
+@@ -1806,7 +1987,7 @@
+                ! THIS STEP FINDS THE OPTIMAL B_NEXT FOR A GIVEN INITIAL DEBT AND INCOME REALIZATION:
+                call optimize(i_b_optimal0, v_valor)
+ 
+-               b0_next_matrix(i_b, i_y, i_p, i_p_vol) = b_grid(i_b_optimal0)
++               b0_next_matrix(i_b, i_y, i_p, i_p_vol) = continuous_b_choice
+                b0_next_matrix_indice(i_b, i_y, i_p, i_p_vol) = i_b_optimal0
+ 
+                v0_matrix_new(i_b, i_y, i_p, i_p_vol) = v_valor
+@@ -1816,8 +1997,8 @@
+                oil0_matrix(i_b, i_y, i_p, i_p_vol)=func_m(y_initial,p_initial)
+             output0_matrix(i_b, i_y, i_p, i_p_vol)=(((1-alpha)*TFP0_matrix(i_b, i_y, i_p, i_p_vol)**theta)+(alpha*oil0_matrix(i_b, i_y, i_p, i_p_vol)**theta))**(1./theta)
+ 
+-               c0_matrix(i_b, i_y, i_p, i_p_vol)=output0_matrix(i_b, i_y, i_p, i_p_vol)- b_initial * coupon +(b_grid(i_b_optimal0)-&
+-               (1d+0 - delta)*b_initial)* q_fun_matrix(i_b_optimal0, i_y,i_p,i_p_vol)-exp(p_initial)*oil0_matrix(i_b, i_y, i_p, i_p_vol)
++               c0_matrix(i_b, i_y, i_p, i_p_vol)=output0_matrix(i_b, i_y, i_p, i_p_vol)- b_initial * coupon +(continuous_b_choice-&
++               (1d+0 - delta)*b_initial)* continuous_q_choice-exp(p_initial)*oil0_matrix(i_b, i_y, i_p, i_p_vol)
+ !
+ 
+                ! NOW, CHECK IF FOR THIS COMBINATION (b_initial,y_initial, i_r, i_r_vol) IT IS OPTIMAL TO DEFAULT OR NOT
+@@ -1843,7 +2024,7 @@
+                   c_matrix(i_b, i_y,i_p, i_p_vol) = c0_matrix(i_b,i_y,i_p, i_p_vol)
+ 
+ 
+-                  q_paid_matrix_new(i_b, i_y,i_p, i_p_vol) =  q_fun_matrix(i_b_optimal0, i_y,i_p, i_p_vol)
++                  q_paid_matrix_new(i_b, i_y,i_p, i_p_vol) = continuous_q_choice
+ !
+ 
+                end if
+@@ -1862,8 +2043,52 @@
+       end do
+    end do
+ 
+-   WRITE(*, *) counter, deviation, deviation_q
+-
++   continuous_change=maxval(abs(b0_next_matrix-old_continuous_b),mask=default_decision==1)
++   open(717,file="continuous_debt_change.csv",position="append")
++   write(717,*)counter,continuous_change
++   close(717)
++   previous_bellman=deviation
++   inner_tolerance=max(1d-10,min(1d-6,1d-3*raw_schedule_residual))
++   changes_d = count(default_decision /= old_d)
++   changes_b = count(b_next_matrix /= old_b)
++   WRITE(*, *) counter, deviation, deviation_q, changes_d, changes_b
++   flush(6)
++   open(711,file='convergence.csv',position='append')
++   write(711,'(I0,2(A,ES24.16),2(A,I0))') counter,',',deviation,',',deviation_q,',',changes_d,',',changes_b
++   close(711)
++   open(714,file='pricing_residual.csv',position='append')
++   write(714,'(I0,A,ES24.16)') counter,',',raw_schedule_residual
++   close(714)
++   open(715,file='nested_history.csv',position='append')
++   write(715,*) counter,outer_steps,inner_steps,update_prices,deviation,raw_schedule_residual
++   close(715)
++   open(716,file='switching_states.txt',status='replace')
++   do i_p_vol=1,p_vol_num
++   do i_p=1,p_num
++   do i_y=1,y_num
++   do i_b=1,b_num
++      if (default_decision(i_b,i_y,i_p,i_p_vol) /= old_d(i_b,i_y,i_p,i_p_vol)) &
++      write(716,*) i_b,i_y,i_p,i_p_vol,b_grid(i_b),y_grid(i_y),p_grid(i_p,i_p_vol), &
++      v0_matrix_new(i_b,i_y,i_p,i_p_vol)-v1_matrix_new(i_y,i_p,i_p_vol), &
++      old_d(i_b,i_y,i_p,i_p_vol),default_decision(i_b,i_y,i_p,i_p_vol)
++   end do
++   end do
++   end do
++   end do
++   close(716)
++
++    ! A common additive shift preserves every policy comparison at fixed prices.
++    ! B(V+c)=B(V)+beta*c. Remove the anchor's uniform value-error component.
++    value_shift=v_matrix_new(1,11,275,3)-v_matrix(1,11,275,3)
++    bellman_bound=beta*max(maxval(abs(v_matrix_new-v_matrix-value_shift)), &
++                         maxval(abs(v1_matrix_new-v1_matrix-value_shift)))
++    open(719,file='bellman_bound.csv',position='append')
++    write(719,*)counter,bellman_bound
++    close(719)
++    value_shift=beta/(1d0-beta)*(v_matrix_new(1,11,275,3)-v_matrix(1,11,275,3))
++    v_matrix_new=v_matrix_new+value_shift
++    v0_matrix_new=v0_matrix_new+value_shift
++    v1_matrix_new=v1_matrix_new+value_shift
+     !UPDATE VALUES OF MATRICES
+    v0_matrix = v0_matrix_new
+    v1_matrix = v1_matrix_new
+@@ -1874,7 +2099,14 @@
+ 
+ 
+ ! FINALLY, CHECK WHETHER THE NEW DEVIATION IS SMALLER THAN THE TOLERANCE LEVEL (CALLED CRITERIA IN THIS CODE)
+-   if (deviation < criteria .or. counter > 1499) then
++   if ((deviation < criteria .and. deviation_q < criteria .and. changes_d == 0 .and. changes_b == 0 .and. continuous_change < criteria .and. bellman_bound < criteria .and. raw_schedule_residual < criteria .and. policy_price_success .and. update_prices) .or. counter >= 600) then
++      open(712,file='solve_status.txt')
++      if (deviation < criteria .and. deviation_q < criteria .and. changes_d == 0 .and. changes_b == 0 .and. continuous_change < criteria .and. bellman_bound < criteria .and. raw_schedule_residual < criteria .and. policy_price_success .and. update_prices) then
++         write(712,*) 'CONVERGED'
++      else
++         write(712,*) 'NOT_CONVERGED_ITERATION_LIMIT'
++      end if
++      close(712)
+ 
+ !3) SAVE RESULTS OF THE CURRENT ITERATION
+       open (8, FILE='graphs_output_dss.txt',STATUS='replace')
+@@ -2071,7 +2303,7 @@
+ call compute_grid
+ call solve_q_nodef
+ 
+-indicator_external = 0 !IF SET TO 1 OR LARGER, CODE WILL START FROM PREVIOUSLY STORED ITERATION
++indicator_external = 1 !IF SET TO 1 OR LARGER, CODE WILL START FROM PREVIOUSLY STORED ITERATION
+ 
+ if (indicator_external < 0.5d+0) then
+ 
+@@ -2139,9 +2371,12 @@
+       open (14, FILE='graphs_q_paid_dss.txt')
+       open (17, FILE='graphs_counter.txt')
+       open (19, FILE='graphs_q_def_free_dss.txt')
++      open (713, FILE='graphs_q_dss.txt')
++      open (720, FILE='graphs_b0_next_dss.txt')
+ 
+ 
+         READ(17,*) counter
++        counter = 0
+         write(*,*) counter
+ 
+           do i_p_vol = 1,p_vol_num
+@@ -2156,6 +2391,8 @@
+ 
+ 
+                READ(14, *) q_paid_matrix(i_b, i_y,i_p, i_p_vol)
++               READ(713, *) q_schedule_old(i_b,i_y,i_p,i_p_vol)
++               READ(720,*) b0_next_matrix(i_b,i_y,i_p,i_p_vol)
+                READ(12, *) b_next_matrix(i_b, i_y,i_p, i_p_vol)
+ 
+                READ(9, *) v_matrix(i_b, i_y,i_p, i_p_vol), v0_matrix(i_b, i_y,i_p, i_p_vol), v1_matrix(i_y,i_p, i_p_vol)
+@@ -2180,13 +2417,15 @@
+    close (14)
+    CLOSE(17)
+    CLOSE(19)
++   close(713)
++   close(720)
+ 
+ 
+ end if
+ 
+ !write(*,*)'prob excl end', prob_excl_end
+ call iterate
+-call simulate
++! Deterministic policy tests do not require simulation.
+ 
+ 
+ 
+@@ -2564,3 +2803,158 @@
+ 
+ 
+ 
++
++! Global maximization with linearly interpolated price and continuation value.
++! On each debt interval, consumption is quadratic and continuation is linear.
++! Split at consumption-floor crossings and utility-curvature roots; the first
++! derivative is monotone on each remaining piece, so every interior maximum is
++! found by a bracketed derivative root. No local-unimodality assumption is used.
++subroutine continuous_debt(n,grid,q,ev,resources,current_b,beta,delta,coupon,bstar,vstar,qstar)
++implicit none
++integer,intent(in)::n
++double precision,intent(in)::grid(n),q(n),ev(n),resources,current_b,beta,delta,coupon
++double precision,intent(out)::bstar,vstar,qstar
++double precision::aa,bb,cc,es,el,ql,width,issuance,x,c,vc,cmax,upper
++ double precision::points(8),left,right,dl,dr,mid,dm,tmp,root,curvature,trial,cons_root,slope_root
++integer::j,k,l,np,it
++vstar=-huge(1d0);bstar=grid(1);qstar=q(1)
++do j=1,n
++ c=resources-current_b*coupon+q(j)*(grid(j)-(1d0-delta)*current_b)
++ vc=-1d0/max(c,1d-10)+beta*ev(j)
++ if(vc>vstar)then
++  vstar=vc;bstar=grid(j);qstar=q(j)
++ end if
++end do
++do j=1,n-1
++ width=grid(j+1)-grid(j)
++ ql=q(j);cc=(q(j+1)-q(j))/width
++ es=(ev(j+1)-ev(j))/width;el=ev(j)
++ issuance=grid(j)-(1d0-delta)*current_b
++ aa=resources-current_b*coupon+ql*issuance
++ bb=ql+cc*issuance
++ cmax=max(aa,aa+bb*width+cc*width*width)
++ if(cc<0d0)then
++  x=-bb/(2d0*cc)
++  if(x>0d0.and.x<width)cmax=max(cmax,aa+bb*x+cc*x*x)
++ end if
++ upper=-1d0/max(cmax,1d-10)+beta*max(ev(j),ev(j+1))
++ if(upper<=vstar)cycle
++ np=2;points(1)=0d0;points(2)=width
++ call add_roots(cc,bb,aa-1d-10)
++ call add_roots(-6d0*cc*cc,-6d0*bb*cc,2d0*cc*aa-2d0*bb*bb)
++ do k=2,np
++  tmp=points(k);l=k-1
++  do while(l>=1)
++   if(points(l)<=tmp)exit
++   points(l+1)=points(l);l=l-1
++  end do
++  points(l+1)=tmp
++ end do
++ do k=1,np
++  call consider(points(k))
++ end do
++ do k=1,np-1
++  left=points(k);right=points(k+1)
++  if(right-left<1d-13*max(1d0,width))cycle
++  mid=.5d0*(left+right)
++  if(aa+bb*mid+cc*mid*mid<=1d-10)cycle
++  dl=deriv(left);dr=deriv(right)
++  if(dl*dr>=0d0)cycle
++  mid=.5d0*(left+right);root=mid
++  do it=1,60
++   dm=deriv(mid)
++   if(dm==0d0)then
++    root=mid;exit
++   end if
++   if((dm>0d0).eqv.(dl>0d0))then
++    left=mid;dl=dm
++   else
++    right=mid
++   end if
++   if(right-left<1d-11*max(1d0,width))then
++    root=.5d0*(left+right);exit
++   end if
++   cons_root=max(aa+bb*mid+cc*mid*mid,1d-10)
++   slope_root=bb+2d0*cc*mid
++   curvature=(2d0*cc*cons_root-2d0*slope_root*slope_root)/(cons_root**3)
++   trial=.5d0*(left+right)
++   if(abs(curvature)>1d-30)then
++    tmp=mid-dm/curvature
++    if(tmp>left.and.tmp<right)then
++     trial=tmp
++     if(abs(trial-mid)<1d-11*max(1d0,width))then
++      root=trial;exit
++     end if
++    end if
++   end if
++   mid=trial;root=mid
++  end do
++  call consider(root)
++ end do
++end do
++contains
++subroutine add_roots(a,b,c0)
++double precision,intent(in)::a,b,c0
++double precision::disc,r1,r2,stable
++if(abs(a)<1d-25)then
++ if(abs(b)>1d-25)then
++  r1=-c0/b
++  if(r1>0d0.and.r1<width)then
++   np=np+1;points(np)=r1
++  end if
++ end if
++else
++ disc=b*b-4d0*a*c0
++ if(disc>=0d0)then
++  stable=-.5d0*(b+sign(sqrt(disc),b))
++  if(abs(stable)>1d-300)then
++   r1=stable/a;r2=c0/stable
++  else
++   r1=-b/(2d0*a);r2=r1
++  end if
++  if(r1>0d0.and.r1<width)then
++   np=np+1;points(np)=r1
++  end if
++  if(r2>0d0.and.r2<width)then
++   np=np+1;points(np)=r2
++  end if
++ end if
++end if
++end subroutine add_roots
++subroutine consider(xx)
++double precision,intent(in)::xx
++double precision::vv,cons
++cons=aa+bb*xx+cc*xx*xx
++vv=-1d0/max(cons,1d-10)+beta*(el+es*xx)
++if(vv>vstar)then
++ vstar=vv;bstar=grid(j)+xx;qstar=ql+cc*xx
++end if
++end subroutine consider
++double precision function deriv(xx)
++double precision,intent(in)::xx
++double precision::cons
++cons=max(aa+bb*xx+cc*xx*xx,1d-10)
++deriv=(bb+2d0*cc*xx)/(cons*cons)+beta*es
++end function deriv
++end subroutine continuous_debt
++
++subroutine build_continuous_controls
++use param
++implicit none
++integer::iv,ip,iy,ib
++double precision::price_local,resources_local
++!$omp parallel do collapse(3) default(shared) private(iv,ip,iy,ib,price_local,resources_local) schedule(static)
++do iv=1,p_vol_num
++do ip=1,p_num
++do iy=1,y_num
++ price_local=exp(p_grid(ip,iv))
++ resources_local=(1d0-alpha)**2*scale_y*exp(y_grid(iy))*price_local/(price_local-alpha**2)
++ do ib=1,b_num
++  call continuous_debt(b_num,b_grid,q_fun_matrix(:,iy,ip,iv),exp_v_matrix(:,iy,ip,iv), &
++  resources_local,b_grid(ib),beta,delta,coupon,control_b(ib,iy,ip,iv),control_v(ib,iy,ip,iv),control_q(ib,iy,ip,iv))
++ end do
++end do
++end do
++end do
++!$omp end parallel do
++end subroutine build_continuous_controls

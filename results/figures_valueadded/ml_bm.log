@@ -1,0 +1,11 @@
+price-node contrast: low = 2, high = 6 of 7  (prices 0.4397 and 2.8911)
+mean output: 9.3875 (masked)  vs 9.3875e+00 (unmasked)
+matched-price contrast: 1.0147 -> 1.2402 (dp=0.2255); common support [0.5136, 2.4753]
+[Warning: Exported image displays axes toolbar. To remove axes toolbar from
+image, export again.] 
+Figure 4c saved.
+FIGURE4d price nodes (ergodic p10/p50/p90): 0.4397 1.1275 2.8911
+Figure 4d saved.
+FIGURE2 volatility: benchmark interpolated to h = -4.15849 (sd 0.1250), intermediate sd 0.1250
+FIGURE2 evaluated at p = 1.3339  (own central nodes: full 1.1275, intermediate 1.1090, basic 1.3339)
+Figure 2 saved.

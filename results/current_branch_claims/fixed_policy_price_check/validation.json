@@ -1,0 +1,74 @@
+{
+  "passed": true,
+  "cases": 11,
+  "states_per_case": 252,
+  "reference": "Independently assembled dense zero-profit matrix and NumPy direct solve; includes persistent kernels and continuous-Y repayment weights",
+  "tests": [
+    {
+      "case": 0,
+      "iterations": 8,
+      "maximum_solution_error": 1.2312706410000374e-11,
+      "maximum_dense_equation_residual": 9.323097849289752e-13
+    },
+    {
+      "case": 1,
+      "iterations": 1,
+      "maximum_solution_error": 0.0,
+      "maximum_dense_equation_residual": 0.0
+    },
+    {
+      "case": 2,
+      "iterations": 7,
+      "maximum_solution_error": 1.8107459975880147e-12,
+      "maximum_dense_equation_residual": 1.1981665659632768e-12
+    },
+    {
+      "case": 3,
+      "iterations": 8,
+      "maximum_solution_error": 7.73070496506989e-12,
+      "maximum_dense_equation_residual": 8.678925633720525e-12
+    },
+    {
+      "case": 4,
+      "iterations": 8,
+      "maximum_solution_error": 8.449713151392757e-12,
+      "maximum_dense_equation_residual": 8.97835278346193e-12
+    },
+    {
+      "case": 5,
+      "iterations": 6,
+      "maximum_solution_error": 1.4793166691617898e-12,
+      "maximum_dense_equation_residual": 1.070844801720483e-12
+    },
+    {
+      "case": 6,
+      "iterations": 8,
+      "maximum_solution_error": 4.5232151357765815e-12,
+      "maximum_dense_equation_residual": 4.575090306602192e-12
+    },
+    {
+      "case": 7,
+      "iterations": 32,
+      "maximum_solution_error": 4.5502268619657116e-11,
+      "maximum_dense_equation_residual": 8.203264456607684e-12
+    },
+    {
+      "case": 8,
+      "iterations": 49,
+      "maximum_solution_error": 6.65348887096684e-11,
+      "maximum_dense_equation_residual": 4.225439442784307e-12
+    },
+    {
+      "case": 9,
+      "iterations": 19,
+      "maximum_solution_error": 3.2889774237432334e-11,
+      "maximum_dense_equation_residual": 7.273161239940151e-12
+    },
+    {
+      "case": 10,
+      "iterations": 20,
+      "maximum_solution_error": 2.272249055579323e-11,
+      "maximum_dense_equation_residual": 5.911882094977727e-12
+    }
+  ]
+}

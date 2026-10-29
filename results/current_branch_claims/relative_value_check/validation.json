@@ -1,0 +1,7 @@
+{
+  "iterations": 30,
+  "identical_default_and_debt_switch_counts": true,
+  "max_paid_price_change_discrepancy": 0.0,
+  "baseline_final_value_change": 2.292314906782167e-07,
+  "corrected_final_value_change": 9.119781552158202e-08
+}

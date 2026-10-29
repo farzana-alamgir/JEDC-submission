@@ -1,0 +1,4 @@
+channel,spread_bp,default_pp,mean_debt,mean_debt_to_gdp
+TOTAL time-varying volatility (full - constant vol),+22.7,+0.055,-0.0006,-0.00023
+of which pure dispersion (mean-preserving - constant vol),+26.2,+0.045,+0.0010,-0.00013
+of which mean/Jensen channel (full - mean-preserving),-3.5,+0.009,-0.0016,-0.00010

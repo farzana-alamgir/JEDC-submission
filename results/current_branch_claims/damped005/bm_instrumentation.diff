@@ -1,0 +1,231 @@
+--- current_branch
++++ bm_instrumented
+@@ -155,6 +155,8 @@
+ DOUBLE PRECISION, DIMENSION(b_num, y_num, p_num, p_vol_num) :: q_fun_matrix, q_src
+ DOUBLE PRECISION, DIMENSION(y_num, p_num, p_vol_num) :: exp_v_excl_matrix, exc_aux_a, exc_aux_b
+ 
++DOUBLE PRECISION :: qdf_a(y_num,p_num,p_vol_num), qdf_b(y_num,p_num,p_vol_num), qdf_expect(y_num,p_num,p_vol_num)
++DOUBLE PRECISION :: q_schedule_old(b_num,y_num,p_num,p_vol_num), raw_schedule_residual
+ contains
+ 
+ 
+@@ -705,17 +707,10 @@
+ ! contiguous (b,y) slice instead keeps the accumulator in cache and streams
+ ! the source once per ipn.
+ do ivn = 1, p_vol_num
+-   do ip = 1, p_num
+-      acc_by = 0d+0
+-      acc_y  = 0d+0
+-      do ipn = 1, p_num
+-         w = trans_matrix_p(ip, ipn, ivn)
+-         acc_by = acc_by + w * exp_aux_a(:, :, ipn, ivn)
+-         acc_y  = acc_y  + w * exc_aux_a(:, ipn, ivn)
+-      end do
+-      exp_aux_b(:, :, ip, ivn) = acc_by
+-      exc_aux_b(:, ip, ivn)    = acc_y
+-   end do
++   call dgemm('N','T',b_num*y_num,p_num,p_num,1d0,exp_aux_a(1,1,1,ivn), &
++       b_num*y_num,trans_matrix_p(1,1,ivn),p_num,0d0,exp_aux_b(1,1,1,ivn),b_num*y_num)
++   call dgemm('N','T',y_num,p_num,p_num,1d0,exc_aux_a(1,1,ivn), &
++       y_num,trans_matrix_p(1,1,ivn),p_num,0d0,exc_aux_b(1,1,ivn),y_num)
+ end do
+ 
+ ! --- Step 3: contract over next-period volatility ---
+@@ -788,19 +783,8 @@
+ ! E[m|p] = 7.1 at the top of the grid, so (1-delta)E[m] = 6.9 and q_def_free
+ ! diverged to 1e92.
+ do ivn = 1, p_vol_num
+-   sdc_sdf = std_u_p*exp(p_vol_grid(ivn)/2d+0)
+-   do ip = 1, p_num
+-      acc_by = 0d+0
+-      do ipn = 1, p_num
+-         eps_sdf = p_grid(ipn, ivn) &
+-                   - ((1d+0-rho_p)*mean_p + rho_p*p_grid(ip, ivn))
+-         m_sdf_s = EXP(-rstar + kappa_risk*eps_sdf &
+-                       - 0.5d+0*(kappa_risk**2)*(sdc_sdf**2))
+-         acc_by = acc_by + trans_matrix_p(ip, ipn, ivn) * m_sdf_s &
+-                  * exp_aux_a(:, :, ipn, ivn)
+-      end do
+-      exp_aux_b(:, :, ip, ivn) = acc_by
+-   end do
++   call dgemm('N','T',b_num*y_num,p_num,p_num,exp(-rstar),exp_aux_a(1,1,1,ivn), &
++       b_num*y_num,trans_matrix_p(1,1,ivn),p_num,0d0,exp_aux_b(1,1,1,ivn),b_num*y_num)
+ end do
+ 
+ do iv = 1, p_vol_num
+@@ -813,6 +797,30 @@
+    end do
+ end do
+ 
++! Same default-free recursion, factored over y', p', h'.
++do ivn=1,p_vol_num
++   do ipn=1,p_num
++      do iy=1,y_num
++         qdf_a(iy,ipn,ivn)=0d0
++         do iyn=1,y_num
++            qdf_a(iy,ipn,ivn)=qdf_a(iy,ipn,ivn)+trans_matrix(iy,iyn) &
++                *(coup_const+(1d0-delta)*q_def_free_paid_matrix(iyn,ipn,ivn))
++         end do
++      end do
++   end do
++   call dgemm('N','T',y_num,p_num,p_num,exp(-rstar),qdf_a(1,1,ivn), &
++       y_num,trans_matrix_p(1,1,ivn),p_num,0d0,qdf_b(1,1,ivn),y_num)
++end do
++do iv=1,p_vol_num
++   qdf_expect(:,:,iv)=0d0
++   do ivn=1,p_vol_num
++      qdf_expect(:,:,iv)=qdf_expect(:,:,iv)+trans_matrix_p_vol(iv,ivn)*qdf_b(:,:,ivn)
++   end do
++end do
++! Relax the price schedule only; raw_schedule_residual tests the UNDAMPED pricing equation.
++raw_schedule_residual=maxval(abs(q_fun_matrix-q_schedule_old))
++q_fun_matrix=(1d0-5.000000000000d-02)*q_schedule_old+5.000000000000d-02*q_fun_matrix
++q_schedule_old=q_fun_matrix
+ END SUBROUTINE precompute_expectations
+ 
+ !-----------------------------------------------------
+@@ -1600,6 +1608,8 @@
+ DOUBLE PRECISION :: exp_m, exp_q, y_next, m_next, coupon_next, argument
+ INTEGER :: i, i_p_vol_next, i_p_next
+ 
++q_def_free_fun = qdf_expect(i_y,i_p,i_p_vol)
++return
+ exp_m = 0d+0
+ exp_q = 0d+0
+ 
+@@ -1708,21 +1718,21 @@
+ 
+ subroutine optimize(index_opt, v_value)
+ USE param
+-integer ::i, index_opt, index_vector(1)
+-DOUBLE PRECISION :: b_next, v_value,  vector(b_num)
+-DOUBLE PRECISION, EXTERNAL:: objective_function
+-
+-do i=1,b_num
+-   i_b_next = i
+-   b_next   = b_grid(i)
+-   vector(i)  = objective_function(b_next)
+-
+-end do
+-
++integer :: index_opt, index_vector(1)
++DOUBLE PRECISION :: v_value, vector(b_num), cs(b_num), tfp_opt, m_opt, x_opt, p_eff_opt, resources_opt
++DOUBLE PRECISION, EXTERNAL :: u_fun
++if (i_excl_global /= 1) error stop 'Vectorized optimize is repayment-only'
++tfp_opt = scale_y*exp(y_initial)
++p_eff_opt = p_initial
++m_opt = func_m(y_initial,p_eff_opt)
++x_opt = ((1-alpha)*tfp_opt**theta+alpha*m_opt**theta)**(1./theta)
++resources_opt = x_opt-m_opt*exp(p_eff_opt)
++cs = resources_opt-(b_initial*coupon-q_vector*(b_grid-(1d0-delta)*b_initial))
++vector = -1d0/max(cs,1d-10)+beta*exp_v_vector
+ index_vector = maxloc(vector)
+ v_value = vector(index_vector(1))
+ index_opt = index_vector(1)
+-
++i_b_next = b_num
+ end subroutine optimize
+ 
+ subroutine iterate
+@@ -1736,10 +1746,12 @@
+ 
+ DOUBLE PRECISION, DIMENSION(b_num, y_num, p_num,p_vol_num) :: v_matrix_new, dev_matrix, dev_matrix_q
+ INTEGER i_b, i_y,i_p, i_p_vol, i_p_next, i_p_vol_next, i_b_optimal0, i_b_optimal1, i_y_next, i_b_prime
++INTEGER :: changes_d, changes_b
++INTEGER :: old_d(b_num,y_num,p_num,p_vol_num), old_b(b_num,y_num,p_num,p_vol_num)
+ DOUBLE PRECISION, EXTERNAL:: q_fun, objective_function, q_def_free_fun
+ 
+ 
+-criteria = 1.0d-3   !CRITERIA FOR CONVERGENCE
++criteria = 1.000000000000d-06   !CRITERIA FOR CONVERGENCE
+ convergence = -1
+ 
+ 
+@@ -1747,6 +1759,8 @@
+    deviation = 0
+    deviation_q = 0
+    counter = counter + 1
++   old_d = default_decision
++   old_b = b_next_matrix
+ 
+ 
+ coupon = (rstar + delta )/ (1d+0 + rstar)
+@@ -1862,7 +1876,16 @@
+       end do
+    end do
+ 
+-   WRITE(*, *) counter, deviation, deviation_q
++   changes_d = count(default_decision /= old_d)
++   changes_b = count(b_next_matrix /= old_b)
++   WRITE(*, *) counter, deviation, deviation_q, changes_d, changes_b
++   flush(6)
++   open(711,file='convergence.csv',position='append')
++   write(711,'(I0,2(A,ES24.16),2(A,I0))') counter,',',deviation,',',deviation_q,',',changes_d,',',changes_b
++   close(711)
++   open(714,file='pricing_residual.csv',position='append')
++   write(714,'(I0,A,ES24.16)') counter,',',raw_schedule_residual
++   close(714)
+ 
+     !UPDATE VALUES OF MATRICES
+    v0_matrix = v0_matrix_new
+@@ -1874,7 +1897,14 @@
+ 
+ 
+ ! FINALLY, CHECK WHETHER THE NEW DEVIATION IS SMALLER THAN THE TOLERANCE LEVEL (CALLED CRITERIA IN THIS CODE)
+-   if (deviation < criteria .or. counter > 1499) then
++   if ((deviation < criteria .and. deviation_q < criteria .and. changes_d == 0 .and. changes_b == 0 .and. raw_schedule_residual < criteria) .or. counter >= 300) then
++      open(712,file='solve_status.txt')
++      if (deviation < criteria .and. deviation_q < criteria .and. changes_d == 0 .and. changes_b == 0 .and. raw_schedule_residual < criteria) then
++         write(712,*) 'CONVERGED'
++      else
++         write(712,*) 'NOT_CONVERGED_ITERATION_LIMIT'
++      end if
++      close(712)
+ 
+ !3) SAVE RESULTS OF THE CURRENT ITERATION
+       open (8, FILE='graphs_output_dss.txt',STATUS='replace')
+@@ -2071,7 +2101,7 @@
+ call compute_grid
+ call solve_q_nodef
+ 
+-indicator_external = 0 !IF SET TO 1 OR LARGER, CODE WILL START FROM PREVIOUSLY STORED ITERATION
++indicator_external = 1 !IF SET TO 1 OR LARGER, CODE WILL START FROM PREVIOUSLY STORED ITERATION
+ 
+ if (indicator_external < 0.5d+0) then
+ 
+@@ -2139,9 +2169,11 @@
+       open (14, FILE='graphs_q_paid_dss.txt')
+       open (17, FILE='graphs_counter.txt')
+       open (19, FILE='graphs_q_def_free_dss.txt')
++      open (713, FILE='graphs_q_dss.txt')
+ 
+ 
+         READ(17,*) counter
++        counter = 0
+         write(*,*) counter
+ 
+           do i_p_vol = 1,p_vol_num
+@@ -2156,6 +2188,7 @@
+ 
+ 
+                READ(14, *) q_paid_matrix(i_b, i_y,i_p, i_p_vol)
++               READ(713, *) q_schedule_old(i_b,i_y,i_p,i_p_vol)
+                READ(12, *) b_next_matrix(i_b, i_y,i_p, i_p_vol)
+ 
+                READ(9, *) v_matrix(i_b, i_y,i_p, i_p_vol), v0_matrix(i_b, i_y,i_p, i_p_vol), v1_matrix(i_y,i_p, i_p_vol)
+@@ -2180,13 +2213,14 @@
+    close (14)
+    CLOSE(17)
+    CLOSE(19)
++   close(713)
+ 
+ 
+ end if
+ 
+ !write(*,*)'prob excl end', prob_excl_end
+ call iterate
+-call simulate
++! Deterministic policy tests do not require simulation.
+ 
+ 
+ 

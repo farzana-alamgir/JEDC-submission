@@ -1,0 +1,16 @@
+[
+  {
+    "economy": "bm",
+    "initial_full_model_residual_agrees_with_independent_warm_start_check": 2.495781359357352e-13,
+    "fixed_policy_solution_residual": 5.850545048424749e-11,
+    "fixed_policy_solution_passed": true,
+    "coupled_equilibrium_passed": false
+  },
+  {
+    "economy": "mp",
+    "initial_full_model_residual_agrees_with_independent_warm_start_check": 1.3117285035946225e-13,
+    "fixed_policy_solution_residual": 2.54607168681531e-11,
+    "fixed_policy_solution_passed": true,
+    "coupled_equilibrium_passed": false
+  }
+]

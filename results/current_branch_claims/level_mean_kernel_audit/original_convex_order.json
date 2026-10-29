@@ -1,0 +1,16 @@
+{
+  "future_volatility": {
+    "max_relative_mean_range": 0.10884342852989244,
+    "minimum_normalized_stop_loss_difference": -0.007925278576847364,
+    "state_pairs_with_stop_loss_violations": 376,
+    "total_adjacent_volatility_state_pairs": 2196,
+    "convex_order_passed": false
+  },
+  "current_volatility": {
+    "max_relative_mean_range": 0.06617082604973248,
+    "minimum_normalized_stop_loss_difference": -0.0019846061020801433,
+    "state_pairs_with_stop_loss_violations": 490,
+    "total_adjacent_volatility_state_pairs": 2196,
+    "convex_order_passed": false
+  }
+}

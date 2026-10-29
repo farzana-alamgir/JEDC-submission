@@ -1,0 +1,61 @@
+{
+  "passed": true,
+  "states": 96,
+  "reference": "Independent dense fixed-policy transition matrix, including default and exclusion/reentry",
+  "cases": [
+    {
+      "mode": 0,
+      "evaluation_steps": 1,
+      "maximum_dense_value_discrepancy": 1.3322676295501878e-15,
+      "maximum_reported_total_value_discrepancy": 1.3322676295501878e-15
+    },
+    {
+      "mode": 0,
+      "evaluation_steps": 10,
+      "maximum_dense_value_discrepancy": 2.6645352591003757e-15,
+      "maximum_reported_total_value_discrepancy": 2.6645352591003757e-15
+    },
+    {
+      "mode": 0,
+      "evaluation_steps": 25,
+      "maximum_dense_value_discrepancy": 3.552713678800501e-15,
+      "maximum_reported_total_value_discrepancy": 3.552713678800501e-15
+    },
+    {
+      "mode": 1,
+      "evaluation_steps": 1,
+      "maximum_dense_value_discrepancy": 1.7763568394002505e-15,
+      "maximum_reported_total_value_discrepancy": 1.7763568394002505e-15
+    },
+    {
+      "mode": 1,
+      "evaluation_steps": 10,
+      "maximum_dense_value_discrepancy": 2.6645352591003757e-15,
+      "maximum_reported_total_value_discrepancy": 2.6645352591003757e-15
+    },
+    {
+      "mode": 1,
+      "evaluation_steps": 25,
+      "maximum_dense_value_discrepancy": 1.7763568394002505e-15,
+      "maximum_reported_total_value_discrepancy": 1.7763568394002505e-15
+    },
+    {
+      "mode": 2,
+      "evaluation_steps": 1,
+      "maximum_dense_value_discrepancy": 1.3322676295501878e-15,
+      "maximum_reported_total_value_discrepancy": 8.881784197001252e-16
+    },
+    {
+      "mode": 2,
+      "evaluation_steps": 10,
+      "maximum_dense_value_discrepancy": 2.6645352591003757e-15,
+      "maximum_reported_total_value_discrepancy": 2.220446049250313e-15
+    },
+    {
+      "mode": 2,
+      "evaluation_steps": 25,
+      "maximum_dense_value_discrepancy": 4.440892098500626e-15,
+      "maximum_reported_total_value_discrepancy": 4.440892098500626e-15
+    }
+  ]
+}

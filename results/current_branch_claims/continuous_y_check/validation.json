@@ -1,0 +1,29 @@
+{
+  "passed": true,
+  "reference": "Independent 64-point Gauss-Legendre integration, split at all repayment/default crossings; constant tail convention",
+  "panels_per_case": 24,
+  "current_y_nodes": 21,
+  "cases": [
+    {
+      "sigma": 0.03,
+      "max_payoff_expectation_discrepancy": 2.220446049250313e-15,
+      "max_max_value_expectation_discrepancy": 2.6645352591003757e-15,
+      "independent_python_weight_discrepancy": 3.3306690738754696e-16,
+      "row_sum_error": 2.220446049250313e-16
+    },
+    {
+      "sigma": 0.005,
+      "max_payoff_expectation_discrepancy": 3.1086244689504383e-15,
+      "max_max_value_expectation_discrepancy": 1.4210854715202004e-14,
+      "independent_python_weight_discrepancy": 7.771561172376096e-16,
+      "row_sum_error": 2.220446049250313e-16
+    },
+    {
+      "sigma": 0.1,
+      "max_payoff_expectation_discrepancy": 1.887379141862766e-15,
+      "max_max_value_expectation_discrepancy": 3.1086244689504383e-15,
+      "independent_python_weight_discrepancy": 4.718447854656915e-16,
+      "row_sum_error": 2.220446049250313e-16
+    }
+  ]
+}

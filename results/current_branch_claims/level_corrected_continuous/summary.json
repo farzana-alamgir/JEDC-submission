@@ -1,0 +1,24 @@
+[
+  {
+    "economy": "bm",
+    "status": "NOT_CONVERGED_ITERATION_LIMIT",
+    "iteration": 600,
+    "outer": 17,
+    "inner": 31,
+    "price_update": false,
+    "value_change": 1.0507721897035083e-06,
+    "pricing_residual": 0.1245530909538003,
+    "switching_examples": {}
+  },
+  {
+    "economy": "mp",
+    "status": "NOT_CONVERGED_ITERATION_LIMIT",
+    "iteration": 600,
+    "outer": 17,
+    "inner": 28,
+    "price_update": false,
+    "value_change": 1.4863805355425086e-06,
+    "pricing_residual": 0.11643822823183919,
+    "switching_examples": {}
+  }
+]
