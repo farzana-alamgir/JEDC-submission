@@ -93,3 +93,4 @@ model/welfare_*.log
 /param.mod
 /shared_types.mod
 model/cal_probe.log
+model/claims_*.log
