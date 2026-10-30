@@ -58,3 +58,7 @@ model/figures_pipeline/ml_common549.log
 model/figures_pipeline/oil_common277.mat
 model/figures_pipeline/ml_c277.log
 model/solve_common_v6.log
+
+# Calibration gradient probe runs (regenerable; 6.9GB, several dumps >100MB).
+# Rebuild with model/cal_probe.sh.
+model/runs_cal/
