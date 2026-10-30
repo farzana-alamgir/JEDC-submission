@@ -62,3 +62,34 @@ model/solve_common_v6.log
 # Calibration gradient probe runs (regenerable; 6.9GB, several dumps >100MB).
 # Rebuild with model/cal_probe.sh.
 model/runs_cal/
+
+# kappa_risk probe runs from model/kappa_probe.sh (regenerable; ~1.7GB each).
+model/runs_kcal/
+model/kappa_probe.log
+
+# va-off probe runs from model/vaoff_probe.sh (regenerable; ~1.7GB each).
+model/runs_vaoff/
+model/vaoff_probe.log
+
+# Gradient-step test run from model/predpoint_probe.sh (regenerable; ~1.7GB).
+model/runs_pred/
+model/predpoint_probe.log
+
+# beta x d1 grid runs from model/bd1_grid.sh (regenerable; ~1.7GB each).
+model/runs_bd1/
+model/bd1_grid.log
+
+# Three economies at the spdebt calibration (model/spdebt_economies.sh).
+model/runs_spdebt/
+model/spdebt_economies.log
+
+# MATLAB working dirs for welfare recomputation (model/figs_*/).
+model/figs_shipped/
+model/figs_spdebt/
+model/welfare_*.log
+
+# Fortran module artifacts when the solver is built from the repo root
+# (model/param.mod and model/shared_types.mod above are path-anchored).
+/param.mod
+/shared_types.mod
+model/cal_probe.log
