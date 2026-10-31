@@ -1,0 +1,5 @@
+economy,mean_spread_bp,se_bp,sd_spread_bp,debt_gdp_pct,oil_gdp_pct,episodes,run
+full SV,409.0,3.2,362.5,34.05,8.92,1473,runs_bd1/spdebt
+mean-preserving SV,405.7,3.3,354.7,33.89,9.01,1487,runs_spdebt/mean_preserving
+constant volatility,402.7,3.1,359.5,33.46,9.06,1474,runs_spdebt/intermediate
+constant price,190.1,0.9,108.2,33.21,11.02,1325,runs_spdebt/basic

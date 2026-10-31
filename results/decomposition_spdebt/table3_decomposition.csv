@@ -1,0 +1,5 @@
+channel,spread_bp,ci95_bp,identified
+oil price risk at all (full - constant price),+218.9,6.5,yes
+"time-varying volatility, TOTAL (full - constant vol)",+6.3,8.7,no
+  of which pure dispersion (mean-preserving - constant vol),+3.0,8.8,no
+  of which expected price (full - mean-preserving),+3.3,8.9,no
