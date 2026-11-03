@@ -93,6 +93,50 @@ def by_volatility(run):
     return out
 
 
+def debt_policy_by_volatility(run, outdir, tag):
+    """Panels C/D: high-minus-low volatility change in next-period debt.
+
+    At median log endowment, across the debt grid, at two oil prices. Only
+    states that repay at BOTH volatility extremes are kept -- a default at one
+    extreme makes the debt choice incomparable.
+
+    The policy arrays are written by oil_prod_CES.f90 with i_p_vol outermost,
+    then i_p, i_y, i_b innermost, so the flat index is
+    ((i_p_vol*p_num + i_p)*y_num + i_y)*b_num + i_b.
+    """
+    BN, YN, PN, PV = 100, 21, 277, 5
+    g = [float(l.split()[0]) for l in open(f'{run}/graphs_p_grid_dss.txt')]
+    b = [float(l.split()[0]) for l in open(f'{run}/graphs_b_grid_dss.txt')]
+    bn = [float(l.split()[0]) for l in open(f'{run}/graphs_b_next_dss.txt')]
+    df = [float(l.split()[0]) for l in open(f'{run}/graphs_default_dss.txt')]
+    i = lambda ib, iy, ip, iv: ((iv * PN + ip) * YN + iy) * BN + ib
+    IY, CTR = YN // 2, PN // 2
+    # the +10% price node, and the value-added denominator the counts use
+    hi_p = min(range(PN), key=lambda k: abs(math.exp(g[k]) / math.exp(g[CTR]) - 1.1003))
+    VA = 11.67582 / 0.3372
+    # b_next_matrix is written as a 1-BASED INDEX into b_grid, not a level, so
+    # a difference of one means the policy moved exactly one grid node. The
+    # grid is uniform, so converting is a multiplication.
+    step = b[1] - b[0]
+    rows = []
+    for name, ip in (('baseline', CTR), ('oil_plus_10pct', hi_p)):
+        for ib in range(BN):
+            frac = 100 * b[ib] / VA
+            if not (10.0 <= frac <= 55.0):
+                continue
+            if df[i(ib, IY, ip, 0)] != 0 or df[i(ib, IY, ip, PV - 1)] != 0:
+                continue
+            dnodes = bn[i(ib, IY, ip, PV - 1)] - bn[i(ib, IY, ip, 0)]
+            rows.append([tag, name, ib, f'{frac:.3f}', f'{dnodes:.0f}',
+                         f'{dnodes*step:.6f}', f'{100*dnodes*step/VA:.4f}'])
+    with open(f'{outdir}/panelCD_debt_policy_{tag}.csv', 'w', newline='') as fh:
+        wr = csv.writer(fh)
+        wr.writerow(['economy', 'price', 'b_index', 'debt_pct_of_va',
+                     'delta_grid_nodes', 'delta_model_units', 'delta_pct_of_va'])
+        wr.writerows(rows)
+    return rows, math.exp(g[hi_p]) / math.exp(g[CTR])
+
+
 def main():
     if len(sys.argv) != 6:
         sys.exit(__doc__)
@@ -214,6 +258,18 @@ def main():
     print(f"  closed-form Jensen lift exp(v/2):"
           f" {100*(math.exp(math.exp(h[4])/2)/math.exp(math.exp(h[0])/2)-1):+.4f}%"
           f"   (the grid reproduces it)")
+    # ---- panels C/D: the debt policy across the grid --------------------
+    print(f"\nPANELS C/D  high-minus-low volatility change in next-period debt")
+    for tag, key in (('full', 'full'), ('meanpres', 'mean_preserving')):
+        rows, ratio = debt_policy_by_volatility(run[key], outdir, tag)
+        for pname in ('baseline', 'oil_plus_10pct'):
+            sel = [float(r[4]) for r in rows if r[1] == pname]
+            up = sum(1 for d in sel if d > 1e-9)
+            dn = sum(1 for d in sel if d < -1e-9)
+            print(f"  {tag:<9}{pname:<16}{up:>3} more{dn:>5} less"
+                  f"{len(sel)-up-dn:>5} unchanged   of {len(sel)}")
+    print(f"  (the second price is {ratio:.4f}x the baseline)")
+
     print(f"\nwritten to {outdir}/")
 
 

@@ -46,6 +46,9 @@ states to eight decimal places.
 | full model | 1.12981 | 1.15172 | **+1.94%** |
 | mean-preserving | 1.13636 | 1.13636 | **0.00%** |
 
+Figure 1(a) shows this: the full model's line sits exactly on the closed-form
+curve, and the corrected one is flat.
+
 Beyond one step it is not exact, and we would rather report that than have it
 found. Because ρ_p is below one, the conditional variance accumulates faster
 than the drift correction, so the two stop cancelling. Iterating the price and
@@ -85,7 +88,8 @@ dispersion part and an expected-price part.
 
 We will not dress this up. Each component is about half the total, and each
 interval is roughly three times the size of the number it brackets. All three
-contain zero. These are Monte Carlo intervals rather than standard errors on
+contain zero. Figure 1(b) makes the contrast plain: one bar clears its interval
+comfortably and three do not. These are Monte Carlo intervals rather than standard errors on
 estimated parameters, but the reading is the same: on average spreads, we cannot
 separate the two channels, and we do not claim the effect belongs to either one.
 R2 writes that a small pure-uncertainty effect would be a fine answer provided
@@ -134,9 +138,18 @@ leans gently toward borrowing, which is the precautionary motive the paper
 describes, but at seven states out of sixty-six we would not call it a general
 response.
 
-One honest caveat on reading that table: a single step on the debt grid is about
-0.2 model units, so "unchanged" means the saved policy does not resolve a
-movement smaller than that, not that the response is exactly zero.
+Figure 1(c) and 1(d) show the same thing state by state. The policy moves in
+whole grid nodes, so every resolved response is exactly one node up or down —
+about 0.6 percentage points of annual value added. In the full economy a row of
+points sits at −1 across the whole debt range; under the correction that row is
+empty at the baseline price and nearly empty after a 10% rise.
+
+One honest caveat on reading this: "unchanged" means the saved policy does not
+resolve a movement smaller than one grid node, not that the response is exactly
+zero. Most states are in that category, which is why we do not lean on the
+counts beyond the asymmetry in their signs.
+
+![**Figure 1.** (a) Expected next-period oil price by volatility state, at a common current price, for the full and mean-preserving economies, with the closed-form log-normal prediction overlaid. (b) The channel decomposition with 95% simulation intervals. (c, d) High-minus-low volatility change in next-period debt across the debt grid at median endowment, at the baseline oil price and after a 10% rise; one grid node is about 0.6 percentage points of annual value added, and only states repaying at both volatility extremes are shown.](decomposition_spdebt/FIGURE_decomposition.jpg)
 
 ## Where this leaves the section
 
