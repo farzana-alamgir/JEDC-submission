@@ -85,7 +85,10 @@ model/spdebt_economies.log
 
 # MATLAB working dirs for welfare recomputation (model/figs_*/).
 model/figs_shipped/
-model/figs_spdebt/
+# The rendered paper figures at the spdebt calibration ARE tracked; the
+# .mat files (~1 GB) and the run_* symlinks are not.
+model/figs_spdebt/*
+!model/figs_spdebt/*.jpg
 model/welfare_*.log
 
 # Fortran module artifacts when the solver is built from the repo root
