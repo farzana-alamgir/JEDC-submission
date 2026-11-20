@@ -1,0 +1,25 @@
+CAL sigma=0.35 beta=0.970366 d1=0.478420 spread=4.1326 sd=2.9651 debt=33.8651
+ECON sigma=0.35 basic spread=2.2784 sd=1.4169 debt=36.2200
+CEV sigma=0.35 CEV  +0.2730%
+CAL sigma=0.25 beta=0.971528 d1=0.468175 spread=4.0793 sd=2.9937 debt=34.2992
+ECON sigma=0.25 basic spread=2.0728 sd=1.6154 debt=36.8120
+CEV sigma=0.25 CEV  +0.4679%
+ECON sigma=0.35 intermediate spread=4.1922 sd=3.0905 debt=33.7786
+CAL sigma=0.20 beta=0.971010 d1=0.460215 spread=4.1788 sd=3.0901 debt=33.8232
+ECON sigma=0.20 basic spread=2.2944 sd=1.5824 debt=36.3157
+CEV sigma=0.20 CEV  +0.3591%
+ECON sigma=0.25 intermediate spread=3.9458 sd=2.9287 debt=33.9391
+ECON sigma=0.35 mean_preserving spread=4.1305 sd=3.0224 debt=33.9403
+ECON sigma=0.20 intermediate spread=4.1431 sd=3.0839 debt=33.6631
+ECON sigma=0.25 mean_preserving spread=3.9585 sd=2.9360 debt=34.1026
+ECON sigma=0.20 mean_preserving spread=4.2287 sd=3.2020 debt=33.8437
+CAL sigma=0.50 beta=0.970215 d1=0.508393 spread=3.9581 sd=2.8570 debt=34.3614
+ECON sigma=0.50 basic spread=2.1448 sd=1.6613 debt=36.2857
+CEV sigma=0.50 CEV  +0.0784%
+ECON sigma=0.50 intermediate spread=4.1147 sd=2.9448 debt=34.4855
+ECON sigma=0.50 mean_preserving spread=4.1040 sd=2.8929 debt=34.5775
+CAL sigma=0.40 beta=0.970796 d1=0.488276 spread=4.0953 sd=3.0070 debt=34.2019
+ECON sigma=0.40 basic spread=1.8582 sd=1.0920 debt=36.2817
+CEV sigma=0.40 CEV  +0.2047%
+ECON sigma=0.40 intermediate spread=4.0837 sd=2.9368 debt=34.0198
+ECON sigma=0.40 mean_preserving spread=3.8624 sd=2.8393 debt=33.8827

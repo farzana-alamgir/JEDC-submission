@@ -1,17 +1,17 @@
 economy,vol_state,obs,mean_spread_bp,sd_spread_bp,mean_price
-full SV,1,51158,339.7,263.7,1.34564
-full SV,2,181616,354.0,300.9,1.36164
-full SV,3,282017,377.2,368.0,1.37076
-full SV,4,182771,409.3,457.6,1.38184
-full SV,5,52438,447.0,560.3,1.40740
-mean-preserving SV,1,51158,349.2,282.6,1.36810
-mean-preserving SV,2,181616,359.7,320.0,1.37532
-mean-preserving SV,3,282017,375.0,372.3,1.37062
-mean-preserving SV,4,182771,396.1,446.9,1.36331
-mean-preserving SV,5,52438,415.4,511.0,1.36220
-constant volatility PLACEBO,1,149519,376.0,387.9,1.37205
-constant volatility PLACEBO,2,150003,376.3,390.3,1.37495
-constant volatility PLACEBO,3,149575,375.1,387.5,1.36917
-constant volatility PLACEBO,4,150351,377.0,394.9,1.37221
-constant volatility PLACEBO,5,150552,375.5,386.4,1.36810
-NOISE FLOOR (placebo range),,,1.9,,
+full SV,1,53037,327.4,209.4,1.22185
+full SV,2,182247,338.7,239.0,1.23284
+full SV,3,277804,356.2,281.7,1.24022
+full SV,4,182874,378.6,338.3,1.25580
+full SV,5,54038,404.8,407.4,1.26817
+mean-preserving SV,1,53037,330.2,222.7,1.24746
+mean-preserving SV,2,182247,337.2,245.5,1.24812
+mean-preserving SV,3,277804,349.6,281.1,1.24122
+mean-preserving SV,4,182874,363.1,323.2,1.23859
+mean-preserving SV,5,54038,377.2,375.5,1.22809
+constant volatility PLACEBO,1,149519,348.2,286.7,1.24317
+constant volatility PLACEBO,2,150003,347.7,285.4,1.24377
+constant volatility PLACEBO,3,149575,347.6,285.3,1.24062
+constant volatility PLACEBO,4,150351,347.5,285.7,1.24230
+constant volatility PLACEBO,5,150552,347.6,286.3,1.24068
+NOISE FLOOR (placebo range),,,0.8,,

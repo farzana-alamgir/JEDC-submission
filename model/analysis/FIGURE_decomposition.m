@@ -78,7 +78,20 @@ end
 set(gca,'YTick',y(end:-1:1),'YTickLabel',names(end:-1:1));
 ylim([0.4 numel(bp)+0.6]); xlim([-30 335]);
 xlabel('effect on the mean spread (basis points)','FontSize',13,'Interpreter','latex');
-title('(b) only the level is identified','FontSize',12,'Interpreter','latex');
+% Panel (b)'s title used to assert 'only the level is identified'. That was
+% true at sigma_oil = 0.30 and false at 0.25, where three of the four channels
+% exclude zero -- a hardcoded claim on a figure that the data had moved past.
+% Derive it from the intervals instead, so it cannot go stale again.
+ident = abs(bp) > ci;
+if all(ident)
+    tb = '(b) every channel excludes zero';
+elseif ~any(ident)
+    tb = '(b) no channel is distinguishable from zero';
+else
+    tb = sprintf('(b) %d of %d channels exclude zero (not: %s)', ...
+                 sum(ident), numel(bp), strjoin(names(~ident), ', '));
+end
+title(tb,'FontSize',12,'Interpreter','latex');
 set(gca,'FontSize',11,'LineWidth',1.1,'Box','on','TickLabelInterpreter','latex');
 grid on; set(gca,'GridAlpha',0.12);
 

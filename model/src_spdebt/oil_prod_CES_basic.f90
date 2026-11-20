@@ -21,9 +21,9 @@ DOUBLE PRECISION :: beta, sigma, b_inf, b_sup, y_inf, y_sup, std_eps,mmax_global
      p_vol_inf, p_vol_sup, std_u_p, std_u_vol, rho_p, rho_p_vol, mean_p, mean_p_vol, std_p_vol,eta
 
 parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width = 1.5d+0,  rstar = 0.01d+0,  &
-     prob_excl_end =0.0833d+0, std_eps = 0.03d+0, rho = 0.9d+0, beta=0.9746d+0, alpha=0.000307d+0, theta=-2.33333333d+0,&          !A-m has been changed in order to capture the new specification of stealing function
-     mean_y = -0.5d+0*std_eps**2,delta = 0.03d+0,  m=4d+0, scale_y=10d+0, d0 = -0.246d+0, d1 = 0.4731d+0, mmax_global=100d+0,&
-     std_u_p = 1d+0, std_u_vol= 1d+0, rho_p = 0.98d+0, rho_p_vol = 0.66d+0 ,pprime=3.97d+0,mean_p = 0.12d+0, mean_p_vol = -4.33d+0, eta = 0.44d+0)
+     prob_excl_end =0.0833d+0, std_eps = 0.03d+0, rho = 0.9d+0, beta=0.971528d+0, alpha=5.779464d-5, theta=-3.0d+0,&          !A-m has been changed in order to capture the new specification of stealing function
+     mean_y = -0.5d+0*std_eps**2,delta = 0.03d+0,  m=4d+0, scale_y=10d+0, d0 = -0.246d+0, d1 = 0.468175d+0, mmax_global=100d+0,&
+     std_u_p = 1d+0, std_u_vol= 1d+0, rho_p = 0.9475d+0, rho_p_vol = 0.7382d+0 ,pprime=3.97d+0,mean_p = 0.12d+0, mean_p_vol = -4.012d+0, eta = 0.2889d+0)
 
 !---------------------------------------------------------------------
 ! Price-grid discretization switch.
@@ -47,11 +47,12 @@ parameter (sigma = 2d+0, pi_number = 3.1415926535897932d+0, zero = 0d+0,  width 
 !     y_t = exp(h_t/2) * eps_t,
 ! so h is the log VARIANCE and the conditional STANDARD DEVIATION is
 ! exp(h/2). The submitted code used exp(h) as the standard deviation,
-! which at mean_p_vol = -4.33d+0 gives 1.32% per quarter against 11.47% under
+! which at the submitted mean_p_vol = -4.33d+0 gave 1.32% per quarter against 11.47% under
 ! exp(h/2). The real oil price in empirical/oil_qtrly.xlsx has a quarterly
 ! log-change standard deviation of 14.47% over 1995-2019, so exp(h) makes
 ! the model's oil price about 8x too smooth and its most volatile state
-! still 3x below the data's average. Every aggregate below is therefore
+! still 3x below the data's average. At the re-estimated mean_p_vol = -4.012d+0
+! the two conventions give 1.81% and 13.45%. Every aggregate below is therefore
 ! E[exp(h)] = exp(mu_h + var_h/2), not E[exp(2h)] = exp(2*mu_h + 2*var_h).
 !---------------------------------------------------------------------
 LOGICAL :: use_common_p_grid, mean_preserving, use_moment_matching, constant_vol
@@ -115,7 +116,7 @@ LOGICAL :: m_cache_valid = .false.
 ! The submitted penalty, max(0, d0*yt + d1*yt**2) with yt = EXP(y), is a
 ! function of the ENDOWMENT alone, so the oil price never enters the default
 ! decision except through the consumption level common to both branches. With
-! rho_p = 0.98 an oil price shock is very nearly permanent and shifts the
+! rho_p = 0.9475 an oil price shock is highly persistent and shifts the
 ! value of repaying and of defaulting by almost the same amount, so the
 ! default margin barely moves. That is the quantitative reason every oil
 ! channel comes out small -- see results/WHY_OPPOSITE.md.
@@ -493,9 +494,9 @@ END FUNCTION normal_cell
 ! variance EXACTLY, keeping the support fixed.
 !
 ! Why this is needed. Tauchen integrates the normal density over fixed grid
-! cells. With rho_p = 0.98 the conditional mean advances by rho of a grid node
+! cells. With rho_p = 0.9475 the conditional mean advances by rho of a grid node
 ! per node, so it slips (1-rho) of a node each step and realigns with the cell
-! edges every 1/(1-rho) = 50 nodes. The realised conditional moments therefore
+! edges every 1/(1-rho) = 19 nodes. The realised conditional moments therefore
 ! oscillate: measured on the 549-node grid the conditional mean departs from
 ! the exact AR(1) law by up to 1.4e-3 (0.7 of a node) and the conditional sd
 ! wobbles by 1.26%, putting an 11-cycle ripple into the bond price schedule.
@@ -639,7 +640,7 @@ end do
 
 do i = 1, n
    ! drift enters the CONDITIONAL mean directly. Folding it into mu_z instead
-   ! would deliver only (1-rho_ar) of it -- 2% at rho_p = 0.98.
+   ! would deliver only (1-rho_ar) of it -- 5% at rho_p = 0.9475.
    cond_mean = (1d+0 - rho_ar)*mu_z + rho_ar*z(i) + drift_use
    do j = 1, n
       Pi(i,j) = normal_cell((edge(j)-cond_mean)/sd_eps, (edge(j+1)-cond_mean)/sd_eps)
@@ -1239,7 +1240,7 @@ if(p_vol_num < 2) then
       !------------------------------------------------------------------
       var_log_vol    = (std_u_vol*eta)**(2d+0)/(1d+0 - rho_p_vol**(2d+0))
       mean_innov_var = std_u_p**(2d+0)*exp(mean_p_vol + 0.5d+0*var_log_vol)
-      p_grid = 0.316427d+0
+      p_grid = mean_p + 0.5d+0*mean_innov_var/(1d+0 - rho_p**(2d+0))
       write(*,'(a,f12.6)') ' basic: log price pinned at ', p_grid(1,1)
       trans_matrix_p = 1d+0
       cdf_matrix_p= 1d+0
