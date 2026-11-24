@@ -1,0 +1,7 @@
+economy,price_case,next_debt_high_minus_low,spread_high_minus_low_bp,default_probability_high_minus_low_pp
+full,baseline,0.0,49.10739971702105,0.023841887655099963
+full,higher_price,0.0,69.09588229772504,0.09775684332284867
+mp,baseline,0.0,36.983737804603436,0.015553861641616188
+mp,higher_price,0.0,50.712136598778386,0.06807703249331246
+cv,baseline,0.0,0.0,0.0
+cv,higher_price,0.0,0.0,0.0

@@ -1,285 +1,131 @@
 # R2, Major 1 and R1, Major 2
 
-*Separating dispersion from the volatility-induced rise in expected oil prices*
+*Is it uncertainty, or just dearer oil?*
 
-Both reports raise the same objection, and it is the right one. In our
-specification a rise in volatility does two things at once. It widens the
-distribution of next period's oil price, which is the uncertainty effect we
-meant to study. But because the price is log-normal, it also lifts the
-*expected level* of that price, even though the mean of the log is untouched.
-We had been calling the combination "uncertainty." As R2 puts it, part of what
-the model calls an effect of uncertainty is really the effect of a higher
-expected oil price.
+Both referees raise the same point, and they are right. In our model, when oil
+prices become more volatile, two things happen at the same time. The range of
+prices the country might face next quarter gets wider — that is the uncertainty
+we set out to study. But the price it expects to pay also goes up. We had been
+calling both of these "uncertainty," which runs two separate things together.
 
-We have run the experiment both reports ask for. It changed what we claim, and
-we would rather set out the result plainly than defend the original wording.
-The short version: the referees are right about the direction, and on average
-spreads the expected-price channel accounts for most of what we had attributed
-to uncertainty. But the exercise also shows, conditionally and unambiguously,
-that dispersion by itself raises the price of risk.
+So we built the economy the referees asked for: one where the expected oil price
+does not change as volatility rises, while the range of possible prices around
+it still widens.
+Everything else is held fixed — same grid, same parameters, same shocks.
 
-## What we did
-
-We add a third economy in which the conditional mean of the price level is held
-fixed while its dispersion still varies with volatility. Writing z for log p and
-h for the log innovation variance,
+Writing z for the log oil price and v for the variance of next quarter's price
+innovation, which is what rises with volatility, the corrected economy draws
 
 ```
-z' = (1 − ρ_p) z̄ + ρ_p z − (exp(h') − v₀)/2 + exp(h'/2) u'
+z' = (1 - rho) zbar + rho z - (v - vbar)/2 + sqrt(v) u',     vbar = E[v]
 ```
 
-with v₀ = E[exp(h)]. One choice here is ours rather than the referees': we
-subtract half the deviation of the conditional variance from its *average*
-rather than half the variance itself, so that the corrected economy lines up
-with the variance-matched constant-volatility economy we are comparing it to.
-All four economies share the same price grid, the same preferences and
-technology, the same default-cost parameters, and the same shocks.
+The original model is the same line without the `-(v - vbar)/2` term. That term
+is exactly the lift that pushes up the expected *level* of the price when the
+mean of its logarithm is unchanged, so subtracting it holds the expected price
+fixed while leaving the spread of possible prices free to widen. We centre the
+correction on the average variance rather than on zero so that the corrected
+economy lines up with the constant-volatility economy we compare it against.
 
-## Does the correction do what it should?
+It behaves as it should: in the original model the expected price climbs about 1.8%
+as we move from the calmest conditions to the most turbulent, while in the new
+one it does not move at all (Figure 1a).
 
-At one step, exactly. Evaluated at a common current price, the full model's
-expected next-period price climbs 1.76% as we move from the calmest volatility
-state to the most volatile. That figure is worth pausing on: it matches the
-closed-form log-normal prediction e^{v/2} to four decimal places, which tells us
-the discretisation is fine enough to carry the very effect under discussion.
-Once the correction is applied, the expected price is identical in all five
-states to eight decimal places.
+## Uncertainty does matter on its own
 
-| | calmest state | most volatile | swing |
-|---|---|---|---|
-| full model | 1.13184 | 1.15179 | **+1.76%** |
-| mean-preserving | 1.13874 | 1.13874 | **0.00%** |
-| closed form e^{v/2} | 1.13184 | 1.15178 | +1.76% |
+The clearest way to see this is to stay inside that new economy and compare its
+calm periods with its turbulent ones. The expected oil price is the same in both,
+so anything that changes across them must be caused by uncertainty.
 
-Figure 1(a) shows this: the full model's line sits exactly on the closed-form
-curve, and the corrected one is flat.
-
-**Beyond one step the correction does not merely lose exactness — it reverses
-sign and overshoots.** We report this prominently because it governs how much
-weight the decomposition below can carry. Because ρ_p is 0.9475 rather than
-close to one, the conditional variance accumulates faster than the drift
-correction, and the two stop cancelling:
-
-| horizon | full model | mean-preserving | residual / effect |
-|---|---|---|---|
-| 1 quarter | +1.76% | −0.00% | 0.00 |
-| 4 quarters | +3.67% | −0.37% | −0.10 |
-| 8 quarters | +3.32% | −0.96% | −0.29 |
-| 12 quarters | +2.39% | −1.31% | −0.55 |
-| **20 quarters** | **+1.04%** | **−1.41%** | **−1.35** |
-| 40 quarters | +0.12% | −0.72% | −6.21 |
-
-A coupon rate of 0.03 implies a duration near twenty-five quarters, so twenty
-quarters is where the bond is actually priced. At that horizon the corrected
-economy's expected prices are falling with volatility by *more* than the full
-economy's are rising. The correction is not a small approximation there; it is
-larger than the thing it is meant to remove, and pointing the other way.
-
-This has a definite consequence for the decomposition, and in a known
-direction. The corrected economy faces systematically *cheaper* oil in
-high-volatility states than a correctly mean-preserving economy would, which
-lowers its spreads in those states. That inflates the measured difference
-between the full and corrected economies, and deflates the measured difference
-between the corrected and constant-volatility economies. So in the table below,
-**the expected-price component is an upper bound and the dispersion component a
-lower bound.** We can sign the bias; we cannot size it.
-
-## What the decomposition shows
-
-Comparing the four economies gives the split the referees asked for. The
-difference between the full and constant-volatility economies is the total
-effect of time-varying volatility; the mean-preserving economy divides it into a
-dispersion part and an expected-price part.
-
-| | difference | 95% interval | excludes zero? |
-|---|---|---|---|
-| oil price risk at all (full − constant price) | **+200.7 bp** | ±4.8 | yes |
-| total effect of time-varying volatility | **+13.4 bp** | ±6.0 | yes |
-| of which dispersion (upper-bounded above) | +1.3 bp | ±6.0 | no |
-| of which expected price (lower-bounded above) | +12.1 bp | ±5.9 | yes |
-
-The constant-volatility economy's five volatility indices are economically
-identical, so the range of its mean spread across them measures the simulation
-noise floor directly: it is 0.8 basis points.
-
-The total effect of time-varying volatility is measurable and positive. Its
-apportionment is where we must be careful. Taken at face value the table says
-almost all of it is the expected-price channel — which is precisely R2's
-objection, confirmed. But the horizon table above says this particular split is
-biased toward exactly that conclusion, so we do not want to lean on the
-arithmetic either way. What we can say without qualification is that the total
-is +13.4 bp and that the dispersion component, measured this way, is not
-distinguishable from zero.
-
-We previously described the large level effect as "thirty times the
-time-variation channel." We have removed that comparison. It invited the reader
-to treat the small number as a measured channel of the same standing as the
-large one, which the overshoot above does not support.
-
-What is not in doubt is the level. Comparing the full economy with one facing a
-constant oil price, the difference in mean spreads is **200.7 basis points**,
-with an interval of ±4.8 — more than forty times its own sampling error, and
-49% of the mean spread. Oil price risk matters a great deal to these borrowers.
-It is the time *variation* in that risk which we cannot cleanly apportion, and
-we have been careful in the revision not to let the large number stand in for
-the small one, or to present it as a response to a 10% oil price move.
-
-## Does dispersion do anything on its own?
-
-Yes, and this is the part of the exercise that identifies something. The
-average-spread decomposition is compromised by the overshoot; the conditional
-comparison is not, because it reads the corrected economy against itself across
-volatility states rather than against another economy.
-
-In the mean-preserving economy — where one-step expected prices are flat by
-construction — mean spreads by volatility state are:
-
-| volatility state | sd(log p) | mean spread | mean price |
-|---|---|---|---|
-| 1 (calmest) | 0.0877 | 330.2 bp | 1.24746 |
-| 2 | 0.1086 | 337.2 | 1.24812 |
-| 3 | 0.1345 | 349.6 | 1.24122 |
-| 4 | 0.1666 | 363.1 | 1.23859 |
-| 5 (most volatile) | 0.2064 | **377.2** | 1.22809 |
-
-Monotone, **+47.0 basis points** from calmest to most volatile, against a
-placebo noise floor of 0.8 bp. And the decisive detail is the last column: the
-mean *price* is **falling** across those states. Spreads rise while oil gets
-cheaper, so this cannot be an expected-price effect. Dispersion raises the
-conditional price of risk.
-
-For contrast, the same table in the full economy runs 327.4 to 404.8 bp, a
-swing of +77.4 bp, with the mean price *rising* from 1.22185 to 1.26817 — the
-two channels working together, which is what the referees asked us to take
-apart.
-
-## Does precautionary borrowing survive?
-
-R1 asks the sharper follow-up: once the expected-price effect is removed, does
-any remaining increase in borrowing reflect a precautionary response to risk
-itself? Averages across the simulated economies cannot answer this, because they
-confound the policy response with the different states each economy visits. So
-we compared the policies directly, holding endowment and debt fixed and varying
-only volatility.
-
-| | more debt | unchanged | less debt | states |
+| when oil prices are... | how volatile | spread | chance of default each year | average oil price |
 |---|---|---|---|---|
-| full, baseline price | 1 | 59 | **9** | 69 |
-| full, price +10.6% | 3 | 53 | **10** | 66 |
-| mean-preserving, baseline | 2 | 64 | **3** | 69 |
-| mean-preserving, price +10.6% | 3 | 61 | **2** | 66 |
+| calmest | 0.09 | 330 bp | 2.2% | 1.247 |
+| | 0.11 | 337 | 2.7 | 1.248 |
+| | 0.13 | 350 | 3.1 | 1.241 |
+| | 0.17 | 363 | 3.9 | 1.239 |
+| most turbulent | 0.21 | **377** | **5.1** | 1.228 |
 
-In the full economy, higher volatility *reduces* next-period debt at nine of
-sixty-nine states at the baseline price and ten of sixty-six after a price rise.
-Under the correction those reductions fall to three and two. **They do not
-vanish, and we have corrected the earlier draft of this response, which said
-they did.** At the previous calibration they did vanish entirely; at this one
-they do not. What survives is a clear asymmetry — deleveraging is roughly three
-to five times less common once the expected-price channel is removed — rather
-than the clean disappearance we previously reported.
+Both measures climb steadily. Spreads rise by 47 basis points, and the chance of
+default each year more than doubles, from about 2% to 5%. The important column is
+the last one: the average oil price is *lower* in the turbulent
+periods, not higher. The country is paying less for its oil and defaulting more
+often anyway. There is no way to tell that story as an expected-price effect.
 
-So the honest reading is that the deleveraging seen under the full
-specification is *largely* the expected-price channel: when oil is expected to
-be dearer, the country pays down. What remains after the correction is a small
-residue in both directions, at a handful of states out of nearly seventy. We
-would not call that a general precautionary response in either direction.
+To be sure this is not simulation noise, we ran the same comparison in the
+constant-volatility economy, where volatility never changes, so its five
+"states" are the same thing five times over and nothing should move across
+them. Across those, spreads move by less than one basis point and default rates
+by about a tenth of a percentage point — a small fraction of the swings above.
+So uncertainty on its own raises both what the country pays to borrow and how
+often it defaults, and this is what we now lead with in Section 6.3.
 
-Figure 1(c) and 1(d) show the same thing state by state. The policy moves in
-whole grid nodes, so every resolved response is exactly one node up or down —
-about 0.59 percentage points of annual value added.
+## What the averages say
 
-One honest caveat on reading this: "unchanged" means the saved policy does not
-resolve a movement smaller than one grid node, not that the response is exactly
-zero. The large majority of states are in that category, which is why we do not
-lean on the counts beyond the asymmetry in their signs.
+Averaged over the whole simulation, the referees' point applies in full, and we
+would rather state that plainly than soften it. Oil price risk in total matters a great
+deal to these countries: it accounts for 200.7 basis points of the average
+spread, roughly half of it. But the part that comes from volatility *changing
+over time* is small, about 13 basis points — and when we split that in two, most
+of it, 12 of the 13, is the expected-price effect rather than uncertainty. That
+is exactly what R2 suspected.
 
-![**Figure 1.** (a) Expected next-period oil price by volatility state, at a common current price, for the full and mean-preserving economies, with the closed-form log-normal prediction overlaid. (b) The channel decomposition with 95% simulation intervals. (c, d) High-minus-low volatility change in next-period debt across the debt grid at median endowment, at the baseline oil price and after a 10% rise; one grid node is about 0.59 percentage points of annual value added, and only states repaying at both volatility extremes are shown.](decomposition_spdebt/FIGURE_decomposition.jpg)
+We report this but do not build the section on it, for a reason we should state
+openly. Our correction is exact one quarter ahead, but these are long
+bonds, priced over something closer to six years, and over that longer horizon it drifts
+and overcorrects — which makes the expected-price share look too large
+and the uncertainty share too small. So we read the 12 as a ceiling and the 1.3
+as a floor rather than as a measurement. The comparison in the previous section
+is free of this, because it never sets one economy against another. We have also
+cut a line from our first draft calling the price effect "thirty times" the
+volatility effect; it invited a comparison the numbers cannot carry.
 
-## Where this leaves the section
+## Borrowing
 
-We have rewritten Section 6.3 accordingly, and the revision concedes more than
-the first draft of this response did.
+R1 asks the natural follow-up: with the expected-price effect taken out, does the
+country still borrow less when things get risky? We looked at the borrowing
+decisions directly, holding income and existing debt fixed so that volatility is
+the only thing changing. In the original model, higher volatility leads the
+country to pay down debt in nine of the sixty-nine situations we can resolve;
+with the correction, that falls to three (Figure 1c). So most of the reduction in borrowing
+was a response to expecting dearer oil, but not all of it. An earlier draft of this response
+claimed those cases vanished entirely — they do not, and we were wrong about
+that. What is left is too thin for us to claim a general precautionary motive
+either way.
 
-The aggregate effect of oil price risk is large and precisely measured: 200.7
-basis points, about half the mean spread. The effect of *time variation* in that
-risk is small but measurable at 13.4 basis points, and the referees are right
-that most of it operates through expected prices rather than through dispersion.
-We cannot put a reliable number on the split, because the one-step correction
-the exercise relies on overshoots at the horizons where the bond is priced.
+![**Figure 1.** (a) The expected oil price next quarter, by how volatile prices currently are, in the original model and in the corrected one. (b) What time-varying volatility does to the average spread, and how that divides between expected prices and dispersion. The bars carry 95% simulation intervals; a bar whose interval crosses the zero line cannot be told apart from zero. The effect of oil price risk as a whole is far larger, at +200.7 basis points, so it is written in rather than drawn, to keep the three smaller bars readable. (c) How often higher volatility leads the country to borrow less, at the baseline oil price and after a 10% rise. (d) The annual chance of default by volatility, on the same scale as panel (a). Panels (a) and (d) are the whole exercise in one picture: the expected price is flat across the corrected economy's volatility states, its default rate still more than doubles, and the constant-volatility economy stays flat throughout.](../model/economies_common_check/decomposition/FIGURE_decomposition.jpg)
 
-What we can show, and now lead with, is the conditional result: holding expected
-prices flat by construction, spreads still rise 47 basis points from the calmest
-to the most volatile state while the oil price itself falls. Dispersion raises
-the price of risk. It does not, at this calibration, produce a general
-precautionary borrowing response.
-
-R2 writes that a small pure-uncertainty effect would be a fine answer provided
-the reader learns why volatility matters. We think that is where we have landed.
-
-We are grateful for the comment. It cost us a headline claim and improved the
-paper.
+We have rewritten Section 6.3 along these lines. R2 writes that a small
+pure-uncertainty effect would be a perfectly good answer, so long as the reader
+comes away understanding why volatility matters. We think that is where we have
+ended up. The comment cost us a headline claim, and the paper is better for it. We thank
+the referees for raising it.
 
 ---
 
 ### Suggested manuscript wording
 
-> We separate the dispersion and expected-price components of time-varying
-> oil-price volatility using a one-step mean-preserving adjustment. The total
-> effect of time-varying volatility on average spreads is 13.4 basis points
-> (95% interval ±6.0), of which the decomposition attributes 12.1 to the
-> expected-price channel and 1.3 to dispersion. Because the adjustment is exact
-> only at one step and overshoots at the horizons relevant for pricing
-> long-term debt, we treat the first figure as an upper bound and the second as
-> a lower bound rather than as a measured split. The conditional evidence is
-> sharper: in the mean-preserving economy, where expected prices are flat by
-> construction, mean spreads rise monotonically by 47 basis points from the
-> calmest to the most volatile state while the mean oil price falls, against a
-> placebo noise floor of 0.8 basis points. Borrowing responses are
-> heterogeneous: volatility-induced debt reductions are three to five times
-> less common once the expected-price channel is removed, but they do not
-> disappear.
+> We separate the two effects of oil price volatility by solving an economy in
+> which the expected price is held fixed while its dispersion still varies.
+> Within that economy, spreads rise steadily by 47 basis points and the annual
+> default probability from 2.2% to 5.1% between the calmest and most turbulent
+> conditions, while the average oil price falls; the constant-volatility economy
+> moves by less than a basis point and a tenth of a percentage point across the
+> same states. Uncertainty therefore raises both the cost of borrowing and the
+> incidence of default. Averaged over the simulation, oil price risk as a whole
+> accounts for 200.7 basis points of the spread and time variation in volatility
+> for a further 13, of which roughly 12 is attributable to expected prices and 1
+> to dispersion; because the adjustment is exact only one quarter ahead and
+> overstates itself at the horizons relevant for long-term debt, we read these as
+> a ceiling and a floor rather than a measured split. Reductions in borrowing
+> become three to five times less common once the expected-price effect is
+> removed, but do not disappear.
 
-### Technical notes
+### Note
 
-The four economies — full SV, mean-preserving SV, constant volatility and
-constant price — give mean spreads of 407.9, 395.9, 394.6 and 207.3 bp
-(standard errors 2.2, 2.1, 2.2, 1.1) on debt/GDP of 34.30, 34.10, 33.94 and
-36.81%, over 1529, 1549, 1548 and 1226 qualifying episodes. Spread and debt
-figures use the Table 3 convention of averaging over hundred-quarter
-pre-default windows.
-
-The by-volatility table pools the whole simulation by realised volatility
-state, not by episode window, and is therefore a different statistic from the
-economy means above; the constant-volatility economy appears in it as a
-placebo, and its 0.8 bp range across five economically identical states is the
-noise floor quoted in the text.
-
-The debt-grid counts cover nodes between 10% and 55% of reference annual value
-added at median endowment, keeping only states that repay at both volatility
-extremes, and are equal-weight counts rather than stationary probabilities. The
-second price is 1.1058× the baseline.
-
-Calibration: σ_oil = 0.25 (`theta = −3.0`, `alpha = 5.779464e-5`), `beta =
-0.971528`, `d1 = 0.468175`, `d0 = −0.246`, on the common 277-node price grid
-with the oil price process estimated on 1995Q1–2019Q4. The choice of elasticity
-is a judgement call: `beta` and `d1` are recalibrated to hit the spread and
-debt targets at each elasticity, so the targets do not select it. A sensitivity
-table across six elasticities is in `model/src_spdebt/README.md`. The
-dispersion component is not stable across them — it ranges from +8.6 to
-−22.1 bp — and at σ_oil = 0.40 the dispersion and expected-price components
-are −22.1 and +23.3 bp, cancelling to a total of +1.2. That instability is the
-same overshoot described above, and is a further reason we report the total
-rather than the split.
-
-Everything here comes from the committed source set `model/src_spdebt`, which
-is byte-identical to the sources in the run directories that produced these
-numbers. The tables are produced by `model/analysis/decomposition.py`, the
-horizon profile by `model/analysis/horizon_check.py`, and the figure by
-`model/analysis/FIGURE_decomposition.m`. No solver settings or convergence
-criteria were changed in preparing this response.
-
-**Not re-measured at this calibration:** the fixed-state spread comparison that
-an earlier draft reported (37 and 51 bp at a representative debt and endowment
-node). The script that produces it requires numpy, which is not installed in
-the current environment. The by-volatility table above answers the same
-question with a larger sample and is what the text now relies on.
+The derivations, the quarter-by-quarter behaviour of the correction, the full
+tables and the sensitivity to the substitution elasticity are all in
+`results/response_R2M1_R1M2_FULL_DETAIL.md`, which we are happy to provide.
+Every number here comes from `model/economies_common_check/`, four separate
+Fortran programs solved on a common price grid; the tables and the figure are
+produced by a single MATLAB file, `model/analysis/JEDC_decomposition.m`, and
+written to `model/economies_common_check/decomposition/`.

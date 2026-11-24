@@ -1,0 +1,5025 @@
+{
+  "reference": {
+    "debt_index": 58,
+    "current_debt": 11.67581776,
+    "current_debt_to_annual_value_added": 0.3371630469981147,
+    "annual_value_added": 34.62958904884166,
+    "endowment_log": 0.0,
+    "p0": 1.1274968515793757,
+    "p1": 1.2406142301450478,
+    "actual_price_increase_percent": 10.032611479776588,
+    "vol_states": [
+      1,
+      5
+    ]
+  },
+  "calibration": {
+    "beta": 0.9746,
+    "d0": -0.246,
+    "d1": 0.4731,
+    "theta": -2.33333333,
+    "alpha": 0.000307,
+    "rho_p": 0.98,
+    "mu_h": -4.33,
+    "rho_h": 0.66,
+    "eta": 0.44
+  },
+  "aggregates": [
+    {
+      "economy": "full",
+      "spread_bp": 409.0,
+      "spread_sd_bp": 362.5,
+      "debt_gdp_percent": 34.05,
+      "oil_gdp_percent": 8.92,
+      "default_entries": 5826,
+      "observed_quarters": 750000,
+      "eligible_market_access_quarters": 680792,
+      "default_entries_per_100_quarters": 0.7767999999999999,
+      "default_entries_per_100_eligible_quarters": 0.8557679878729479,
+      "mean_oil_price": 1.3721002170192267
+    },
+    {
+      "economy": "mp",
+      "spread_bp": 405.7,
+      "spread_sd_bp": 354.7,
+      "debt_gdp_percent": 33.89,
+      "oil_gdp_percent": 9.01,
+      "default_entries": 5743,
+      "observed_quarters": 750000,
+      "eligible_market_access_quarters": 681692,
+      "default_entries_per_100_quarters": 0.7657333333333334,
+      "default_entries_per_100_eligible_quarters": 0.842462578407844,
+      "mean_oil_price": 1.3692131788003867
+    },
+    {
+      "economy": "cv",
+      "spread_bp": 402.7,
+      "spread_sd_bp": 359.5,
+      "debt_gdp_percent": 33.46,
+      "oil_gdp_percent": 9.06,
+      "default_entries": 5793,
+      "observed_quarters": 750000,
+      "eligible_market_access_quarters": 681450,
+      "default_entries_per_100_quarters": 0.7724,
+      "default_entries_per_100_eligible_quarters": 0.850099053488884,
+      "mean_oil_price": 1.37129349156012
+    }
+  ],
+  "fixed_states": [
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_vol_state": 1,
+      "conditional_sd_percent": 6.388451012779167,
+      "current_debt": 11.67581776,
+      "current_endowment_log": 0.0,
+      "repays_today": true,
+      "next_debt": 11.675817756252652,
+      "next_period_default_probability_percent": 5.2773664898002336e-05,
+      "annual_spread_bp": 323.0479492678029
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_vol_state": 5,
+      "conditional_sd_percent": 20.611486984466172,
+      "current_debt": 11.67581776,
+      "current_endowment_log": 0.0,
+      "repays_today": true,
+      "next_debt": 11.675817756252652,
+      "next_period_default_probability_percent": 0.023894661319997967,
+      "annual_spread_bp": 372.15534898482395
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_vol_state": 1,
+      "conditional_sd_percent": 6.388451012779167,
+      "current_debt": 11.67581776,
+      "current_endowment_log": 0.0,
+      "repays_today": true,
+      "next_debt": 11.675817756252652,
+      "next_period_default_probability_percent": 0.0006306949220231924,
+      "annual_spread_bp": 373.2900624063684
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_vol_state": 5,
+      "conditional_sd_percent": 20.611486984466172,
+      "current_debt": 11.67581776,
+      "current_endowment_log": 0.0,
+      "repays_today": true,
+      "next_debt": 11.675817756252652,
+      "next_period_default_probability_percent": 0.09838753824487187,
+      "annual_spread_bp": 442.38594470409345
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_vol_state": 1,
+      "conditional_sd_percent": 6.388451012779167,
+      "current_debt": 11.67581776,
+      "current_endowment_log": 0.0,
+      "repays_today": true,
+      "next_debt": 11.675817756252652,
+      "next_period_default_probability_percent": 5.000444701010687e-05,
+      "annual_spread_bp": 324.5429864406968
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_vol_state": 5,
+      "conditional_sd_percent": 20.611486984466172,
+      "current_debt": 11.67581776,
+      "current_endowment_log": 0.0,
+      "repays_today": true,
+      "next_debt": 11.675817756252652,
+      "next_period_default_probability_percent": 0.015603866088626295,
+      "annual_spread_bp": 361.5267242453002
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_vol_state": 1,
+      "conditional_sd_percent": 6.388451012779167,
+      "current_debt": 11.67581776,
+      "current_endowment_log": 0.0,
+      "repays_today": true,
+      "next_debt": 11.675817756252652,
+      "next_period_default_probability_percent": 0.0006524285182721854,
+      "annual_spread_bp": 380.55359911600027
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_vol_state": 5,
+      "conditional_sd_percent": 20.611486984466172,
+      "current_debt": 11.67581776,
+      "current_endowment_log": 0.0,
+      "repays_today": true,
+      "next_debt": 11.675817756252652,
+      "next_period_default_probability_percent": 0.06872946101158464,
+      "annual_spread_bp": 431.26573571477866
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_vol_state": 1,
+      "conditional_sd_percent": 12.50245432441475,
+      "current_debt": 11.67581776,
+      "current_endowment_log": 0.0,
+      "repays_today": true,
+      "next_debt": 11.675817756252652,
+      "next_period_default_probability_percent": 0.000419007255852042,
+      "annual_spread_bp": 339.1844306030278
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_vol_state": 5,
+      "conditional_sd_percent": 12.50245432441475,
+      "current_debt": 11.67581776,
+      "current_endowment_log": 0.0,
+      "repays_today": true,
+      "next_debt": 11.675817756252652,
+      "next_period_default_probability_percent": 0.000419007255852042,
+      "annual_spread_bp": 339.1844306030278
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_vol_state": 1,
+      "conditional_sd_percent": 12.50245432441475,
+      "current_debt": 11.67581776,
+      "current_endowment_log": 0.0,
+      "repays_today": true,
+      "next_debt": 11.675817756252652,
+      "next_period_default_probability_percent": 0.005410072850384918,
+      "annual_spread_bp": 402.32208779896973
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_vol_state": 5,
+      "conditional_sd_percent": 12.50245432441475,
+      "current_debt": 11.67581776,
+      "current_endowment_log": 0.0,
+      "repays_today": true,
+      "next_debt": 11.675817756252652,
+      "next_period_default_probability_percent": 0.005410072850384918,
+      "annual_spread_bp": 402.32208779896973
+    }
+  ],
+  "channels": [
+    {
+      "channel": "oil price risk at all (full - constant price)",
+      "spread_bp": "+218.9",
+      "ci95_bp": "6.5",
+      "identified": "yes"
+    },
+    {
+      "channel": "time-varying volatility, TOTAL (full - constant vol)",
+      "spread_bp": "+6.3",
+      "ci95_bp": "8.7",
+      "identified": "no"
+    },
+    {
+      "channel": "  of which pure dispersion (mean-preserving - constant vol)",
+      "spread_bp": "+3.0",
+      "ci95_bp": "8.8",
+      "identified": "no"
+    },
+    {
+      "channel": "  of which expected price (full - mean-preserving)",
+      "spread_bp": "+3.3",
+      "ci95_bp": "8.9",
+      "identified": "no"
+    }
+  ],
+  "price_means": [
+    {
+      "economy": "full",
+      "current_vol_state": 1,
+      "current_sd_percent": 6.388451012779167,
+      "current_price": 1.1274968515793757,
+      "expected_next_price": 1.1314062299775434
+    },
+    {
+      "economy": "full",
+      "current_vol_state": 2,
+      "current_sd_percent": 8.561976054391298,
+      "current_price": 1.1274968515793757,
+      "expected_next_price": 1.1331692283164667
+    },
+    {
+      "economy": "full",
+      "current_vol_state": 3,
+      "current_sd_percent": 11.474993459727875,
+      "current_price": 1.1274968515793757,
+      "expected_next_price": 1.1358339281190686
+    },
+    {
+      "economy": "full",
+      "current_vol_state": 4,
+      "current_sd_percent": 15.379098710894349,
+      "current_price": 1.1274968515793757,
+      "expected_next_price": 1.1396578448921457
+    },
+    {
+      "economy": "full",
+      "current_vol_state": 5,
+      "current_sd_percent": 20.611486984466172,
+      "current_price": 1.1274968515793757,
+      "expected_next_price": 1.1444504723255353
+    },
+    {
+      "economy": "mp",
+      "current_vol_state": 1,
+      "current_sd_percent": 6.388451012779167,
+      "current_price": 1.1274968515793757,
+      "expected_next_price": 1.1363554273941345
+    },
+    {
+      "economy": "mp",
+      "current_vol_state": 2,
+      "current_sd_percent": 8.561976054391298,
+      "current_price": 1.1274968515793757,
+      "expected_next_price": 1.1363554273941343
+    },
+    {
+      "economy": "mp",
+      "current_vol_state": 3,
+      "current_sd_percent": 11.474993459727875,
+      "current_price": 1.1274968515793757,
+      "expected_next_price": 1.1363554273941343
+    },
+    {
+      "economy": "mp",
+      "current_vol_state": 4,
+      "current_sd_percent": 15.379098710894349,
+      "current_price": 1.1274968515793757,
+      "expected_next_price": 1.1363554273941345
+    },
+    {
+      "economy": "mp",
+      "current_vol_state": 5,
+      "current_sd_percent": 20.611486984466172,
+      "current_price": 1.1274968515793757,
+      "expected_next_price": 1.1363554273941345
+    },
+    {
+      "economy": "cv",
+      "current_vol_state": 1,
+      "current_sd_percent": 12.50245432441475,
+      "current_price": 1.1274968515793757,
+      "expected_next_price": 1.136355427394135
+    },
+    {
+      "economy": "cv",
+      "current_vol_state": 2,
+      "current_sd_percent": 12.50245432441475,
+      "current_price": 1.1274968515793757,
+      "expected_next_price": 1.136355427394135
+    },
+    {
+      "economy": "cv",
+      "current_vol_state": 3,
+      "current_sd_percent": 12.50245432441475,
+      "current_price": 1.1274968515793757,
+      "expected_next_price": 1.136355427394135
+    },
+    {
+      "economy": "cv",
+      "current_vol_state": 4,
+      "current_sd_percent": 12.50245432441475,
+      "current_price": 1.1274968515793757,
+      "expected_next_price": 1.136355427394135
+    },
+    {
+      "economy": "cv",
+      "current_vol_state": 5,
+      "current_sd_percent": 12.50245432441475,
+      "current_price": 1.1274968515793757,
+      "expected_next_price": 1.136355427394135
+    }
+  ],
+  "borrowing_curves": [
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 0.0,
+      "current_debt_reference_annual_va_percent": 0.0,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 0.20483891,
+      "current_debt_reference_annual_va_percent": 0.5915141231133141,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 0.40967782,
+      "current_debt_reference_annual_va_percent": 1.1830282462266282,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 0.61451672,
+      "current_debt_reference_annual_va_percent": 1.7745423404629033,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 0.81935563,
+      "current_debt_reference_annual_va_percent": 2.3660564635762174,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 1.02419454,
+      "current_debt_reference_annual_va_percent": 2.957570586689532,
+      "next_debt_high_minus_low": -0.2048389080044326,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 1.22903345,
+      "current_debt_reference_annual_va_percent": 3.5490847098028455,
+      "next_debt_high_minus_low": -0.20483890800443239,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 1.43387236,
+      "current_debt_reference_annual_va_percent": 4.14059883291616,
+      "next_debt_high_minus_low": -0.2048389080044326,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 1.63871126,
+      "current_debt_reference_annual_va_percent": 4.732112927152435,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 1.84355017,
+      "current_debt_reference_annual_va_percent": 5.323627050265749,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 2.04838908,
+      "current_debt_reference_annual_va_percent": 5.915141173379064,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 2.25322799,
+      "current_debt_reference_annual_va_percent": 6.506655296492378,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 2.4580669,
+      "current_debt_reference_annual_va_percent": 7.098169419605691,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 2.6629058,
+      "current_debt_reference_annual_va_percent": 7.689683513841966,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 2.86774471,
+      "current_debt_reference_annual_va_percent": 8.28119763695528,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 3.07258362,
+      "current_debt_reference_annual_va_percent": 8.872711760068595,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 3.27742253,
+      "current_debt_reference_annual_va_percent": 9.464225883181909,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 3.48226144,
+      "current_debt_reference_annual_va_percent": 10.055740006295222,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 3.68710034,
+      "current_debt_reference_annual_va_percent": 10.647254100531498,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 3.89193925,
+      "current_debt_reference_annual_va_percent": 11.238768223644813,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 4.09677816,
+      "current_debt_reference_annual_va_percent": 11.830282346758128,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 4.30161707,
+      "current_debt_reference_annual_va_percent": 12.42179646987144,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 4.50645598,
+      "current_debt_reference_annual_va_percent": 13.013310592984755,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 4.71129488,
+      "current_debt_reference_annual_va_percent": 13.60482468722103,
+      "next_debt_high_minus_low": -0.20483890800443216,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 4.91613379,
+      "current_debt_reference_annual_va_percent": 14.196338810334344,
+      "next_debt_high_minus_low": -0.20483890800443305,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 5.1209727,
+      "current_debt_reference_annual_va_percent": 14.787852933447656,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 5.32581161,
+      "current_debt_reference_annual_va_percent": 15.37936705656097,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 5.53065052,
+      "current_debt_reference_annual_va_percent": 15.970881179674286,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 5.73548942,
+      "current_debt_reference_annual_va_percent": 16.56239527391056,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 5.94032833,
+      "current_debt_reference_annual_va_percent": 17.153909397023874,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 6.14516724,
+      "current_debt_reference_annual_va_percent": 17.74542352013719,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 6.35000615,
+      "current_debt_reference_annual_va_percent": 18.3369376432505,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 6.55484506,
+      "current_debt_reference_annual_va_percent": 18.928451766363818,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 6.75968396,
+      "current_debt_reference_annual_va_percent": 19.51996586060009,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 6.96452287,
+      "current_debt_reference_annual_va_percent": 20.111479983713405,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 7.16936178,
+      "current_debt_reference_annual_va_percent": 20.702994106826722,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 7.37420069,
+      "current_debt_reference_annual_va_percent": 21.294508229940035,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 7.5790396,
+      "current_debt_reference_annual_va_percent": 21.88602235305335,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 7.7838785,
+      "current_debt_reference_annual_va_percent": 22.477536447289626,
+      "next_debt_high_minus_low": -0.20483890800443216,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 7.98871741,
+      "current_debt_reference_annual_va_percent": 23.069050570402936,
+      "next_debt_high_minus_low": -0.20483890800443305,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 8.19355632,
+      "current_debt_reference_annual_va_percent": 23.660564693516257,
+      "next_debt_high_minus_low": -0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 8.39839523,
+      "current_debt_reference_annual_va_percent": 24.252078816629567,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 8.60323414,
+      "current_debt_reference_annual_va_percent": 24.84359293974288,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 8.80807304,
+      "current_debt_reference_annual_va_percent": 25.435107033979158,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 9.01291195,
+      "current_debt_reference_annual_va_percent": 26.026621157092467,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 9.21775086,
+      "current_debt_reference_annual_va_percent": 26.618135280205788,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 9.42258977,
+      "current_debt_reference_annual_va_percent": 27.209649403319098,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 9.62742868,
+      "current_debt_reference_annual_va_percent": 27.80116352643241,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 9.83226758,
+      "current_debt_reference_annual_va_percent": 28.39267762066869,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 10.03710649,
+      "current_debt_reference_annual_va_percent": 28.984191743782,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 10.2419454,
+      "current_debt_reference_annual_va_percent": 29.575705866895312,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 10.44678431,
+      "current_debt_reference_annual_va_percent": 30.16721999000863,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 10.65162322,
+      "current_debt_reference_annual_va_percent": 30.75873411312194,
+      "next_debt_high_minus_low": -0.20483890800443483,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 10.85646212,
+      "current_debt_reference_annual_va_percent": 31.350248207358213,
+      "next_debt_high_minus_low": -0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 11.06130103,
+      "current_debt_reference_annual_va_percent": 31.94176233047153,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 11.26613994,
+      "current_debt_reference_annual_va_percent": 32.53327645358485,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 11.47097885,
+      "current_debt_reference_annual_va_percent": 33.12479057669816,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 11.67581776,
+      "current_debt_reference_annual_va_percent": 33.716304699811474,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 11.88065666,
+      "current_debt_reference_annual_va_percent": 34.30781879404775,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 12.08549557,
+      "current_debt_reference_annual_va_percent": 34.89933291716107,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 12.29033448,
+      "current_debt_reference_annual_va_percent": 35.49084704027438,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 12.49517339,
+      "current_debt_reference_annual_va_percent": 36.082361163387695,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 12.7000123,
+      "current_debt_reference_annual_va_percent": 36.673875286501,
+      "next_debt_high_minus_low": -0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 12.9048512,
+      "current_debt_reference_annual_va_percent": 37.26538938073728,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 13.10969011,
+      "current_debt_reference_annual_va_percent": 37.856903503850596,
+      "next_debt_high_minus_low": -0.20483890800443305,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 13.31452902,
+      "current_debt_reference_annual_va_percent": 38.44841762696391,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 13.51936793,
+      "current_debt_reference_annual_va_percent": 39.03993175007722,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 13.72420684,
+      "current_debt_reference_annual_va_percent": 39.63144587319054,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 13.92904574,
+      "current_debt_reference_annual_va_percent": 40.22295996742681,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 14.13388465,
+      "current_debt_reference_annual_va_percent": 40.81447409054012,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 14.33872356,
+      "current_debt_reference_annual_va_percent": 41.405988213653444,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 14.54356247,
+      "current_debt_reference_annual_va_percent": 41.99750233676675,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 14.74840138,
+      "current_debt_reference_annual_va_percent": 42.58901645988007,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 14.95324028,
+      "current_debt_reference_annual_va_percent": 43.180530554116345,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 15.15807919,
+      "current_debt_reference_annual_va_percent": 43.77204467722966,
+      "next_debt_high_minus_low": 0.20483890800443305,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 15.3629181,
+      "current_debt_reference_annual_va_percent": 44.36355880034297,
+      "next_debt_high_minus_low": 0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 15.56775701,
+      "current_debt_reference_annual_va_percent": 44.955072923456285,
+      "next_debt_high_minus_low": 0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 15.77259592,
+      "current_debt_reference_annual_va_percent": 45.546587046569606,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 15.97743482,
+      "current_debt_reference_annual_va_percent": 46.13810114080587,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 16.18227373,
+      "current_debt_reference_annual_va_percent": 46.729615263919186,
+      "next_debt_high_minus_low": -0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 16.38711264,
+      "current_debt_reference_annual_va_percent": 47.321129387032514,
+      "next_debt_high_minus_low": 0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 16.59195155,
+      "current_debt_reference_annual_va_percent": 47.91264351014582,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 16.79679046,
+      "current_debt_reference_annual_va_percent": 48.50415763325913,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 17.00162936,
+      "current_debt_reference_annual_va_percent": 49.09567172749541,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 0.0,
+      "current_debt_reference_annual_va_percent": 0.0,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 0.20483891,
+      "current_debt_reference_annual_va_percent": 0.5915141231133141,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 0.40967782,
+      "current_debt_reference_annual_va_percent": 1.1830282462266282,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 0.61451672,
+      "current_debt_reference_annual_va_percent": 1.7745423404629033,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 0.81935563,
+      "current_debt_reference_annual_va_percent": 2.3660564635762174,
+      "next_debt_high_minus_low": -0.20483890800443239,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 1.02419454,
+      "current_debt_reference_annual_va_percent": 2.957570586689532,
+      "next_debt_high_minus_low": -0.2048389080044326,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 1.22903345,
+      "current_debt_reference_annual_va_percent": 3.5490847098028455,
+      "next_debt_high_minus_low": -0.20483890800443239,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 1.43387236,
+      "current_debt_reference_annual_va_percent": 4.14059883291616,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 1.63871126,
+      "current_debt_reference_annual_va_percent": 4.732112927152435,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 1.84355017,
+      "current_debt_reference_annual_va_percent": 5.323627050265749,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 2.04838908,
+      "current_debt_reference_annual_va_percent": 5.915141173379064,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 2.25322799,
+      "current_debt_reference_annual_va_percent": 6.506655296492378,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 2.4580669,
+      "current_debt_reference_annual_va_percent": 7.098169419605691,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 2.6629058,
+      "current_debt_reference_annual_va_percent": 7.689683513841966,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 2.86774471,
+      "current_debt_reference_annual_va_percent": 8.28119763695528,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 3.07258362,
+      "current_debt_reference_annual_va_percent": 8.872711760068595,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 3.27742253,
+      "current_debt_reference_annual_va_percent": 9.464225883181909,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 3.48226144,
+      "current_debt_reference_annual_va_percent": 10.055740006295222,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 3.68710034,
+      "current_debt_reference_annual_va_percent": 10.647254100531498,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 3.89193925,
+      "current_debt_reference_annual_va_percent": 11.238768223644813,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 4.09677816,
+      "current_debt_reference_annual_va_percent": 11.830282346758128,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 4.30161707,
+      "current_debt_reference_annual_va_percent": 12.42179646987144,
+      "next_debt_high_minus_low": -0.20483890800443216,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 4.50645598,
+      "current_debt_reference_annual_va_percent": 13.013310592984755,
+      "next_debt_high_minus_low": -0.20483890800443305,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 4.71129488,
+      "current_debt_reference_annual_va_percent": 13.60482468722103,
+      "next_debt_high_minus_low": -0.20483890800443216,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 4.91613379,
+      "current_debt_reference_annual_va_percent": 14.196338810334344,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 5.1209727,
+      "current_debt_reference_annual_va_percent": 14.787852933447656,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 5.32581161,
+      "current_debt_reference_annual_va_percent": 15.37936705656097,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 5.53065052,
+      "current_debt_reference_annual_va_percent": 15.970881179674286,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 5.73548942,
+      "current_debt_reference_annual_va_percent": 16.56239527391056,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 5.94032833,
+      "current_debt_reference_annual_va_percent": 17.153909397023874,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 6.14516724,
+      "current_debt_reference_annual_va_percent": 17.74542352013719,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 6.35000615,
+      "current_debt_reference_annual_va_percent": 18.3369376432505,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 6.55484506,
+      "current_debt_reference_annual_va_percent": 18.928451766363818,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 6.75968396,
+      "current_debt_reference_annual_va_percent": 19.51996586060009,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 6.96452287,
+      "current_debt_reference_annual_va_percent": 20.111479983713405,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 7.16936178,
+      "current_debt_reference_annual_va_percent": 20.702994106826722,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 7.37420069,
+      "current_debt_reference_annual_va_percent": 21.294508229940035,
+      "next_debt_high_minus_low": -0.20483890800443216,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 7.5790396,
+      "current_debt_reference_annual_va_percent": 21.88602235305335,
+      "next_debt_high_minus_low": -0.20483890800443305,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 7.7838785,
+      "current_debt_reference_annual_va_percent": 22.477536447289626,
+      "next_debt_high_minus_low": -0.20483890800443216,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 7.98871741,
+      "current_debt_reference_annual_va_percent": 23.069050570402936,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 8.19355632,
+      "current_debt_reference_annual_va_percent": 23.660564693516257,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 8.39839523,
+      "current_debt_reference_annual_va_percent": 24.252078816629567,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 8.60323414,
+      "current_debt_reference_annual_va_percent": 24.84359293974288,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 8.80807304,
+      "current_debt_reference_annual_va_percent": 25.435107033979158,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 9.01291195,
+      "current_debt_reference_annual_va_percent": 26.026621157092467,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 9.21775086,
+      "current_debt_reference_annual_va_percent": 26.618135280205788,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 9.42258977,
+      "current_debt_reference_annual_va_percent": 27.209649403319098,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 9.62742868,
+      "current_debt_reference_annual_va_percent": 27.80116352643241,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 9.83226758,
+      "current_debt_reference_annual_va_percent": 28.39267762066869,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 10.03710649,
+      "current_debt_reference_annual_va_percent": 28.984191743782,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 10.2419454,
+      "current_debt_reference_annual_va_percent": 29.575705866895312,
+      "next_debt_high_minus_low": -0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 10.44678431,
+      "current_debt_reference_annual_va_percent": 30.16721999000863,
+      "next_debt_high_minus_low": -0.20483890800443305,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 10.65162322,
+      "current_debt_reference_annual_va_percent": 30.75873411312194,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 10.85646212,
+      "current_debt_reference_annual_va_percent": 31.350248207358213,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 11.06130103,
+      "current_debt_reference_annual_va_percent": 31.94176233047153,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 11.26613994,
+      "current_debt_reference_annual_va_percent": 32.53327645358485,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 11.47097885,
+      "current_debt_reference_annual_va_percent": 33.12479057669816,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 11.67581776,
+      "current_debt_reference_annual_va_percent": 33.716304699811474,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 11.88065666,
+      "current_debt_reference_annual_va_percent": 34.30781879404775,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 12.08549557,
+      "current_debt_reference_annual_va_percent": 34.89933291716107,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 12.29033448,
+      "current_debt_reference_annual_va_percent": 35.49084704027438,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 12.49517339,
+      "current_debt_reference_annual_va_percent": 36.082361163387695,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 12.7000123,
+      "current_debt_reference_annual_va_percent": 36.673875286501,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 12.9048512,
+      "current_debt_reference_annual_va_percent": 37.26538938073728,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 13.10969011,
+      "current_debt_reference_annual_va_percent": 37.856903503850596,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 13.31452902,
+      "current_debt_reference_annual_va_percent": 38.44841762696391,
+      "next_debt_high_minus_low": -0.20483890800443483,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 13.51936793,
+      "current_debt_reference_annual_va_percent": 39.03993175007722,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 13.72420684,
+      "current_debt_reference_annual_va_percent": 39.63144587319054,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 13.92904574,
+      "current_debt_reference_annual_va_percent": 40.22295996742681,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 14.13388465,
+      "current_debt_reference_annual_va_percent": 40.81447409054012,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 14.33872356,
+      "current_debt_reference_annual_va_percent": 41.405988213653444,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 14.54356247,
+      "current_debt_reference_annual_va_percent": 41.99750233676675,
+      "next_debt_high_minus_low": 0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 14.74840138,
+      "current_debt_reference_annual_va_percent": 42.58901645988007,
+      "next_debt_high_minus_low": 0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 14.95324028,
+      "current_debt_reference_annual_va_percent": 43.180530554116345,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 15.15807919,
+      "current_debt_reference_annual_va_percent": 43.77204467722966,
+      "next_debt_high_minus_low": 0.20483890800443305,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 15.3629181,
+      "current_debt_reference_annual_va_percent": 44.36355880034297,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 15.56775701,
+      "current_debt_reference_annual_va_percent": 44.955072923456285,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 15.77259592,
+      "current_debt_reference_annual_va_percent": 45.546587046569606,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 15.97743482,
+      "current_debt_reference_annual_va_percent": 46.13810114080587,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 16.18227373,
+      "current_debt_reference_annual_va_percent": 46.729615263919186,
+      "next_debt_high_minus_low": -0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 0.0,
+      "current_debt_reference_annual_va_percent": 0.0,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 0.20483891,
+      "current_debt_reference_annual_va_percent": 0.5915141231133141,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 0.40967782,
+      "current_debt_reference_annual_va_percent": 1.1830282462266282,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 0.61451672,
+      "current_debt_reference_annual_va_percent": 1.7745423404629033,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 0.81935563,
+      "current_debt_reference_annual_va_percent": 2.3660564635762174,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 1.02419454,
+      "current_debt_reference_annual_va_percent": 2.957570586689532,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 1.22903345,
+      "current_debt_reference_annual_va_percent": 3.5490847098028455,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 1.43387236,
+      "current_debt_reference_annual_va_percent": 4.14059883291616,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 1.63871126,
+      "current_debt_reference_annual_va_percent": 4.732112927152435,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 1.84355017,
+      "current_debt_reference_annual_va_percent": 5.323627050265749,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 2.04838908,
+      "current_debt_reference_annual_va_percent": 5.915141173379064,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 2.25322799,
+      "current_debt_reference_annual_va_percent": 6.506655296492378,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 2.4580669,
+      "current_debt_reference_annual_va_percent": 7.098169419605691,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 2.6629058,
+      "current_debt_reference_annual_va_percent": 7.689683513841966,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 2.86774471,
+      "current_debt_reference_annual_va_percent": 8.28119763695528,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 3.07258362,
+      "current_debt_reference_annual_va_percent": 8.872711760068595,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 3.27742253,
+      "current_debt_reference_annual_va_percent": 9.464225883181909,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 3.48226144,
+      "current_debt_reference_annual_va_percent": 10.055740006295222,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 3.68710034,
+      "current_debt_reference_annual_va_percent": 10.647254100531498,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 3.89193925,
+      "current_debt_reference_annual_va_percent": 11.238768223644813,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 4.09677816,
+      "current_debt_reference_annual_va_percent": 11.830282346758128,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 4.30161707,
+      "current_debt_reference_annual_va_percent": 12.42179646987144,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 4.50645598,
+      "current_debt_reference_annual_va_percent": 13.013310592984755,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 4.71129488,
+      "current_debt_reference_annual_va_percent": 13.60482468722103,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 4.91613379,
+      "current_debt_reference_annual_va_percent": 14.196338810334344,
+      "next_debt_high_minus_low": 0.20483890800443305,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 5.1209727,
+      "current_debt_reference_annual_va_percent": 14.787852933447656,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 5.32581161,
+      "current_debt_reference_annual_va_percent": 15.37936705656097,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 5.53065052,
+      "current_debt_reference_annual_va_percent": 15.970881179674286,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 5.73548942,
+      "current_debt_reference_annual_va_percent": 16.56239527391056,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 5.94032833,
+      "current_debt_reference_annual_va_percent": 17.153909397023874,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 6.14516724,
+      "current_debt_reference_annual_va_percent": 17.74542352013719,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 6.35000615,
+      "current_debt_reference_annual_va_percent": 18.3369376432505,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 6.55484506,
+      "current_debt_reference_annual_va_percent": 18.928451766363818,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 6.75968396,
+      "current_debt_reference_annual_va_percent": 19.51996586060009,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 6.96452287,
+      "current_debt_reference_annual_va_percent": 20.111479983713405,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 7.16936178,
+      "current_debt_reference_annual_va_percent": 20.702994106826722,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 7.37420069,
+      "current_debt_reference_annual_va_percent": 21.294508229940035,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 7.5790396,
+      "current_debt_reference_annual_va_percent": 21.88602235305335,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 7.7838785,
+      "current_debt_reference_annual_va_percent": 22.477536447289626,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 7.98871741,
+      "current_debt_reference_annual_va_percent": 23.069050570402936,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 8.19355632,
+      "current_debt_reference_annual_va_percent": 23.660564693516257,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 8.39839523,
+      "current_debt_reference_annual_va_percent": 24.252078816629567,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 8.60323414,
+      "current_debt_reference_annual_va_percent": 24.84359293974288,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 8.80807304,
+      "current_debt_reference_annual_va_percent": 25.435107033979158,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 9.01291195,
+      "current_debt_reference_annual_va_percent": 26.026621157092467,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 9.21775086,
+      "current_debt_reference_annual_va_percent": 26.618135280205788,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 9.42258977,
+      "current_debt_reference_annual_va_percent": 27.209649403319098,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 9.62742868,
+      "current_debt_reference_annual_va_percent": 27.80116352643241,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 9.83226758,
+      "current_debt_reference_annual_va_percent": 28.39267762066869,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 10.03710649,
+      "current_debt_reference_annual_va_percent": 28.984191743782,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 10.2419454,
+      "current_debt_reference_annual_va_percent": 29.575705866895312,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 10.44678431,
+      "current_debt_reference_annual_va_percent": 30.16721999000863,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 10.65162322,
+      "current_debt_reference_annual_va_percent": 30.75873411312194,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 10.85646212,
+      "current_debt_reference_annual_va_percent": 31.350248207358213,
+      "next_debt_high_minus_low": 0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 11.06130103,
+      "current_debt_reference_annual_va_percent": 31.94176233047153,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 11.26613994,
+      "current_debt_reference_annual_va_percent": 32.53327645358485,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 11.47097885,
+      "current_debt_reference_annual_va_percent": 33.12479057669816,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 11.67581776,
+      "current_debt_reference_annual_va_percent": 33.716304699811474,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 11.88065666,
+      "current_debt_reference_annual_va_percent": 34.30781879404775,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 12.08549557,
+      "current_debt_reference_annual_va_percent": 34.89933291716107,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 12.29033448,
+      "current_debt_reference_annual_va_percent": 35.49084704027438,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 12.49517339,
+      "current_debt_reference_annual_va_percent": 36.082361163387695,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 12.7000123,
+      "current_debt_reference_annual_va_percent": 36.673875286501,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 12.9048512,
+      "current_debt_reference_annual_va_percent": 37.26538938073728,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 13.10969011,
+      "current_debt_reference_annual_va_percent": 37.856903503850596,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 13.31452902,
+      "current_debt_reference_annual_va_percent": 38.44841762696391,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 13.51936793,
+      "current_debt_reference_annual_va_percent": 39.03993175007722,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 13.72420684,
+      "current_debt_reference_annual_va_percent": 39.63144587319054,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 13.92904574,
+      "current_debt_reference_annual_va_percent": 40.22295996742681,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 14.13388465,
+      "current_debt_reference_annual_va_percent": 40.81447409054012,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 14.33872356,
+      "current_debt_reference_annual_va_percent": 41.405988213653444,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 14.54356247,
+      "current_debt_reference_annual_va_percent": 41.99750233676675,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 14.74840138,
+      "current_debt_reference_annual_va_percent": 42.58901645988007,
+      "next_debt_high_minus_low": 0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 14.95324028,
+      "current_debt_reference_annual_va_percent": 43.180530554116345,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 15.15807919,
+      "current_debt_reference_annual_va_percent": 43.77204467722966,
+      "next_debt_high_minus_low": 0.20483890800443305,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 15.3629181,
+      "current_debt_reference_annual_va_percent": 44.36355880034297,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 15.56775701,
+      "current_debt_reference_annual_va_percent": 44.955072923456285,
+      "next_debt_high_minus_low": 0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 15.77259592,
+      "current_debt_reference_annual_va_percent": 45.546587046569606,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 15.97743482,
+      "current_debt_reference_annual_va_percent": 46.13810114080587,
+      "next_debt_high_minus_low": 0.20483890800443483,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 16.18227373,
+      "current_debt_reference_annual_va_percent": 46.729615263919186,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 16.38711264,
+      "current_debt_reference_annual_va_percent": 47.321129387032514,
+      "next_debt_high_minus_low": 0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 16.59195155,
+      "current_debt_reference_annual_va_percent": 47.91264351014582,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 16.79679046,
+      "current_debt_reference_annual_va_percent": 48.50415763325913,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 0.0,
+      "current_debt_reference_annual_va_percent": 0.0,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 0.20483891,
+      "current_debt_reference_annual_va_percent": 0.5915141231133141,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 0.40967782,
+      "current_debt_reference_annual_va_percent": 1.1830282462266282,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 0.61451672,
+      "current_debt_reference_annual_va_percent": 1.7745423404629033,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 0.81935563,
+      "current_debt_reference_annual_va_percent": 2.3660564635762174,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 1.02419454,
+      "current_debt_reference_annual_va_percent": 2.957570586689532,
+      "next_debt_high_minus_low": 0.2048389080044326,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 1.22903345,
+      "current_debt_reference_annual_va_percent": 3.5490847098028455,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 1.43387236,
+      "current_debt_reference_annual_va_percent": 4.14059883291616,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 1.63871126,
+      "current_debt_reference_annual_va_percent": 4.732112927152435,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 1.84355017,
+      "current_debt_reference_annual_va_percent": 5.323627050265749,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 2.04838908,
+      "current_debt_reference_annual_va_percent": 5.915141173379064,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 2.25322799,
+      "current_debt_reference_annual_va_percent": 6.506655296492378,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 2.4580669,
+      "current_debt_reference_annual_va_percent": 7.098169419605691,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 2.6629058,
+      "current_debt_reference_annual_va_percent": 7.689683513841966,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 2.86774471,
+      "current_debt_reference_annual_va_percent": 8.28119763695528,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 3.07258362,
+      "current_debt_reference_annual_va_percent": 8.872711760068595,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 3.27742253,
+      "current_debt_reference_annual_va_percent": 9.464225883181909,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 3.48226144,
+      "current_debt_reference_annual_va_percent": 10.055740006295222,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 3.68710034,
+      "current_debt_reference_annual_va_percent": 10.647254100531498,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 3.89193925,
+      "current_debt_reference_annual_va_percent": 11.238768223644813,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 4.09677816,
+      "current_debt_reference_annual_va_percent": 11.830282346758128,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 4.30161707,
+      "current_debt_reference_annual_va_percent": 12.42179646987144,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 4.50645598,
+      "current_debt_reference_annual_va_percent": 13.013310592984755,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 4.71129488,
+      "current_debt_reference_annual_va_percent": 13.60482468722103,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 4.91613379,
+      "current_debt_reference_annual_va_percent": 14.196338810334344,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 5.1209727,
+      "current_debt_reference_annual_va_percent": 14.787852933447656,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 5.32581161,
+      "current_debt_reference_annual_va_percent": 15.37936705656097,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 5.53065052,
+      "current_debt_reference_annual_va_percent": 15.970881179674286,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 5.73548942,
+      "current_debt_reference_annual_va_percent": 16.56239527391056,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 5.94032833,
+      "current_debt_reference_annual_va_percent": 17.153909397023874,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 6.14516724,
+      "current_debt_reference_annual_va_percent": 17.74542352013719,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 6.35000615,
+      "current_debt_reference_annual_va_percent": 18.3369376432505,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 6.55484506,
+      "current_debt_reference_annual_va_percent": 18.928451766363818,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 6.75968396,
+      "current_debt_reference_annual_va_percent": 19.51996586060009,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 6.96452287,
+      "current_debt_reference_annual_va_percent": 20.111479983713405,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 7.16936178,
+      "current_debt_reference_annual_va_percent": 20.702994106826722,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 7.37420069,
+      "current_debt_reference_annual_va_percent": 21.294508229940035,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 7.5790396,
+      "current_debt_reference_annual_va_percent": 21.88602235305335,
+      "next_debt_high_minus_low": -0.20483890800443305,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 7.7838785,
+      "current_debt_reference_annual_va_percent": 22.477536447289626,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 7.98871741,
+      "current_debt_reference_annual_va_percent": 23.069050570402936,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 8.19355632,
+      "current_debt_reference_annual_va_percent": 23.660564693516257,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 8.39839523,
+      "current_debt_reference_annual_va_percent": 24.252078816629567,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 8.60323414,
+      "current_debt_reference_annual_va_percent": 24.84359293974288,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 8.80807304,
+      "current_debt_reference_annual_va_percent": 25.435107033979158,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 9.01291195,
+      "current_debt_reference_annual_va_percent": 26.026621157092467,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 9.21775086,
+      "current_debt_reference_annual_va_percent": 26.618135280205788,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 9.42258977,
+      "current_debt_reference_annual_va_percent": 27.209649403319098,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 9.62742868,
+      "current_debt_reference_annual_va_percent": 27.80116352643241,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 9.83226758,
+      "current_debt_reference_annual_va_percent": 28.39267762066869,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 10.03710649,
+      "current_debt_reference_annual_va_percent": 28.984191743782,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 10.2419454,
+      "current_debt_reference_annual_va_percent": 29.575705866895312,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 10.44678431,
+      "current_debt_reference_annual_va_percent": 30.16721999000863,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 10.65162322,
+      "current_debt_reference_annual_va_percent": 30.75873411312194,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 10.85646212,
+      "current_debt_reference_annual_va_percent": 31.350248207358213,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 11.06130103,
+      "current_debt_reference_annual_va_percent": 31.94176233047153,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 11.26613994,
+      "current_debt_reference_annual_va_percent": 32.53327645358485,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 11.47097885,
+      "current_debt_reference_annual_va_percent": 33.12479057669816,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 11.67581776,
+      "current_debt_reference_annual_va_percent": 33.716304699811474,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 11.88065666,
+      "current_debt_reference_annual_va_percent": 34.30781879404775,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 12.08549557,
+      "current_debt_reference_annual_va_percent": 34.89933291716107,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 12.29033448,
+      "current_debt_reference_annual_va_percent": 35.49084704027438,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 12.49517339,
+      "current_debt_reference_annual_va_percent": 36.082361163387695,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 12.7000123,
+      "current_debt_reference_annual_va_percent": 36.673875286501,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 12.9048512,
+      "current_debt_reference_annual_va_percent": 37.26538938073728,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 13.10969011,
+      "current_debt_reference_annual_va_percent": 37.856903503850596,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 13.31452902,
+      "current_debt_reference_annual_va_percent": 38.44841762696391,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 13.51936793,
+      "current_debt_reference_annual_va_percent": 39.03993175007722,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 13.72420684,
+      "current_debt_reference_annual_va_percent": 39.63144587319054,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 13.92904574,
+      "current_debt_reference_annual_va_percent": 40.22295996742681,
+      "next_debt_high_minus_low": 0.20483890800443305,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 14.13388465,
+      "current_debt_reference_annual_va_percent": 40.81447409054012,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 14.33872356,
+      "current_debt_reference_annual_va_percent": 41.405988213653444,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 14.54356247,
+      "current_debt_reference_annual_va_percent": 41.99750233676675,
+      "next_debt_high_minus_low": 0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 14.74840138,
+      "current_debt_reference_annual_va_percent": 42.58901645988007,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 14.95324028,
+      "current_debt_reference_annual_va_percent": 43.180530554116345,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 15.15807919,
+      "current_debt_reference_annual_va_percent": 43.77204467722966,
+      "next_debt_high_minus_low": 0.20483890800443305,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 15.3629181,
+      "current_debt_reference_annual_va_percent": 44.36355880034297,
+      "next_debt_high_minus_low": -0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 15.56775701,
+      "current_debt_reference_annual_va_percent": 44.955072923456285,
+      "next_debt_high_minus_low": 0.20483890800443127,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 15.77259592,
+      "current_debt_reference_annual_va_percent": 45.546587046569606,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 15.97743482,
+      "current_debt_reference_annual_va_percent": 46.13810114080587,
+      "next_debt_high_minus_low": 0.20483890800443483,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 16.18227373,
+      "current_debt_reference_annual_va_percent": 46.729615263919186,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 0.0,
+      "current_debt_reference_annual_va_percent": 0.0,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 0.20483891,
+      "current_debt_reference_annual_va_percent": 0.5915141231133141,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 0.40967782,
+      "current_debt_reference_annual_va_percent": 1.1830282462266282,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 0.61451672,
+      "current_debt_reference_annual_va_percent": 1.7745423404629033,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 0.81935563,
+      "current_debt_reference_annual_va_percent": 2.3660564635762174,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 1.02419454,
+      "current_debt_reference_annual_va_percent": 2.957570586689532,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 1.22903345,
+      "current_debt_reference_annual_va_percent": 3.5490847098028455,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 1.43387236,
+      "current_debt_reference_annual_va_percent": 4.14059883291616,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 1.63871126,
+      "current_debt_reference_annual_va_percent": 4.732112927152435,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 1.84355017,
+      "current_debt_reference_annual_va_percent": 5.323627050265749,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 2.04838908,
+      "current_debt_reference_annual_va_percent": 5.915141173379064,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 2.25322799,
+      "current_debt_reference_annual_va_percent": 6.506655296492378,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 2.4580669,
+      "current_debt_reference_annual_va_percent": 7.098169419605691,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 2.6629058,
+      "current_debt_reference_annual_va_percent": 7.689683513841966,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 2.86774471,
+      "current_debt_reference_annual_va_percent": 8.28119763695528,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 3.07258362,
+      "current_debt_reference_annual_va_percent": 8.872711760068595,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 3.27742253,
+      "current_debt_reference_annual_va_percent": 9.464225883181909,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 3.48226144,
+      "current_debt_reference_annual_va_percent": 10.055740006295222,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 3.68710034,
+      "current_debt_reference_annual_va_percent": 10.647254100531498,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 3.89193925,
+      "current_debt_reference_annual_va_percent": 11.238768223644813,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 4.09677816,
+      "current_debt_reference_annual_va_percent": 11.830282346758128,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 4.30161707,
+      "current_debt_reference_annual_va_percent": 12.42179646987144,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 4.50645598,
+      "current_debt_reference_annual_va_percent": 13.013310592984755,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 4.71129488,
+      "current_debt_reference_annual_va_percent": 13.60482468722103,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 4.91613379,
+      "current_debt_reference_annual_va_percent": 14.196338810334344,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 5.1209727,
+      "current_debt_reference_annual_va_percent": 14.787852933447656,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 5.32581161,
+      "current_debt_reference_annual_va_percent": 15.37936705656097,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 5.53065052,
+      "current_debt_reference_annual_va_percent": 15.970881179674286,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 5.73548942,
+      "current_debt_reference_annual_va_percent": 16.56239527391056,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 5.94032833,
+      "current_debt_reference_annual_va_percent": 17.153909397023874,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 6.14516724,
+      "current_debt_reference_annual_va_percent": 17.74542352013719,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 6.35000615,
+      "current_debt_reference_annual_va_percent": 18.3369376432505,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 6.55484506,
+      "current_debt_reference_annual_va_percent": 18.928451766363818,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 6.75968396,
+      "current_debt_reference_annual_va_percent": 19.51996586060009,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 6.96452287,
+      "current_debt_reference_annual_va_percent": 20.111479983713405,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 7.16936178,
+      "current_debt_reference_annual_va_percent": 20.702994106826722,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 7.37420069,
+      "current_debt_reference_annual_va_percent": 21.294508229940035,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 7.5790396,
+      "current_debt_reference_annual_va_percent": 21.88602235305335,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 7.7838785,
+      "current_debt_reference_annual_va_percent": 22.477536447289626,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 7.98871741,
+      "current_debt_reference_annual_va_percent": 23.069050570402936,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 8.19355632,
+      "current_debt_reference_annual_va_percent": 23.660564693516257,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 8.39839523,
+      "current_debt_reference_annual_va_percent": 24.252078816629567,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 8.60323414,
+      "current_debt_reference_annual_va_percent": 24.84359293974288,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 8.80807304,
+      "current_debt_reference_annual_va_percent": 25.435107033979158,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 9.01291195,
+      "current_debt_reference_annual_va_percent": 26.026621157092467,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 9.21775086,
+      "current_debt_reference_annual_va_percent": 26.618135280205788,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 9.42258977,
+      "current_debt_reference_annual_va_percent": 27.209649403319098,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 9.62742868,
+      "current_debt_reference_annual_va_percent": 27.80116352643241,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 9.83226758,
+      "current_debt_reference_annual_va_percent": 28.39267762066869,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 10.03710649,
+      "current_debt_reference_annual_va_percent": 28.984191743782,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 10.2419454,
+      "current_debt_reference_annual_va_percent": 29.575705866895312,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 10.44678431,
+      "current_debt_reference_annual_va_percent": 30.16721999000863,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 10.65162322,
+      "current_debt_reference_annual_va_percent": 30.75873411312194,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 10.85646212,
+      "current_debt_reference_annual_va_percent": 31.350248207358213,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 11.06130103,
+      "current_debt_reference_annual_va_percent": 31.94176233047153,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 11.26613994,
+      "current_debt_reference_annual_va_percent": 32.53327645358485,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 11.47097885,
+      "current_debt_reference_annual_va_percent": 33.12479057669816,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 11.67581776,
+      "current_debt_reference_annual_va_percent": 33.716304699811474,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 11.88065666,
+      "current_debt_reference_annual_va_percent": 34.30781879404775,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 12.08549557,
+      "current_debt_reference_annual_va_percent": 34.89933291716107,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 12.29033448,
+      "current_debt_reference_annual_va_percent": 35.49084704027438,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 12.49517339,
+      "current_debt_reference_annual_va_percent": 36.082361163387695,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 12.7000123,
+      "current_debt_reference_annual_va_percent": 36.673875286501,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 12.9048512,
+      "current_debt_reference_annual_va_percent": 37.26538938073728,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 13.10969011,
+      "current_debt_reference_annual_va_percent": 37.856903503850596,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 13.31452902,
+      "current_debt_reference_annual_va_percent": 38.44841762696391,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 13.51936793,
+      "current_debt_reference_annual_va_percent": 39.03993175007722,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 13.72420684,
+      "current_debt_reference_annual_va_percent": 39.63144587319054,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 13.92904574,
+      "current_debt_reference_annual_va_percent": 40.22295996742681,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 14.13388465,
+      "current_debt_reference_annual_va_percent": 40.81447409054012,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 14.33872356,
+      "current_debt_reference_annual_va_percent": 41.405988213653444,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 14.54356247,
+      "current_debt_reference_annual_va_percent": 41.99750233676675,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 14.74840138,
+      "current_debt_reference_annual_va_percent": 42.58901645988007,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 14.95324028,
+      "current_debt_reference_annual_va_percent": 43.180530554116345,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 15.15807919,
+      "current_debt_reference_annual_va_percent": 43.77204467722966,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 15.3629181,
+      "current_debt_reference_annual_va_percent": 44.36355880034297,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 15.56775701,
+      "current_debt_reference_annual_va_percent": 44.955072923456285,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 15.77259592,
+      "current_debt_reference_annual_va_percent": 45.546587046569606,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 15.97743482,
+      "current_debt_reference_annual_va_percent": 46.13810114080587,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 16.18227373,
+      "current_debt_reference_annual_va_percent": 46.729615263919186,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 16.38711264,
+      "current_debt_reference_annual_va_percent": 47.321129387032514,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 16.59195155,
+      "current_debt_reference_annual_va_percent": 47.91264351014582,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 16.79679046,
+      "current_debt_reference_annual_va_percent": 48.50415763325913,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "current_price": 1.1274968515793757,
+      "current_debt": 17.00162936,
+      "current_debt_reference_annual_va_percent": 49.09567172749541,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 0.0,
+      "current_debt_reference_annual_va_percent": 0.0,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 0.20483891,
+      "current_debt_reference_annual_va_percent": 0.5915141231133141,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 0.40967782,
+      "current_debt_reference_annual_va_percent": 1.1830282462266282,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 0.61451672,
+      "current_debt_reference_annual_va_percent": 1.7745423404629033,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 0.81935563,
+      "current_debt_reference_annual_va_percent": 2.3660564635762174,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 1.02419454,
+      "current_debt_reference_annual_va_percent": 2.957570586689532,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 1.22903345,
+      "current_debt_reference_annual_va_percent": 3.5490847098028455,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 1.43387236,
+      "current_debt_reference_annual_va_percent": 4.14059883291616,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 1.63871126,
+      "current_debt_reference_annual_va_percent": 4.732112927152435,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 1.84355017,
+      "current_debt_reference_annual_va_percent": 5.323627050265749,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 2.04838908,
+      "current_debt_reference_annual_va_percent": 5.915141173379064,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 2.25322799,
+      "current_debt_reference_annual_va_percent": 6.506655296492378,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 2.4580669,
+      "current_debt_reference_annual_va_percent": 7.098169419605691,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 2.6629058,
+      "current_debt_reference_annual_va_percent": 7.689683513841966,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 2.86774471,
+      "current_debt_reference_annual_va_percent": 8.28119763695528,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 3.07258362,
+      "current_debt_reference_annual_va_percent": 8.872711760068595,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 3.27742253,
+      "current_debt_reference_annual_va_percent": 9.464225883181909,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 3.48226144,
+      "current_debt_reference_annual_va_percent": 10.055740006295222,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 3.68710034,
+      "current_debt_reference_annual_va_percent": 10.647254100531498,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 3.89193925,
+      "current_debt_reference_annual_va_percent": 11.238768223644813,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 4.09677816,
+      "current_debt_reference_annual_va_percent": 11.830282346758128,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 4.30161707,
+      "current_debt_reference_annual_va_percent": 12.42179646987144,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 4.50645598,
+      "current_debt_reference_annual_va_percent": 13.013310592984755,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 4.71129488,
+      "current_debt_reference_annual_va_percent": 13.60482468722103,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 4.91613379,
+      "current_debt_reference_annual_va_percent": 14.196338810334344,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 5.1209727,
+      "current_debt_reference_annual_va_percent": 14.787852933447656,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 5.32581161,
+      "current_debt_reference_annual_va_percent": 15.37936705656097,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 5.53065052,
+      "current_debt_reference_annual_va_percent": 15.970881179674286,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 5.73548942,
+      "current_debt_reference_annual_va_percent": 16.56239527391056,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 5.94032833,
+      "current_debt_reference_annual_va_percent": 17.153909397023874,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 6.14516724,
+      "current_debt_reference_annual_va_percent": 17.74542352013719,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 6.35000615,
+      "current_debt_reference_annual_va_percent": 18.3369376432505,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 6.55484506,
+      "current_debt_reference_annual_va_percent": 18.928451766363818,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 6.75968396,
+      "current_debt_reference_annual_va_percent": 19.51996586060009,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 6.96452287,
+      "current_debt_reference_annual_va_percent": 20.111479983713405,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 7.16936178,
+      "current_debt_reference_annual_va_percent": 20.702994106826722,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 7.37420069,
+      "current_debt_reference_annual_va_percent": 21.294508229940035,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 7.5790396,
+      "current_debt_reference_annual_va_percent": 21.88602235305335,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 7.7838785,
+      "current_debt_reference_annual_va_percent": 22.477536447289626,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 7.98871741,
+      "current_debt_reference_annual_va_percent": 23.069050570402936,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 8.19355632,
+      "current_debt_reference_annual_va_percent": 23.660564693516257,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 8.39839523,
+      "current_debt_reference_annual_va_percent": 24.252078816629567,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 8.60323414,
+      "current_debt_reference_annual_va_percent": 24.84359293974288,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 8.80807304,
+      "current_debt_reference_annual_va_percent": 25.435107033979158,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 9.01291195,
+      "current_debt_reference_annual_va_percent": 26.026621157092467,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 9.21775086,
+      "current_debt_reference_annual_va_percent": 26.618135280205788,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 9.42258977,
+      "current_debt_reference_annual_va_percent": 27.209649403319098,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 9.62742868,
+      "current_debt_reference_annual_va_percent": 27.80116352643241,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 9.83226758,
+      "current_debt_reference_annual_va_percent": 28.39267762066869,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 10.03710649,
+      "current_debt_reference_annual_va_percent": 28.984191743782,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 10.2419454,
+      "current_debt_reference_annual_va_percent": 29.575705866895312,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 10.44678431,
+      "current_debt_reference_annual_va_percent": 30.16721999000863,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 10.65162322,
+      "current_debt_reference_annual_va_percent": 30.75873411312194,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 10.85646212,
+      "current_debt_reference_annual_va_percent": 31.350248207358213,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 11.06130103,
+      "current_debt_reference_annual_va_percent": 31.94176233047153,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 11.26613994,
+      "current_debt_reference_annual_va_percent": 32.53327645358485,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 11.47097885,
+      "current_debt_reference_annual_va_percent": 33.12479057669816,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 11.67581776,
+      "current_debt_reference_annual_va_percent": 33.716304699811474,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 11.88065666,
+      "current_debt_reference_annual_va_percent": 34.30781879404775,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 12.08549557,
+      "current_debt_reference_annual_va_percent": 34.89933291716107,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 12.29033448,
+      "current_debt_reference_annual_va_percent": 35.49084704027438,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 12.49517339,
+      "current_debt_reference_annual_va_percent": 36.082361163387695,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 12.7000123,
+      "current_debt_reference_annual_va_percent": 36.673875286501,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 12.9048512,
+      "current_debt_reference_annual_va_percent": 37.26538938073728,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 13.10969011,
+      "current_debt_reference_annual_va_percent": 37.856903503850596,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 13.31452902,
+      "current_debt_reference_annual_va_percent": 38.44841762696391,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 13.51936793,
+      "current_debt_reference_annual_va_percent": 39.03993175007722,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 13.72420684,
+      "current_debt_reference_annual_va_percent": 39.63144587319054,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 13.92904574,
+      "current_debt_reference_annual_va_percent": 40.22295996742681,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 14.13388465,
+      "current_debt_reference_annual_va_percent": 40.81447409054012,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 14.33872356,
+      "current_debt_reference_annual_va_percent": 41.405988213653444,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 14.54356247,
+      "current_debt_reference_annual_va_percent": 41.99750233676675,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 14.74840138,
+      "current_debt_reference_annual_va_percent": 42.58901645988007,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 14.95324028,
+      "current_debt_reference_annual_va_percent": 43.180530554116345,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 15.15807919,
+      "current_debt_reference_annual_va_percent": 43.77204467722966,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 15.3629181,
+      "current_debt_reference_annual_va_percent": 44.36355880034297,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 15.56775701,
+      "current_debt_reference_annual_va_percent": 44.955072923456285,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 15.77259592,
+      "current_debt_reference_annual_va_percent": 45.546587046569606,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 15.97743482,
+      "current_debt_reference_annual_va_percent": 46.13810114080587,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 16.18227373,
+      "current_debt_reference_annual_va_percent": 46.729615263919186,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "current_price": 1.2406142301450478,
+      "current_debt": 16.38711264,
+      "current_debt_reference_annual_va_percent": 47.321129387032514,
+      "next_debt_high_minus_low": 0.0,
+      "current_endowment_log": 0.0
+    }
+  ],
+  "high_minus_low": [
+    {
+      "economy": "full",
+      "price_case": "baseline",
+      "next_debt_high_minus_low": 0.0,
+      "spread_high_minus_low_bp": 49.10739971702105,
+      "default_probability_high_minus_low_pp": 0.023841887655099963
+    },
+    {
+      "economy": "full",
+      "price_case": "higher_price",
+      "next_debt_high_minus_low": 0.0,
+      "spread_high_minus_low_bp": 69.09588229772504,
+      "default_probability_high_minus_low_pp": 0.09775684332284867
+    },
+    {
+      "economy": "mp",
+      "price_case": "baseline",
+      "next_debt_high_minus_low": 0.0,
+      "spread_high_minus_low_bp": 36.983737804603436,
+      "default_probability_high_minus_low_pp": 0.015553861641616188
+    },
+    {
+      "economy": "mp",
+      "price_case": "higher_price",
+      "next_debt_high_minus_low": 0.0,
+      "spread_high_minus_low_bp": 50.712136598778386,
+      "default_probability_high_minus_low_pp": 0.06807703249331246
+    },
+    {
+      "economy": "cv",
+      "price_case": "baseline",
+      "next_debt_high_minus_low": 0.0,
+      "spread_high_minus_low_bp": 0.0,
+      "default_probability_high_minus_low_pp": 0.0
+    },
+    {
+      "economy": "cv",
+      "price_case": "higher_price",
+      "next_debt_high_minus_low": 0.0,
+      "spread_high_minus_low_bp": 0.0,
+      "default_probability_high_minus_low_pp": 0.0
+    }
+  ],
+  "provenance": [
+    {
+      "economy": "full",
+      "run": "model/runs_bd1/spdebt",
+      "source_sha256": "91c1894e955d7860c1e4f9f7978b5ed52a8e45ae1a3e018190c03542d791069c",
+      "input_files": [
+        {
+          "path": "model/runs_bd1/spdebt/src.f90",
+          "bytes": 105430
+        },
+        {
+          "path": "model/runs_bd1/spdebt/graphs_b_grid_dss.txt",
+          "bytes": 1300
+        },
+        {
+          "path": "model/runs_bd1/spdebt/graphs_y_grid_dss.txt",
+          "bytes": 273
+        },
+        {
+          "path": "model/runs_bd1/spdebt/graphs_p_grid_dss.txt",
+          "bytes": 109415
+        },
+        {
+          "path": "model/runs_bd1/spdebt/graphs_p_vol_grid_dss.txt",
+          "bytes": 65
+        },
+        {
+          "path": "model/runs_bd1/spdebt/graphs_default_dss.txt",
+          "bytes": 20359500
+        },
+        {
+          "path": "model/runs_bd1/spdebt/graphs_b0_next_dss.txt",
+          "bytes": 113431500
+        },
+        {
+          "path": "model/runs_bd1/spdebt/graphs_q_paid_dss.txt",
+          "bytes": 46536000
+        },
+        {
+          "path": "model/runs_bd1/spdebt/graphs_q_def_free.txt",
+          "bytes": 785295
+        },
+        {
+          "path": "model/runs_bd1/spdebt/graphs_trans_matrix_y.txt",
+          "bytes": 11907
+        },
+        {
+          "path": "model/runs_bd1/spdebt/graphs_trans_matrix_p.txt",
+          "bytes": 30307955
+        },
+        {
+          "path": "model/runs_bd1/spdebt/graphs_trans_matrix_p_vol.txt",
+          "bytes": 675
+        },
+        {
+          "path": "model/runs_bd1/spdebt/graphs_param_dss.txt",
+          "bytes": 22
+        },
+        {
+          "path": "model/runs_bd1/spdebt/graphs_data_sim_dss.txt",
+          "bytes": 250500000
+        }
+      ]
+    },
+    {
+      "economy": "mp",
+      "run": "model/runs_spdebt/mean_preserving",
+      "source_sha256": "d796965dccd833c4f4be2ba02b6059898ca11dac5b714385d217495345998916",
+      "input_files": [
+        {
+          "path": "model/runs_spdebt/mean_preserving/src.f90",
+          "bytes": 105428
+        },
+        {
+          "path": "model/runs_spdebt/mean_preserving/graphs_b_grid_dss.txt",
+          "bytes": 1300
+        },
+        {
+          "path": "model/runs_spdebt/mean_preserving/graphs_y_grid_dss.txt",
+          "bytes": 273
+        },
+        {
+          "path": "model/runs_spdebt/mean_preserving/graphs_p_grid_dss.txt",
+          "bytes": 109415
+        },
+        {
+          "path": "model/runs_spdebt/mean_preserving/graphs_p_vol_grid_dss.txt",
+          "bytes": 65
+        },
+        {
+          "path": "model/runs_spdebt/mean_preserving/graphs_default_dss.txt",
+          "bytes": 20359500
+        },
+        {
+          "path": "model/runs_spdebt/mean_preserving/graphs_b0_next_dss.txt",
+          "bytes": 113431500
+        },
+        {
+          "path": "model/runs_spdebt/mean_preserving/graphs_q_paid_dss.txt",
+          "bytes": 46536000
+        },
+        {
+          "path": "model/runs_spdebt/mean_preserving/graphs_q_def_free.txt",
+          "bytes": 785295
+        },
+        {
+          "path": "model/runs_spdebt/mean_preserving/graphs_trans_matrix_y.txt",
+          "bytes": 11907
+        },
+        {
+          "path": "model/runs_spdebt/mean_preserving/graphs_trans_matrix_p.txt",
+          "bytes": 30307955
+        },
+        {
+          "path": "model/runs_spdebt/mean_preserving/graphs_trans_matrix_p_vol.txt",
+          "bytes": 675
+        },
+        {
+          "path": "model/runs_spdebt/mean_preserving/graphs_param_dss.txt",
+          "bytes": 22
+        },
+        {
+          "path": "model/runs_spdebt/mean_preserving/graphs_data_sim_dss.txt",
+          "bytes": 250500000
+        }
+      ]
+    },
+    {
+      "economy": "cv",
+      "run": "model/runs_spdebt/intermediate",
+      "source_sha256": "5a942cc173d9726c261abe51193674bd8f86cedc150e6fb885f4be6a8a732eba",
+      "input_files": [
+        {
+          "path": "model/runs_spdebt/intermediate/src.f90",
+          "bytes": 105428
+        },
+        {
+          "path": "model/runs_spdebt/intermediate/graphs_b_grid_dss.txt",
+          "bytes": 1300
+        },
+        {
+          "path": "model/runs_spdebt/intermediate/graphs_y_grid_dss.txt",
+          "bytes": 273
+        },
+        {
+          "path": "model/runs_spdebt/intermediate/graphs_p_grid_dss.txt",
+          "bytes": 109415
+        },
+        {
+          "path": "model/runs_spdebt/intermediate/graphs_p_vol_grid_dss.txt",
+          "bytes": 65
+        },
+        {
+          "path": "model/runs_spdebt/intermediate/graphs_default_dss.txt",
+          "bytes": 20359500
+        },
+        {
+          "path": "model/runs_spdebt/intermediate/graphs_b0_next_dss.txt",
+          "bytes": 113431500
+        },
+        {
+          "path": "model/runs_spdebt/intermediate/graphs_q_paid_dss.txt",
+          "bytes": 46536000
+        },
+        {
+          "path": "model/runs_spdebt/intermediate/graphs_q_def_free.txt",
+          "bytes": 785295
+        },
+        {
+          "path": "model/runs_spdebt/intermediate/graphs_trans_matrix_y.txt",
+          "bytes": 11907
+        },
+        {
+          "path": "model/runs_spdebt/intermediate/graphs_trans_matrix_p.txt",
+          "bytes": 30307955
+        },
+        {
+          "path": "model/runs_spdebt/intermediate/graphs_trans_matrix_p_vol.txt",
+          "bytes": 675
+        },
+        {
+          "path": "model/runs_spdebt/intermediate/graphs_param_dss.txt",
+          "bytes": 22
+        },
+        {
+          "path": "model/runs_spdebt/intermediate/graphs_data_sim_dss.txt",
+          "bytes": 250500000
+        }
+      ]
+    }
+  ],
+  "revision": "0898dc709510f6d355726c5701f7cac470891322"
+}

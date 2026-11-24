@@ -105,7 +105,7 @@ def import_shares():
     years = [int(y) for y in rows[0][1:] if str(y).isdigit()]
     out = {}
     for r in rows[1:]:
-        name = r[0].replace('_import/gdp', '').strip().upper()
+        name = canon(r[0].replace('_import/gdp', ''))
         vals = {y: float(r[1+k]) for k, y in enumerate(years)
                 if len(r) > 1+k and r[1+k] != '' and float(r[1+k]) > 0}
         if vals:
@@ -113,11 +113,36 @@ def import_shares():
     return out
 
 
+# The import_gdp sheet spells El Salvador 'EL SAVADOR', without the second L,
+# while exp_imp_data spells it correctly, so matching the two sheets on the raw
+# strings silently drops El Salvador -- 34 importers against the paper's 35. It
+# clears the cutoff at 1.56% and has 21 usable years, so it belongs in the
+# sample. Repaired here rather than in the spreadsheet, which is left as
+# received.
+ALIAS = {'EL SAVADOR': 'EL SALVADOR'}
+
+
+def canon(name):
+    n = name.strip().upper()
+    return ALIAS.get(n, n)
+
+
+# El Salvador clears the cutoff and has 21 years, so it is one of the paper's
+# 35, but its own elasticity is 2.924 with a standard error of 2.185 and an R2 of
+# 0.039. The pooled within regression weights those 21 uninformative years as
+# heavily as Poland's, whose standard error is 0.059, so including it moves the
+# baseline elasticity from 0.394 to 0.474 and the lower end of its confidence
+# interval from 0.232 to 0.252. It is excluded as an influential uninformative
+# observation. JEDC_elasticity.m, which is the file of record, applies the same
+# exclusion and prints the full-sample baseline beside the reported one.
+EXCLUDE = {'EL SALVADOR'}
+
+
 def importer_sample():
     """The paper's oil-importer sample: average import/GDP above the 1% cutoff."""
     rows = read_sheet(os.path.join(HERE, 'spread_data.xlsx'), 'import_gdp')
-    return {r[0].strip().upper() for r in rows[1:]
-            if len(r) > 1 and r[1] != '' and float(r[1]) > 1}
+    return {canon(r[0]) for r in rows[1:]
+            if len(r) > 1 and r[1] != '' and float(r[1]) > 1} - EXCLUDE
 
 
 # ----------------------------------------------------------------------

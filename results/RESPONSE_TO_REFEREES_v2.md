@@ -495,7 +495,7 @@ Everything is in the repository.
 | exhibit | produced by |
 |---|---|
 | Tables 1–3, Figure D data | `model/analysis/decomposition.py` |
-| Figure D | `model/analysis/FIGURE_decomposition.m` |
+| Figure D | `model/analysis/JEDC_decomposition.m` |
 | Table 3 moments (§7) | `model/analysis/moments_fast.py`, `MOMENTS.m` |
 | the ten paper figures | `model/src_spdebt/ALL_FIGURES_common_grid.m` |
 | welfare (§2) | `model/analysis/welfare_report.m` |

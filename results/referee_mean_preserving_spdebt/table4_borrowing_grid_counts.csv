@@ -1,0 +1,5 @@
+economy,price_case,repayment_states,more_debt,same_debt,less_debt
+full,baseline,67,4,53,10
+full,higher_price,63,3,50,10
+mp,baseline,66,7,59,0
+mp,higher_price,63,5,56,2

@@ -1,0 +1,130 @@
+% ---------------------------------------------------------------------------
+% Response to R2 Major 6 -- JEDC revision
+% Body only: paste after the previous comment in the combined response file.
+% Needs booktabs in the preamble. The top heading is \section (numbered) and
+% the subheadings are \subsection*, matching the author's edit.
+% ---------------------------------------------------------------------------
+
+\section{R2, Major 6}
+{\itshape The magnitude of the model's spread response}
+
+\begin{quote}\itshape
+The effect in the model is much smaller than that in the data [\ldots] A
+discussion of what determines this magnitude in the model would help the reader
+interpret the result. Also, the author could estimate regression (1) on
+model-simulated data, with volatility in the same units as the empirical
+measure, so that the model's coefficients can be compared with the empirical
+ones.
+\end{quote}
+
+Regression (1) has been estimated on simulated data as suggested. The following
+table shows the descriptive statistics of the empirical volatility vs the
+simulated volatility from the model.
+
+\begin{table}[h]
+\centering\footnotesize
+\begin{tabular}{lccc}
+\toprule
+ & min & mean & max \\
+\midrule
+data, the paper's volatility series & 8.86 & 12.90 & 31.58 \\
+model, $100\exp(\text{state}/2)$    & 8.77 & 13.79 & 20.64 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+The one asymmetry is at the top: the data reach 31.6 and the model's grid stops
+at 20.6, so the model never experiences a quarter as volatile as 2008Q4. That
+matters below.
+
+Regression (1) in the paper relates the contemporaneous change in the log spread
+to the \emph{previous} quarter's change in the log oil price, which avoids the
+simultaneity between the two within a quarter. The simulated counterpart does
+the same thing. It also controls for the change in debt to GDP:
+\texttt{dy\_diff} is the first difference of \texttt{dy3}, which is commercial
+public and publicly guaranteed external debt as a percent of GDP. The simulated
+regression matches both choices, with the simulated debt stock taken over four
+times quarterly output so the ratio is on an annual-GDP basis, averaging 26.1\%
+against 0 to 25.3\% for the data series.
+
+\begin{table}[h]
+\centering\footnotesize
+\begin{tabular}{lcc}
+\toprule
+ & model & data \\
+\midrule
+oil price volatility               & $+0.0047$ & $+0.0100$ \ ($t$ 2.29) \\
+oil price change, previous quarter & $+0.0007$ \ ($t$ 0.4) & $+0.1416$ \ ($t$ 0.93) \\
+change in debt / GDP               & $+0.1338$ \ ($t$ 297) & $+0.0027$ \ ($t$ 0.49) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+Standard errors are two-way clustered by country and quarter in the data,
+following Major 1c of the other report, and clustered by simulated history in
+the model, where each of the 500 independent histories plays the role a country
+plays in the panel.
+
+\textbf{On volatility, which is the paper's subject, the model and data both
+show a positive and statistically significant coefficient and the model delivers
+47\% of the empirical coefficient.}
+
+\textbf{On the oil price change the model and the data agree, and they agree on
+zero.} The simulated coefficient is $+0.0007$ with a $t$ of 0.4 and the
+empirical one $+0.1416$ with a two-way $t$ of 0.93. The 6 to 8 basis points in
+the comment are computed from the empirical coefficient of 0.14, whose standard
+error covers zero.
+
+The model's spread responds to the oil price in the same quarter rather than the
+next: on the contemporaneous change the coefficient is $+1.03$. It then retraces
+as the price mean-reverts, which is why the previous quarter's change shows
+nothing.
+
+\textbf{On debt the model is far more responsive than the panel}, $+0.134$
+against $+0.0027$, and the difference looks like measurement rather than
+mechanism. In the model debt is the state variable and the spread is a function
+of it, so the relationship is exact. In the data the regressor is one debt
+aggregate, reported annually and carried across the quarters of each year, which
+is a noisy and slow-moving proxy for the leverage a lender prices; an attenuated
+coefficient is what that predicts, and the empirical estimate is indeed
+indistinguishable from zero.
+
+\subsection*{What governs the magnitude in the model}
+
+Three things, in order of how much they bind.
+
+\textbf{The size of the shock.} The oil bill is 9 to 10\% of GDP and the
+substitution elasticity is below one, so the quantity response does not offset
+the price and a 10\% oil price rise is close to a 1\% of GDP resource loss. The
+model turns that into an 11\% rise in the spread on impact. The transmission is
+not weak; the shock is small relative to what usually moves sovereign spreads.
+
+\textbf{Where the volatility grid stops.} The model's volatility reaches 20.6 in
+the empirical units against 31.6 in the data, so the states that would generate
+the largest responses are outside its support. This is a direct and quantifiable
+reason its volatility coefficient is the smaller of the two.
+
+\textbf{Risk-neutral lenders.} Spreads in the model are pure expected-default
+compensation, with no term for the price of risk. Major 5 of the other report
+asks about precisely this, and our reply there reports what an exogenous
+stochastic discount factor does. That is the most promising route to closing the
+remaining gap on the volatility channel.
+
+\subsection*{Suggested manuscript wording}
+
+\begin{quote}
+Regression (1) estimated on model-simulated data, with volatility expressed in
+the units of the empirical measure and the same controls as in the panel, gives
+a volatility coefficient of 0.0047 against 0.0100, so the model reproduces about
+47 per cent of the estimated response. On the lagged oil price change the
+simulated coefficient is 0.0007 and the empirical one 0.14, and neither is
+distinguishable from zero once standard errors are clustered by quarter as well
+as by country; the model's spread responds to the oil price within the quarter
+rather than after it, with a contemporaneous coefficient of 1.03. The magnitude
+of the model's response is governed by the size of the shock -- a 10 per cent
+oil price change is close to a 1 per cent of GDP resource loss at an oil bill of
+9 to 10 per cent of GDP -- by the range of the volatility grid, which stops
+short of the most volatile quarters in the data, and by the assumption of
+risk-neutral lenders, which leaves spreads as pure expected-default
+compensation.
+\end{quote}
