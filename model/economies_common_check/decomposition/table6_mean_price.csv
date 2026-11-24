@@ -1,0 +1,5 @@
+economy,mean_oil_price_simulated,pct_diff_from_full,quarters,run
+full SV,1.24294,+0.00,750000,../economies_common_check/benchmark
+mean-preserving SV,1.24175,-0.10,750000,../economies_common_check/mean_preserving
+constant volatility,1.24211,-0.07,750000,../economies_common_check/intermediate
+constant price,1.24234,-0.05,750000,../economies_common_check/basic

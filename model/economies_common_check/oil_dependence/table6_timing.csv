@@ -1,0 +1,5 @@
+timing,coef_volatility,se_twoway_volatility,t_twoway_volatility,coef_price,se_twoway_price,t_twoway_price,coef_ddebt_gdp,se_twoway_ddebt_gdp,t_twoway_ddebt_gdp,n,countries,quarters
+"lagged price change (as the paper), with debt/GDP",0.010001,0.004368,2.289,0.141593,0.151453,0.935,0.002704,0.005458,0.495,1532,32,80
+"lagged price change (as the paper), no debt/GDP",0.010021,0.004366,2.295,0.140673,0.151058,0.931,NaN,NaN,NaN,1532,32,80
+"contemporaneous price change, with debt/GDP",0.005542,0.004901,1.131,-0.138423,0.163208,-0.848,0.001751,0.005688,0.308,1537,32,81
+"contemporaneous price change, no debt/GDP",0.005557,0.004901,1.134,-0.138923,0.163030,-0.852,NaN,NaN,NaN,1537,32,81

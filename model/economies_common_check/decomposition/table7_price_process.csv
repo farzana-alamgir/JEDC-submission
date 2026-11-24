@@ -1,0 +1,5 @@
+economy,sd_log_price,ar1_persistence,implied_innovation_sd,mean_price,pct_diff_sd_from_full,pct_diff_rho_from_full,run
+full SV,0.44065,0.94751,0.14088,1.24294,+0.000,+0.000,../economies_common_check/benchmark
+mean-preserving SV,0.44201,0.94779,0.14095,1.24175,+0.309,+0.029,../economies_common_check/mean_preserving
+constant volatility,0.44025,0.94772,0.14048,1.24211,-0.089,+0.022,../economies_common_check/intermediate
+constant price,0.00000,NaN,0.00000,1.24234,-100.000,NaN,../economies_common_check/basic

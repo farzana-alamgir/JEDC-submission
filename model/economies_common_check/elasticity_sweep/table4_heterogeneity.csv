@@ -1,0 +1,24 @@
+statistic,value
+countries,34.000000
+mean sigma,0.413992
+median sigma,0.379393
+p25 sigma,0.191355
+p75 sigma,0.650386
+sd of the estimates,0.590975
+precision-weighted mean,0.329811
+mean weighted by oil share,0.304546
+variance of the estimates,0.349251
+average sampling variance,0.219078
+implied variance of true sigma,0.130174
+implied sd of true sigma,0.360796
+complements (sigma<1),32.000000
+cannot reject adopted 0.25,19.000000
+cannot reject submitted 2,3.000000
+above the solved range 0.50,15.000000
+"sigma on ln oil share, coef",-0.147147
+"sigma on ln oil share, se",0.166299
+"sigma on ln oil share, r2",0.023882
+"mean sigma, most dependent third (exact terciles)",0.310390
+"mean sigma, least dependent third (exact terciles)",0.241257
+"mean sigma, most dependent third (0.667 cutoff)",0.267613
+"mean sigma, least dependent third (0.333 cutoff)",0.196525

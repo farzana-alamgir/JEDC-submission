@@ -1,0 +1,7 @@
+specification,coefficient,se,implied_elasticity,n
+"within country, clustered by year",0.6057,0.0830,0.394,660
+collapsed to a time series,0.6271,,0.373,21
+"collapsed, with linear time trend",0.9575,,0.043,21
+first differences within country,0.8358,0.1332,0.164,612
+95% CI lower (baseline),0.4430,,0.557,660
+95% CI upper (baseline),0.7683,,0.232,660

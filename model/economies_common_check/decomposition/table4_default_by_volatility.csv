@@ -1,0 +1,17 @@
+economy,vol_state,quarters_good_standing,default_events,default_pct_annual,se_pp
+full SV,1,48740,245,1.996,0.127
+full SV,2,166572,1011,2.406,0.075
+full SV,3,252443,1984,3.107,0.069
+full SV,4,164667,1767,4.224,0.099
+full SV,5,48222,758,6.141,0.218
+mean-preserving SV,1,48707,269,2.191,0.132
+mean-preserving SV,2,166547,1125,2.675,0.079
+mean-preserving SV,3,253091,1967,3.073,0.068
+mean-preserving SV,4,165449,1631,3.885,0.095
+mean-preserving SV,5,48599,635,5.125,0.199
+constant volatility PLACEBO,1,136210,1090,3.163,0.095
+constant volatility PLACEBO,2,136472,1131,3.274,0.096
+constant volatility PLACEBO,3,136057,1102,3.201,0.095
+constant volatility PLACEBO,4,136800,1117,3.226,0.095
+constant volatility PLACEBO,5,137136,1145,3.298,0.096
+NOISE FLOOR (placebo range),,,,0.135,

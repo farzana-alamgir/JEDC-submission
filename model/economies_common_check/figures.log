@@ -1,0 +1,30 @@
+
+=== ALL_FIGURES ===
+  building oil_intermediate   from intermediate
+  building oil_basic          from basic
+  building oil_bm             from benchmark
+drawing...
+
+price-node contrast: low = 129, high = 149 of 277  (prices 1.0083 and 1.2608)
+mean output: 9.5724 (masked)  vs 9.5724e+00 (unmasked)
+matched-price contrast: 1.0120 -> 1.2562 (dp=0.2442); common support [0.2413, 5.2677]
+[Warning: Exported image displays axes toolbar. To remove axes toolbar from
+image, export again.] 
+Figure 4c saved.
+FIGURE4d price nodes (ergodic p10/p50/p90): 0.6450 1.1275 1.9710
+Figure 4d saved.
+FIGURE2 volatility: benchmark interpolated to h = -3.92029 (sd 0.1408), intermediate sd 0.1408
+FIGURE2 evaluated at p = 1.2423  (own central nodes: full 1.1275, intermediate 1.1275, basic 1.2423)
+Figure 2 saved.
+
+=== result ===
+  FIGURE2       93.8 kB
+  FIGURE3       98.9 kB
+  FIGURE4a      61.6 kB
+  FIGURE4b      60.3 kB
+  FIGURE4c      62.2 kB
+  FIGURE4d      70.5 kB
+  FIGURE5       75.3 kB
+  FIGURE6a      80.3 kB
+  FIGURE6b      79.9 kB
+  FIGURE7       62.4 kB

@@ -1,0 +1,5 @@
+economy,default_pct_annual,default_se_pp,mean_spread_bp,se_bp,sd_spread_bp,debt_gdp_pct,oil_gdp_pct,episodes,run
+full SV,3.345,0.043,407.9,2.2,299.4,34.30,9.24,1529,../economies_common_check/benchmark
+mean-preserving SV,3.258,0.043,395.9,2.1,293.6,34.10,9.26,1549,../economies_common_check/mean_preserving
+constant volatility,3.232,0.043,394.6,2.2,292.9,33.94,9.28,1548,../economies_common_check/intermediate
+constant price,1.666,0.030,207.3,1.1,161.5,36.81,10.26,1226,../economies_common_check/basic
