@@ -1,0 +1,119 @@
+% ---------------------------------------------------------------------------
+% Response to R1 Major 5 -- JEDC revision
+% Body only: paste after the previous comment in the combined response file.
+% Needs booktabs. Top heading is \section (numbered), subheadings \subsection*,
+% matching the convention used for R2 Major 6.
+% ---------------------------------------------------------------------------
+
+\section{R1, Major 5}
+{\itshape Lender-side risk pricing}
+
+\begin{quote}\itshape
+The precautionary-borrowing result assumes risk-neutral lenders. [\ldots] the
+paper should discuss how robust it is to lender-side risk pricing, state that
+its strength is conditional on risk-neutral pricing, and if feasible add a
+robustness exercise with an exogenous SDF or a reduced-form global risk premium.
+\end{quote}
+
+We have run the exercise. The result does not depend on risk-neutral pricing:
+at an empirically disciplined risk premium the state dependence is slightly
+\emph{stronger} than in the baseline, and the debt ratio is essentially
+unchanged.
+
+\subsection*{The exercise}
+
+The model carries an exogenous stochastic discount factor,
+\[
+  m' = \exp(-r^{*})\,\frac{\exp(\kappa\varepsilon')}{Z(p,\sigma')},
+\]
+where $\varepsilon'$ is the innovation to the log oil price and $Z$ normalises
+the kernel on the discrete grid, so that $\mathrm{E}[m'] = \exp(-r^{*})$ holds
+exactly at any $\kappa$. A positive $\kappa$ makes the discount factor high
+when oil is dear, so lenders require more for default risk concentrated in those
+states. Setting $\kappa = 0$ recovers the baseline exactly.
+
+\subsection*{Disciplining $\kappa$}
+
+$\kappa$ is not observable, so we discipline it by the maximum Sharpe ratio the
+kernel implies, which for this kernel is $\sqrt{\exp(\kappa^{2}v)-1}$ in a state
+whose conditional innovation variance is $v$. We average that across the
+volatility states at their simulated frequencies and annualise. Equities run
+about 0.4 a year, so a kernel implying much more than that is not a plausible
+description of lenders.
+
+\subsection*{The result}
+
+\begin{table}[h]
+\centering\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{ccccccc}
+\toprule
+$\kappa$ & mean spread & debt/GDP & default \% p.a. & \multicolumn{2}{c}{spread} & implied \\
+\cmidrule(lr){5-6}
+         &             &          &                 & low vol.\ & high vol.\ & Sharpe \\
+\midrule
+0    & 3.59\% & 26.1\% & 3.35\% & 3.27\% & 4.05\% & 0.00 \\
+1.0  & 4.15\% & 26.1\% & 1.86\% & 3.79\% & 4.68\% & 0.28 \\
+2.0  & 4.67\% & 25.1\% & 0.92\% & 4.25\% & 5.28\% & 0.56 \\
+3.0  & 5.12\% & 23.3\% & 0.40\% & 4.67\% & 5.79\% & 0.87 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+$\sigma_{\text{oil}} = 0.25$, every other parameter at its baseline value.
+Spreads are whole-simulation means, debt is relative to annual output, and low
+and high volatility are the extreme states of the simulated grid. The levels
+are therefore not the Table 3 statistics, which average over the hundred
+quarters preceding each default episode: on that basis the baseline
+economy has a mean spread of 4.08\% and debt/GDP of 34.3\%, against targets of
+4.1\% and 34\%. Every column is computed the same way at every $\kappa$, so the
+comparison across rows is like for like.
+
+\textbf{The state dependence strengthens monotonically in $\kappa$.} The gap
+between high- and low-volatility spreads rises from $+0.77$ to $+1.12$. Risk
+pricing loads on exactly the states where default risk is concentrated, so it
+reinforces the mechanism rather than competing with it.
+
+\textbf{At a plausible risk premium the calibration barely moves.} The equity
+benchmark of 0.4 falls between the second and third rows of the table, at
+$\kappa = 1.43$. There the gap is $+0.95$ against $+0.77$, about a fifth
+larger, and debt/GDP is 25.6\% against 26.1\%. The precautionary-borrowing
+result therefore does not rest on risk-neutral pricing, and the baseline is if
+anything the conservative case.
+
+\subsection*{What the exercise costs}
+
+The default frequency falls sharply, from 3.35\% a year to 1.86\% at
+$\kappa = 1$ and 0.92\% at $\kappa = 2$. That is the mechanical consequence of
+pricing default risk more expensively: the country defaults less because
+defaulting has become dearer to finance. The exercise holds every other
+parameter at its baseline value, which isolates the risk-pricing channel but
+means the $\kappa > 0$ economies no longer match the baseline's default
+frequency. Re-matching it would require re-selecting $d_{1}$, which we have not
+done, since the point is the comparative static rather than a second
+calibration.
+
+So the claim is about the sign and the ordering rather than the levels:
+introducing a plausible risk premium leaves the state dependence intact and
+slightly larger, at a debt ratio essentially unchanged, while lowering the
+default rate below its target.
+
+\subsection*{Suggested manuscript wording}
+
+\begin{quote}
+Spreads in the baseline are pure expected-default compensation, with no price of
+risk. To check that the state dependence does not rest on this, we add an
+exogenous stochastic discount factor in which the discount factor is high when
+oil is dear, normalised on the solution grid so that the risk-free rate is
+unchanged for any strength of risk pricing. The strength is disciplined by the
+maximum Sharpe ratio the kernel implies: an annualised 0.4, the equity
+benchmark, corresponds to $\kappa = 1.43$. At that value the gap between
+high- and low-volatility spreads is 0.95 percentage points against 0.77 in the
+baseline, and the debt-to-GDP ratio is 25.6 per cent against 26.1 per cent, so
+risk pricing strengthens the state dependence slightly and leaves the debt
+moment intact. The model's default frequency falls as risk pricing rises, from
+3.35 to 1.86 per cent a year at $\kappa = 1$, so the risk-pricing economies no
+longer match the default frequency of Table 3; we report the comparative static
+rather than recalibrating the default cost to restore it.
+\end{quote}

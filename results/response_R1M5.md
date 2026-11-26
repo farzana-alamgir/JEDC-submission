@@ -48,15 +48,25 @@ implying much more than that is not a plausible description of lenders.
 baseline value. Spreads are whole-simulation means; debt is relative to annual
 output; low and high volatility are the extreme states of the simulated grid.*
 
+*These are whole-simulation means, not the Table 3 statistics, which average
+over the 100 quarters before each qualifying default episode. On that basis the
+κ = 0 economy has a mean spread of 4.08% and debt/GDP of 34.3%, against targets
+of 4.1% and 34.0%, so the baseline matches both; the whole-simulation figures
+for the same economy are 3.59% and 26.1%. Every column is computed the same way
+at every κ, so the comparison across rows is like for like — but no column
+should be read against a Table 3 target.*
+
+
 **The state dependence strengthens monotonically in κ.** The gap between
 high- and low-volatility spreads rises from +0.77 to +1.12. Risk pricing loads
 on exactly the states where default risk is concentrated, so it reinforces the
 mechanism rather than competing with it.
 
-**At the equity benchmark the effect on the calibration is negligible.** A
-Sharpe ratio of 0.4 corresponds to κ = 1.43. There the volatility gap is +0.95
-against +0.77, so the state dependence is about a fifth stronger, and debt/GDP
-is 25.6% against 26.1% — half a percentage point. The precautionary-borrowing
+**At a plausible risk premium the calibration barely moves.** The equity
+benchmark of 0.4 falls between the second and third rows of the table, at
+κ = 1.43. There the volatility gap is +0.95 against +0.77, so the state
+dependence is about a fifth stronger, and debt/GDP is 25.6% against 26.1% —
+half a percentage point on the same basis. The precautionary-borrowing
 margin the paper is about is therefore not an artefact of risk neutrality, and
 if anything the baseline understates it.
 
@@ -101,6 +111,8 @@ survives per κ is the patched source and a log tail.
 
 The earlier σ_oil = 0.30 sweep is in `results/RISK_PREMIUM_AND_FIGURE3.md`.
 Its conclusion was that risk pricing buys the Figure 3 ordering only by
-destroying the debt moment — debt/GDP fell from 33.7% to 18.1% by κ = 3. At the
-adopted calibration that trade-off is much weaker: 26.1% to 23.3% over the same
-range. The re-solve was worth doing for that reason alone.
+destroying the debt moment — debt/GDP fell from 33.7% to 18.1% by κ = 3, on the
+episode-window measure. At the adopted calibration the fall is far smaller,
+26.1% to 23.3% over the same range, on the whole-simulation measure. The levels
+are not comparable across the two bases; the contrast is in the size of the
+decline, roughly a half against a tenth. The re-solve was worth doing for that reason alone.

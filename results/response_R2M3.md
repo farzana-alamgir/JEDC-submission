@@ -45,6 +45,15 @@ model.
 value. Spreads are whole-simulation means, debt is relative to annual output,
 and low and high volatility are the extreme states of the simulated grid.*
 
+*These are whole-simulation means, not the Table 3 statistics, which average
+over the 100 quarters before each qualifying default episode. On that basis the
+κ = 0 economy has a mean spread of 4.08% and debt/GDP of 34.3%, against targets
+of 4.1% and 34.0%, so the baseline matches both; the whole-simulation figures
+for the same economy are 3.59% and 26.1%. Every column is computed the same way
+at every κ, so the comparison across rows is like for like — but no column
+should be read against a Table 3 target.*
+
+
 Three things move the wrong way, all monotonically.
 
 **The state dependence collapses.** The gap between high- and low-volatility
@@ -52,18 +61,21 @@ spreads falls from +0.77 to +0.22 and then to zero. At κ = 0.50 the simulated
 spread is the same in the most and least volatile states, to two decimal places.
 The paper's central prediction is not weakened at the margin; it is gone.
 
-**The spread level falls by two thirds**, 3.59% to 1.30%, against a target of
-about 4%. A disruption premium makes default more painful, so less of it is
-priced.
+**The spread level falls by nearly two thirds**, 3.59% to 1.30%. A disruption premium
+makes default more painful, so less of it is priced — and the baseline's match
+to the 4.1% spread target is lost.
 
-**Debt runs away**, 26.1% to 48.2% against a 34% target, for the same reason: a
-costlier default sustains more borrowing.
+**Debt runs away**, rising by more than four fifths across the range, for the
+same reason: a costlier default sustains more borrowing. The baseline already
+matches the paper's 34% debt target, so every positive κ pushes the debt moment
+above it.
 
-The three are not independent, and that is the point. Debt/GDP passes through
-its 34% target at about κ = 0.19 — so there is a disruption premium at which the
-debt moment is matched. At that κ the volatility gap is +0.36, less than half
-the baseline's +0.77, and the mean spread is 2.36% against a 4% target. **The
-calibration can have the debt moment or the state dependence, not both.**
+The three are not independent, and that is the point. The baseline is the only
+version of the model that matches the debt target, and it is also the version
+with the full state dependence. A disruption premium moves both away at once:
+debt rises above target while the volatility gap shrinks, and there is no
+intermediate value at which the calibration is recovered. **There is no
+disruption premium that buys the mechanism without costing the debt moment.**
 
 ## Why it fails, which is the useful part
 

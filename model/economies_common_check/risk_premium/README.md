@@ -11,8 +11,15 @@
 matlab -batch "JEDC_riskpremium"       # the table, including the Sharpe ratios
 ```
 
-`kappa_risk = 0` is `../benchmark` and is not re-solved; `JEDC_riskpremium.m`
-extracts that row from the baseline panel with the same awk.
+`kappa_risk = 0` is `../benchmark` and is not re-solved. Its row is put into
+`sweep/kappa.csv` by running the same awk on the baseline panel directly,
+
+```
+awk -v K=0.0 -f extract_kappa.awk ../benchmark/graphs_data_sim_dss.txt >> sweep/kappa.csv
+```
+
+which takes about 4 seconds. `JEDC_riskpremium.m` then reads all four rows from
+that file; it does not shell out to awk itself.
 
 | file | what |
 |---|---|
@@ -35,6 +42,20 @@ extracts that row from the baseline panel with the same awk.
 Risk pricing strengthens the state dependence. The equity Sharpe benchmark of
 0.4 sits at κ = 1.43, where the gap is +0.95 against +0.77 and debt/GDP is 25.6%
 against 26.1%.
+
+### Basis of these columns
+
+All columns are whole-simulation means. They are NOT the Table 3 statistics,
+which average over the 100 quarters before each qualifying default episode
+(`per_before = 100` in `sim_prod_oil_dec29.m`). On that basis the κ = 0
+economy has a mean spread of 4.08% and debt/GDP of 34.3%, against targets of
+4.1% and 34.0% — i.e. the baseline matches both. The whole-simulation figures
+for the same economy are 3.59% and 26.1%, so a column above must never be read
+against a Table 3 target. Verified by running the author's own script on
+`benchmark/graphs_data_sim_dss.txt`: it prints `Mean debt/y = 34.2992`.
+The κ > 0 panels were not retained, so the episode-window figures for those
+rows would need the solves re-run.
+
 
 ## Two things to know
 

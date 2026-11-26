@@ -7,18 +7,32 @@
 ## Running it
 
 ```
-./run_disruptsweep.sh      # three solves, ~70 min, two at a time
+./run_disruptsweep.sh                  # three solves, ~70 min, two at a time
+matlab -batch "JEDC_disruption"        # the table, and the basis check
 ```
 
 `oil_disruption = 0` is `../benchmark` and is not re-solved. While in default or
 excluded the country pays `p·(1 + oil_disruption)` for oil, applied in the
-source as `p_eff = p + default_grid(i_excl)·log(1 + oil_disruption)`.
+source as `p_eff = p + default_grid(i_excl)·log(1 + oil_disruption)`. Its row is
+put into `sweep/disrupt.csv` by running the same awk on the baseline panel,
+
+```
+awk -v K=0.00 -f extract_disrupt.awk ../benchmark/graphs_data_sim_dss.txt >> sweep/disrupt.csv
+```
+
+`JEDC_disruption.m` then rebuilds that row from the panel in MATLAB and compares
+the two, which is the check that the sweep's κ = 0 really is the economy of
+record; it agrees to 4e-5. The same script prints the baseline on the Table 3
+basis — 4.08% and 34.3%, against targets of 4.1% and 34.0% — beside the
+whole-simulation figures, so the two bases cannot be confused again.
 
 | file | what |
 |---|---|
 | `disruptsweep.sh` | one solve: patch `oil_disruption`, verify, compile, extract, delete the run |
 | `run_disruptsweep.sh` | κ = 0.10, 0.25 together, then 0.50; writes `sweep/DONE` |
 | `extract_disrupt.awk` | one pass over a panel → one row |
+| `JEDC_disruption.m` | the table, the κ = 0 check and both measurement bases |
+| `table1_disrupt.csv` | the result as the letter reports it |
 | `sweep/disrupt.csv` | the result |
 | `sweep/sigma030_prior.csv` | the superseded σ_oil = 0.30 runs, same moments |
 
@@ -36,9 +50,24 @@ extra cost of defaulting is κ·p·m, which rises with the oil price, so a deare
 barrel both squeezes the importer toward default and raises the penalty for
 defaulting. Past κ ≈ 0.2 the penalty wins.
 
-Debt/GDP crosses its 34% target at κ = 0.19, where the volatility gap is already
-down to +0.36. The calibration can have the debt moment or the state
-dependence, not both.
+The baseline is the only version that matches the debt target, and it is also
+the version with the full state dependence: any positive κ raises debt above
+target and shrinks the volatility gap at the same time. There is no κ that buys
+the mechanism without costing the debt moment.
+
+### Basis of these columns
+
+All columns are whole-simulation means. They are NOT the Table 3 statistics,
+which average over the 100 quarters before each qualifying default episode
+(`per_before = 100` in `sim_prod_oil_dec29.m`). On that basis the κ = 0
+economy has a mean spread of 4.08% and debt/GDP of 34.3%, against targets of
+4.1% and 34.0% — i.e. the baseline matches both. The whole-simulation figures
+for the same economy are 3.59% and 26.1%, so a column above must never be read
+against a Table 3 target. Verified by running the author's own script on
+`benchmark/graphs_data_sim_dss.txt`: it prints `Mean debt/y = 34.2992`.
+The κ > 0 panels were not retained, so the episode-window figures for those
+rows would need the solves re-run.
+
 
 ## A warning about watchers
 

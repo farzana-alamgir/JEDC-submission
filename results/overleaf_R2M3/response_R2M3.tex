@@ -1,0 +1,141 @@
+% ---------------------------------------------------------------------------
+% Response to R2 Major 3 -- JEDC revision
+% Body only: paste after the previous comment in the combined response file.
+% Needs booktabs. Top heading is \section (numbered), subheadings \subsection*.
+% ---------------------------------------------------------------------------
+
+\section{R2, Major 3}
+{\itshape Oil imports during default}
+
+\begin{quote}\itshape
+In the model, a country in default keeps importing oil at the world price with
+no friction. The only direct cost of default is the endowment loss $h(y)$.
+[\ldots] The author should discuss this assumption; even better would be a
+robustness exercise in which default also disrupts oil imports, for example
+through a price wedge or partial exclusion from oil purchases during autarky.
+\end{quote}
+
+We have done both. The assumption is discussed below and the robustness
+exercise has been run, since it is a parameter of the model already. The result
+is negative, and we report it in full because the way it fails is informative
+about the mechanism.
+
+\subsection*{The assumption}
+
+Oil is bought on spot markets, usually by private importers and refiners rather
+than by the sovereign, and a sovereign default does not by itself bar a
+country's firms from purchasing crude. The channel through which a default
+episode disrupts fuel supply is the loss of foreign exchange and of trade
+credit --- the inability to open letters of credit --- rather than exclusion
+from the oil market as such. The paper's motivating example works that way: the
+2022 fuel crisis was a balance-of-payments and credit event.
+
+That makes the frictionless assumption a defensible simplification rather than a
+neutral one, and the referee is right that the paper should say so. Mendoza and
+Yue (2012) make the loss of imported inputs the central cost of default, so a
+reader coming from that literature will expect the channel to be present and its
+absence should be a stated modelling choice.
+
+\subsection*{The exercise}
+
+While in default or excluded, the country pays $p(1+\kappa)$ for imported oil.
+This is a parameter of the model, and $\kappa = 0$ reproduces the baseline
+exactly.
+
+\begin{table}[h]
+\centering\footnotesize
+\setlength{\tabcolsep}{5pt}
+\begin{tabular}{cccccc}
+\toprule
+$\kappa$ & mean spread & debt/GDP & default \% p.a. & \multicolumn{2}{c}{spread} \\
+\cmidrule(lr){5-6}
+         &             &          &                 & low vol.\ & high vol.\ \\
+\midrule
+0    & 3.59\% & 26.1\% & 3.35\% & 3.27\% & 4.05\% \\
+0.10 & 2.94\% & 29.7\% & 2.80\% & 2.70\% & 3.30\% \\
+0.25 & 2.01\% & 36.7\% & 1.81\% & 1.92\% & 2.14\% \\
+0.50 & 1.30\% & 48.2\% & 1.27\% & 1.30\% & 1.29\% \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\noindent
+$\sigma_{\text{oil}} = 0.25$, every other parameter at its baseline value.
+Spreads are whole-simulation means and debt is relative to annual output. The
+levels are therefore not the Table 3 statistics, which average over the hundred
+quarters preceding each default episode: on that basis the baseline
+economy has a mean spread of 4.08\% and debt/GDP of 34.3\%, against targets of
+4.1\% and 34\%. Every column is computed the same way at every $\kappa$, so the
+comparison across rows is like for like.
+
+Three things move the wrong way, all monotonically.
+
+\textbf{The state dependence collapses.} The gap between high- and
+low-volatility spreads falls from $+0.77$ to $+0.22$ and then to zero: at
+$\kappa = 0.50$ the simulated spread is the same in the most and least volatile
+states to two decimal places. The paper's central prediction is not weakened at
+the margin, it is gone.
+
+\textbf{The spread level falls by nearly two thirds}, 3.59\% to 1.30\%. A
+more painful default means less default is priced, and the baseline's match to
+the 4.1\% spread target is lost.
+
+\textbf{Debt runs away}, rising by more than four fifths across the range, for
+the same reason: a costlier default sustains more borrowing. The baseline
+already matches the paper's 34\% debt target, so every positive $\kappa$ pushes
+the debt moment above it.
+
+These are not independent, and that is the point. The baseline is the only
+version of the model that matches the debt target, and it is also the version
+with the full state dependence. A disruption premium moves both away at once:
+debt rises above target while the volatility gap shrinks, and there is no
+intermediate value at which the calibration is recovered. \textbf{There is no
+disruption premium that buys the mechanism without costing the debt moment.}
+
+\subsection*{Why it fails, which is the useful part}
+
+The extra cost of defaulting is $\kappa pm$: it is proportional to the oil
+price. A dearer barrel therefore does two things at once. It squeezes the
+importer, which pushes it toward default --- the paper's mechanism. And it
+raises the penalty for defaulting, which pushes it away. The two offset, and
+past roughly $\kappa = 0.2$ the penalty dominates.
+
+This is not a numerical artefact. It is the cancellation that makes the oil
+price a weak driver of default incentives whenever the shock is near-permanent:
+a persistent price rise shifts the value of repaying and the value of defaulting
+almost equally. A disruption premium does not break that symmetry, it tilts it
+the wrong way, because the premium is largest exactly when the price is highest.
+
+\subsection*{What would work, and why we have not done it}
+
+For a price rise to raise the spread more strongly, the default penalty must
+\emph{fall} when oil is dear, so that defaulting becomes relatively more
+attractive precisely when the importer is squeezed. The natural candidate is to
+express the penalty as a share of value added --- output net of the oil bill ---
+rather than of the endowment, since value added shrinks when oil is expensive.
+
+We have not implemented it. The current penalty is in endowment units, and
+tying it to value added introduces a fixed point, since the penalty affects
+productive capacity, which affects oil demand, which affects value added. That
+requires an iterative solve and is a structural change to the production and
+default block rather than a robustness check.
+
+\subsection*{Suggested manuscript wording}
+
+\begin{quote}
+The model assumes that a country in default continues to import oil at the world
+price. The channel through which default episodes disrupt fuel supply in
+practice is the loss of foreign exchange and trade credit rather than exclusion
+from oil markets, so we treat this as a simplification and report what relaxing
+it does. Charging a defaulting country $p(1+\kappa)$ for oil raises the cost of
+default in proportion to the oil price, which both squeezes the importer and
+raises the penalty for defaulting; past $\kappa \approx 0.2$ the second effect
+dominates. The gap between high- and low-volatility spreads falls from 0.77
+percentage points to zero as $\kappa$ rises to 0.50, while debt-to-GDP rises by
+more than four fifths above a baseline that already matches its 34 per cent
+target, so the disruption premium cannot be calibrated to match the debt moment
+and preserve the state dependence at the same time. A penalty proportional to
+value added rather than to the endowment would work in the required direction,
+but it introduces a fixed point between the default cost and oil demand, and we
+leave it to future work.
+\end{quote}
